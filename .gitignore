@@ -1,0 +1,20 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Local logs, caches, build outputs, and secrets
+*.log
+.cache/
+.tmp/
+dist/
+build/
+node_modules/
+
+# JLCEDA local autosave/export backups; the authoritative project is Hushlight.eprj2
+Hushlight_backup/
+*.epro2
+
+# Third-party competitor recordings are local research evidence, not repository assets
+5c51297ee01209c593cd43d823ddc661.mp4
+83f3537cf2301615544e69c2decf3d19.mp4
