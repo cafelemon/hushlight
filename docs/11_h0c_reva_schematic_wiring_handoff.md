@@ -31,7 +31,7 @@
 | `05-HEAD-LINK` | 左：BASE-S3 侧串阻/ESD；中：30Pin FFC；右：头部端口与测试点；电源针放上，SPI/UART 放中，GND 回流针夹在信号间 | `B`，连接器型号、同面/异面和线束仍为 `H-FFC-001` Gate |
 | `06-MOTION-IO` | 左：MOTION-C3、刷写/心跳/kill；中：DRV8833 与 VM bulk；右上：PAN 电机与编码器/限位；右下：TILT 电机与编码器/限位 | `B`，U8/U9 已放；电机、编码器、限位、栅极/输入保护未完成 |
 | `07-CONNECTORS-TEST` | 左：EC11、锁定静音；中：红灯/TCA9554；右：Base/Motion/Head 服务调试口；下：按电源、USB、音频、运动分组的测试点 | `B`，当前只保留结构占位 |
-| `H0-HEAD-REVA` | 左：AMOLED 计算模组座/供电；中：摄像头、隐私灯、快门检测；右：Base FFC、头部调试口；模组天线区域留空 | `GATE`，必须先完成 `H-IO-001`，不得猜测 34Pin 扩展 GPIO 或摄像头 DVP 引脚 |
+| `H0-HEAD-REVA` | 左：`HEAD-S3` AMOLED 计算模组座/供电；中：摄像头、隐私灯、快门检测；右：Base FFC、头部调试口；模组天线区域留空 | `GATE`，必须先完成 `H-IO-001`；在此之前不选定扩展 GPIO、不连接摄像头 DVP |
 
 ### 2.1 页内连线规则
 
@@ -65,7 +65,7 @@
 | 12 | `R2.100k.2` | `Q1.S`（pins 1–3） | `A` | 接 `VBUS_RAW` |
 | 13 | `D3.BZT52C15.K` | `Q1.S`（pins 1–3） | `A` | 15V 齐纳 Vgs 钳位，阴极接 Source |
 | 14 | `D3.BZT52C15.A` | `Q1.G`（pin 4） | `A` | 阳极接 Gate |
-| 15 | `U5.POWER_OK3`（pin 14） | `BASE-S3` 的待分配低压输入 + 3.3V 上拉 | `B` | 名称 `PD_12V_OK_N`；只作全性能准入，不直接驱动功率器件 |
+| 15 | `U5.POWER_OK3`（pin 14） | `TP_PD_PDO3_OK_N` + 3.3V 上拉；预留跨页网 `PD_PDO3_OK_N` | `GATE` | 此轮不接 BASE-S3。待在 10 中冻结确切 GPIO 后，才接入全性能准入状态机；不直接驱动功率器件 |
 | 16 | `U5.SCL`（pin 7） | `BASE-S3.GPIO18 / SYS_I2C_SCL` | `B` | 4.7kΩ 上拉到 `BASE_3V3` |
 | 17 | `U5.SDA`（pin 8） | `BASE-S3.GPIO17 / SYS_I2C_SDA` | `B` | 4.7kΩ 上拉到 `BASE_3V3` |
 | 18 | `U5.ALERT`（pin 19） | `TCA9554.P3 / PD_INT_N` + 3.3V 上拉 | `B` | 开漏；若不做诊断，仍保留测试点 |
@@ -95,7 +95,7 @@
 | 11 | `R3.75k.1` | `5V_SYS` | `A` | 反馈上端，走线从 COUT 正端 Kelvin 取样 |
 | 12 | `R3.75k.2` | `U6.FB`（pin 2）+ `R4.10k.1` | `A` | 网络名 `FB_5V`；远离 SW |
 | 13 | `R4.10k.2` | `GND` | `A` | 接 U6 AGND 邻近的安静地 |
-| 14 | `U6.EN`（pin 1） | `VBUS_PD` | `B` | 先以 0Ω/DNP 分压位接入；主 Buck 允许在 9V 和 12V 受控路径工作 |
+| 14 | `U6.EN`（pin 1） | `VBUS_PD`，经待补放 `R_EN0=0Ω` 默认位 | `B` | 本轮唯一默认实现；若后续需要 UVLO 分压，另开 Gate 并替换 0Ω，不在本轮并列两种接法 |
 | 15 | `U6.MODE`（pin 10） | 悬空（默认 FCCM） | `A` | 不放普通网络标签；预留 `0Ω DNP → GND` 改 Eco-mode |
 | 16 | `U6.PG`（pin 4） | `5V_SYS_PG`，再经 100k 上拉到 `BASE_3V3` | `B` | 开漏输出；BASE-S3 读取启动状态 |
 | 17 | `U6.NC`（pin 5） | 不连接 | `A` | 必须标非连接，不接 GND |
@@ -110,7 +110,8 @@
 | `C9.2`、`C10.2` | `GND` | 回 U7 PGND/EP 邻近 |
 | `U7.SW`（pins 1,2,3） | `L2.1` | 仅局部 `SW_3V3` |
 | `L2.2` | `BASE_3V3` | 输出节点 |
-| `C11.1`、`U7.VOS`（pin 14）、`U7.FSW`（pin 7） | `BASE_3V3` | FSW 取 1.25MHz 目标，最终以 datasheet/EMI 实测冻结 |
+| `C11.1`、`U7.VOS`（pin 14） | `BASE_3V3` | 输出采样与输出电容同一安静节点 |
+| `U7.FSW`（pin 7） | `FSW_3V3_CFG` 测试焊盘/配置位 | `GATE`：不在本轮把 FSW 接到 `BASE_3V3` 或 GND；先完成 datasheet 复核和 EMI 决策，再指定唯一连接 |
 | `C11.2` | `GND` | 输出电容回路最短 |
 | `U7.FB`（pin 5） | `U7.AGND`（pin 6） | TPS62132 固定输出型要求 |
 | `U7.DEF`（pin 8） | `GND` | 保持标称 3.3V，不要拉高到 +5% |
@@ -129,7 +130,7 @@
 | `C13.2` | `GND` | 近端 |
 | `U10.OUT` | `AUDIO_3V3A` + `C14.1` | 仅 ES7210、ES8311、麦克风模拟敏感域 |
 | `C14.2`、`U10.GND` | `GND` | 不切割地平面 |
-| `U10.EN` | `5V_SYS` 或受控 `AUDIO_EN` | 默认不悬空；爆音策略由 BASE 状态机控制 |
+| `U10.EN` | `5V_SYS` | 本轮唯一默认连接；`AUDIO_EN` 仅保留 DNP 配置位，需单独 Gate 后才替换 |
 
 ### 3.5 Head / Motor eFuse：TPS259470
 
@@ -143,14 +144,15 @@ U11 与 U12 使用相同 pinout；必须先补 `EN/UVLO`、`OVLO`、`ILM`、`DVD
 | U11 Head | `FLT`（pin 4） | `HEAD_OC_N` → TCA9554.P4 + 3.3V 上拉 | 开漏低有效 |
 | U11 Head | `ILM`（pin 9） | `R_ILIM_HEAD → GND` | 目标 2.0A，值待 Gate |
 | U11 Head | `DVDT`（pin 7） | `C_DVDT_HEAD → GND` | 软启动值待 Gate |
-| U11 Head | `ITIMER`（pin 10） | `C_TIMER_HEAD → GND` 或按 TI 允许悬空 | 先保留焊盘 |
+| U11 Head | `ITIMER`（pin 10） | 不连接；只留 `C_TIMER_HEAD` DNP 焊盘至 GND | 本轮采用 TI 的最快故障响应默认；`H-PWR-001` 通过前不得装电容 |
 | U11 Head | `OVLO`（pin 2）、`GND`（pin 8） | OVLO 分压到 `5V_SYS`/GND；GND→GND | OVLO 不悬空 |
 | U12 Motor | `IN`（pin 5） | `5V_SYS` | Motor 域独立输入去耦 |
 | U12 Motor | `OUT`（pin 6） | `MOTOR_5V` → DRV8833 VM | U12 后先到 470µF + 10µF + 100nF bulk |
 | U12 Motor | `EN/UVLO`（pin 1） | `MOTOR_PWR_EN` + 默认下拉/分压 | 默认关闭；仅限位/心跳正常后允许 |
 | U12 Motor | `FLT`（pin 4） | `MOTOR_OC_N` → TCA9554.P5 + 3.3V 上拉 | 开漏低有效 |
 | U12 Motor | `ILM`（pin 9） | `R_ILIM_MOTOR → GND` | 目标 3.0A，值待 Gate |
-| U12 Motor | `DVDT`（pin 7）、`ITIMER`（pin 10）、`OVLO`（pin 2）、`GND`（pin 8） | 同 U11 相应规则 | `OVLO`、`ILM` 不得浮空 |
+| U12 Motor | `DVDT`（pin 7）、`OVLO`（pin 2）、`GND`（pin 8） | 同 U11 相应规则 | `OVLO`、`ILM` 不得浮空 |
+| U12 Motor | `ITIMER`（pin 10） | 不连接；只留 `C_TIMER_MOTOR` DNP 焊盘至 GND | 本轮采用最快故障响应默认；`H-PWR-001` 通过前不得装电容 |
 
 ## 4. 其余页：现在只接批准的核心网络
 
@@ -202,7 +204,8 @@ ES7210 的模拟输入模式、MICBIAS、AC 耦合/偏置和 AEC 参考输入必
 | 源 | 目标 | 状态/规则 |
 |---|---|---|
 | U8 GPIO0/1 | U9 DRV8833 `AIN1/AIN2` | `A` 核心网络；0/1 均预留串阻 |
-| U8 GPIO2/3 | U9 `BIN1/BIN2` | `A`；GPIO2 是绑带脚，电阻网络复核后才允许接 |
+| U8 GPIO3 | U9 `BIN2` | `A`；预留源端串阻 |
+| U8 GPIO2 | U9 `BIN1` | `GATE`；GPIO2 是绑带脚，复核启动电平与电阻网络后才允许接 |
 | U9 `AOUT1/AOUT2` | `J_MOTOR_P.1/.2` | `B`，连接器防反插 |
 | U9 `BOUT1/BOUT2` | `J_MOTOR_T.1/.2` | `B` |
 | U12 `MOTOR_5V` | U9 `VM` + 近端 `10µF + 100nF` + Motor bulk | `B`，不从 BASE_3V3 取电 |
@@ -217,7 +220,7 @@ ES7210 的模拟输入模式、MICBIAS、AC 耦合/偏置和 AEC 参考输入必
 
 - EC11：`A/B → U1 GPIO1/2`，`SW → TCA9554.P0`，共同端接 GND；A/B 以 RC/软件消抖二选一，不能双重造成迟滞。
 - 静音锁定开关：一组触点硬件关闭麦克风有效供电/ES7210 MICBIAS，另一组触点形成 `MUTE_SENSE → U1 GPIO39`；红灯由独立硬件路径点亮，TCA9554.P1 只读/辅助显示。
-- Head Carrier：只在完成 `H-IO-001` 后，根据 Waveshare 34Pin 原理图把 `HEAD_SPI_*`、`HEAD_UART_*`、`HEAD_READY`、`SHUTTER_CLOSED_N` 接到实际扩展脚。当前禁止把摄像头直接并到未知 GPIO。
+- Head Carrier：头部计算单元固定为 `HEAD-S3`。只在完成 `H-IO-001` 后，根据 Waveshare 34Pin 原理图把 `HEAD_SPI_*`、`HEAD_UART_*`、`HEAD_READY`、`SHUTTER_CLOSED_N` 接到已验证的 `HEAD-S3` 扩展脚；当前禁止把摄像头直接并到未知 GPIO。
 
 ## 5. 人工连线后的检查顺序
 
