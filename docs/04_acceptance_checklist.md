@@ -121,6 +121,18 @@ H0 是 V0 内部研发载体，不作为种子用户交付物。Korvo-2 参考�
 
 网易云音乐和微信必须分别在 macOS、Windows 上完成支持版本矩阵；一端通过不能替代另一端验收。
 
+### 7.1 macOS Bridge 专项 Gate
+
+macOS 线按 `MACsoftware/docs/04_acceptance_checklist.md` 执行以下三段证据门禁：
+
+| 阶段 | 必须通过 | 结论边界 |
+|---|---|---|
+| S1 局域网研发闭环 | `MAC-AC-LAN-*`、`MAC-AC-UI-*`、`MAC-AC-SYS-*`、`MAC-AC-MUS-*`、`MAC-AC-CHT-*`、`MAC-AC-LOG-*`、`MAC-AC-STB-001` | 证明 macOS 本地能力和设备联调，不代表云端或安装包完成 |
+| S2 云端完整闭环 | `MAC-AC-CLD-*` 及 S1 全量回归 | 证明计划上市功能冻结，不代表正式签名分发完成 |
+| S3 正式产品准备 | `MAC-AC-REL-*` | 形成 V1 Alpha 可交付基线，不代表 Pilot、量产或生产验收 |
+
+macOS 开发构建、第三方应用研判和局域网演示均不能替代 S2/S3 Gate。
+
 ## 8. 消息发送安全 Gate
 
 以下任一项失败，V0 不得通过：
@@ -181,6 +193,7 @@ H0 是 V0 内部研发载体，不作为种子用户交付物。Korvo-2 参考�
 | FR-BRG-001 至 FR-BRG-010 | AC-ONB-003、AC-ONB-004；AC-BRG-001 至 AC-BRG-010 |
 | FR-ACT-001 至 FR-ACT-005 | AC-ACT-001 至 AC-ACT-008 |
 | FR-ACT-006 至 FR-ACT-007 | 消息发送安全 Gate 全部条目 |
+| macOS Bridge 细化需求 `MAC-FR-001` 至 `MAC-FR-018` | `MACsoftware/docs/04_acceptance_checklist.md` 的 `MAC-AC-*` |
 | FR-MEM-001 至 FR-MEM-006 | AC-MEM-001 至 AC-MEM-003；记忆端到端测试 |
 | FR-PRO-001 至 FR-PRO-005 | AC-PRO-001 至 AC-PRO-005 |
 | `08_hardware_prototype_plan.md` H0 规则 | `AC-H0-*` 全部专项验收项 |

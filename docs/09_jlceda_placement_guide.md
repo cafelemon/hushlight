@@ -1,8 +1,11 @@
-# Hushlight H0 Rev A 嘉立创原理图器件放置清单
+# Hushlight H0 Rev A 嘉立创原理图早期放置清单（已废止）
 
-> 日期：2026-08-12  
-> 用途：你负责快速放置/移动器件，我负责后续网络命名、连线、参数复核和 ERC。  
-> 当前状态：只做原理图布局，不是 PCB Layout，不可下单。
+> 日期：2026-08-12；废止标记：2026-08-13
+>
+> 状态：历史记录，不得用于当前 EDA 操作、接线、PCB 或 BOM。
+> 替代文件：[`10_hardware_board_design_spec.md`](10_hardware_board_design_spec.md) 为板级权威；[`11_h0c_reva_schematic_wiring_handoff.md`](11_h0c_reva_schematic_wiring_handoff.md) 为现行落图/接线交接单。
+
+本清单基于早期单主控、5V/2A 和未冻结 Head 接口假设，已被 H0C Rev A 的 BASE-S3 / HEAD-S3 / MOTION-C3 三域、USB-C PD 12V/3A 与 Gate 规则取代。保留它只为追溯早期摆放意图；尤其不得复用其中的 U5/U6/U7 或 D4 等位号。
 
 ## 0. 放置规则
 
@@ -178,4 +181,3 @@
 - ES7210、ES8311、NS4150B 的数据手册级外围与连线；
 - 电源芯片和所有 R/C/L/ESD 的具体选型与数值；
 - GPIO Pin Budget、地址表、ERC 和待决项清单。
-

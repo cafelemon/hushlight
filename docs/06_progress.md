@@ -93,9 +93,12 @@
 
 ### 2026-08-13
 
-- `01POWERUSB` 已清除未完成导线、保留既有元件并补齐首轮 PD/eFuse 必须外围；EDA 当前显示本页 69 个元件，主件按 USB/PD、主 Buck、3.3V/LDO、Head/Motor eFuse 功能块收拢，尚未接线。
-- 本轮冻结落图：`R29=470Ω` PD VBUS 检测/泄放、`R30/R31=4.7kΩ` PD I²C、`R32=0Ω` 主 Buck EN、`R33/R34=1.69kΩ/1.10kΩ` eFuse 限流、`R35…R44` 的 EN/OVLO/FLT 配置，以及 `C44…C51` 的 eFuse 输入去耦、DVDT/ITIMER。详细位号与接线意图记录在 `11_h0c_reva_schematic_wiring_handoff.md` 3.6 节。
+- `01POWERUSB` 已清除未完成导线、保留既有元件并补齐首轮 PD/eFuse 必须外围；随后实放并保存 `D4=TPD2E2U06DRLR / C1972959`，但 G0 审计已将它判为 `BLOCKED-P0`，不得用于 Type-C CC。EDA 当前显示本页 70 个元件。主件按 USB/PD、主 Buck、3.3V/LDO、Head/Motor eFuse 功能块收拢，尚未接线。
+- 本轮冻结落图：`R29=470Ω` PD VBUS 检测/泄放、`R32=0Ω` 主 Buck EN、`R33/R34=1.69kΩ/1.10kΩ` eFuse 限流、`R35…R44` 的 EN/OVLO/FLT 配置，以及 `C44…C51` 的 eFuse 输入去耦、DVDT/ITIMER。`R30/R31=4.7kΩ` 虽已实放为 PD I²C 上拉候选，但与 02 页候选上拉构成 `BLOCKED-P0`，不允许接入。详细位号与接线意图记录在 `11_h0c_reva_schematic_wiring_handoff.md` 3.6 节。
 - 初始限流按 TPS25947 数据表公式为 Head 约 1.97A、Motor 约 3.03A；OVLO 分压首轮约 5.88V。它们只作为研发样机初始值，仍须 `H-PWR-001` 的浪涌、热、动作负载、误保护台架 Gate 后冻结。
+- `02-MCU-DEBUG` 已实放并保存 `R45=R_IOEXP_INT=10kΩ / 0603WAF1002T5E / C25804`。它是 TCA9554 `INT` 的唯一上拉位，后续只允许按 `TCA9554.INT → R45 → BASE_3V3` 接线；尚未接线或 ERC。
+- 已将 `09_jlceda_placement_guide.md` 标为历史放置清单，避免其早期单主控/5V 基线与现行 H0C Rev A 三域、12V PD 基线混用；后续 EDA 操作以 `10_hardware_board_design_spec.md` 和 `11_h0c_reva_schematic_wiring_handoff.md` 为准。
+- 完成 H0C Rev A G0 只读原理图审计并形成 `12_h0c_reva_g0_schematic_audit.md`。发现两项 P0：`D4=TPD2E2U06DRLR` 的 5.5V 耐压不适合作 Type-C CC 的 short-to-VBUS 保护；01 与 02 页存在两组 `SYS_I2C` 4.7kΩ 上拉候选。两项关闭前，不开始 CC 或 I²C 接线；并补齐 DRV8833 的 VCP/VINT/ISEN/PowerPAD 接线约束。
 - 本轮未新增任何导线、未运行 ERC、未转 PCB、未生成 BOM、未采购或下单。
 
 ## 4. 当前待办

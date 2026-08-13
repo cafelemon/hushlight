@@ -16,7 +16,7 @@ swift test
 swift run HushlightMac
 ```
 
-`swift run` 仅用于开发预览。正式 `.app`、签名、公证、更新和卸载从 M1 开始建设。
+`swift run` 仅用于开发预览。阶段一先建立用于权限验证的 Xcode `.app`；正式签名、公证、更新、回滚和卸载在 S3 建设。
 
 ## 当前边界
 
@@ -24,4 +24,12 @@ swift run HushlightMac
 - 未申请麦克风、辅助功能、自动化等系统权限。
 - 界面中的“未配置”与空记录是真实状态，不代表集成已经完成。
 
-文档入口见 [`docs/00_overview.md`](docs/00_overview.md)。
+## 文档
+
+- [`docs/00_overview.md`](docs/00_overview.md)：项目总览与三阶段主线
+- [`docs/01_prd.md`](docs/01_prd.md)：产品边界、旅程和需求
+- [`docs/02_roadmap.md`](docs/02_roadmap.md)：工作包、周期和 Gate
+- [`docs/03_architecture.md`](docs/03_architecture.md)：LAN/Cloud 双 Transport 与执行架构
+- [`docs/04_acceptance_checklist.md`](docs/04_acceptance_checklist.md)：分阶段验收矩阵
+- [`docs/08_bridge_protocol.md`](docs/08_bridge_protocol.md)：`bridge-v1` 协议规格
+- [`docs/09_local_adapter_spec.md`](docs/09_local_adapter_spec.md)：系统、网易云和微信适配器规格

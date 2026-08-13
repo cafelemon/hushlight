@@ -1,7 +1,7 @@
 # 小熙 Hushlight 技术架构
 
-> 文档版本：V0.3
-> 更新日期：2026-08-11
+> 文档版本：V0.4
+> 更新日期：2026-08-13
 > 状态：立项基线，待架构评审  
 > 上游依据：[01_prd.md](01_prd.md)
 > H0 专项依据：[08_hardware_prototype_plan.md](08_hardware_prototype_plan.md)
@@ -136,6 +136,16 @@ Bridge 不向用户暴露 MCP、端口、脚本或命令行。内部可以采用
 
 双线可以独立选择技术框架，但不得各自定义产品语义。任何平台特有能力必须标记为平台扩展，不能悄然改变 V0 公共范围。
 
+### 4.2 macOS Bridge 已冻结基线
+
+- 原生 Swift 6 + SwiftUI，最低 macOS 13，Bundle ID 为 `com.hushlight.bridge.mac`。
+- 纯 Bridge：菜单栏常驻、独立管理窗口、默认隐藏且可切换的 Dock 图标；不承载聊天、记忆或模型能力。
+- 使用版本化私有 `bridge-v1` 作为 macOS、Windows、设备和云端共享契约；后续 MCP 只作为外层网关。
+- 阶段一通过 Network.framework、Bonjour `_hushlight-bridge._tcp` 和 WSS 完成局域网全部能力；阶段二增加 Bridge 主动建立的云端 WSS，并作为上市主通道。
+- LAN、Cloud 和 Debug 测试台必须进入同一 `CommandRouter → PolicyEngine → Adapter → Result` 执行链。
+- 阶段三通过官网 Developer ID DMG 分发，不走 Mac App Store；使用 Hardened Runtime、公证和经供应链评审后精确固定的 Sparkle `2.9.4`。
+- macOS 详细需求、架构、协议、适配器和 Gate 以 `MACsoftware/docs/` 为权威实现基线。
+
 ## 5. 本地能力接入优先级
 
 | 优先级 | 接入方式 | 适用情况 | 主要风险 |
@@ -154,6 +164,8 @@ Bridge 不向用户暴露 MCP、端口、脚本或命令行。内部可以采用
 - 能被远程停用而不影响其他能力。
 
 ## 6. 工具调用链路
+
+下图是阶段二和上市主链路。阶段一由设备通过 LAN Transport 提交相同 `bridge-v1` 请求，Bridge 内部校验、执行和结果语义不变。局域网只用于研发联调和后续诊断，不形成第二套产品动作协议。
 
 ```mermaid
 sequenceDiagram
@@ -285,11 +297,12 @@ Schema 名称和枚举必须版本化。实现阶段可以调整字段，但不�
 - 首个音乐适配对象为网易云音乐，首个聊天适配对象为微信。
 - 两端共享工具、权限、确认和结果契约，但可以采用不同本地实现。
 - 关系与偏好记忆以云端为权威，Bridge 保存必要缓存。
+- macOS Bridge 使用原生 SwiftUI 和三阶段开发；阶段一局域网、阶段二云端长连接、阶段三正式产品准备。
 
 ### 待下一轮技术研判
 
-- macOS 与 Windows Bridge 的具体技术框架。
-- 两个平台对网易云音乐和微信的正式接口、系统接口与 UI 自动化边界。
+- Windows Bridge 的具体技术框架。
+- Windows 对网易云音乐和微信的正式接口、系统接口与 UI 自动化边界；macOS 具体支持版本仍需 S1 实机冻结。
 - ASR、LLM、TTS、成本路由和降级策略。
 - 自研板摄像头、电机/驱动/编码或限位方案、PCB/BSP 细节、首板排期与独立预算。
 
@@ -299,7 +312,7 @@ Schema 名称和枚举必须版本化。实现阶段可以调整字段，但不�
 - PostgreSQL 存账户、配置和结构化记忆；对象存储只保存必要资源。
 - 模型、音乐和聊天适配均通过接口隔离，避免绑定单一供应商。
 
-技术栈必须在项目搭建前通过 ADR 冻结；本文件不将建议写成已确认选择。
+未冻结技术栈必须在项目搭建前通过 ADR 冻结；macOS Bridge 已由 D-020 和 `MACsoftware/docs/07_decisions.md` 完成决策。
 
 ## 12. 非功能目标
 
@@ -316,11 +329,11 @@ Schema 名称和枚举必须版本化。实现阶段可以调整字段，但不�
 
 ## 13. 架构待决策
 
-- macOS 与 Windows Bridge 的桌面框架。
-- 网易云音乐和微信在两平台的具体接入方式与支持版本。
-- 实时协议和确认令牌格式。
+- Windows Bridge 的桌面框架。
+- 网易云音乐和微信在 Windows 的具体接入方式与支持版本；macOS 版本矩阵仍需实机验证。
+- 云端实时会话协议和生产确认凭据签发接口；Bridge 工具执行采用 `bridge-v1`。
 - 记忆数据生命周期和本地敏感字段同步范围。
-- Bridge 日志保留周期和云端同步字段。
+- Bridge 云端同步字段；macOS 本地动作元数据和诊断保留已冻结为 7 天上限。
 - 模型供应商、成本路由和降级策略。
 - 消费版外观、在场传感器和量产硬件方案。
 - 自研板具体摄像头、电机/驱动/限位、原理图、BOM、首板排期和独立预算。
