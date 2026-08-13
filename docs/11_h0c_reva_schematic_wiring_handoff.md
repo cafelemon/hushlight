@@ -1,13 +1,13 @@
 # 小熙 Hushlight H0C Rev A 原理图人工接线交接单
 
-> 版本：V0.1  
-> 日期：2026-08-12  
+> 版本：V0.3
+> 日期：2026-08-13
 > 状态：供人工连线；不代表 ERC 通过、可转 PCB、可打板或可采购  
 > 适用工程：`Hushlight.eprj2` → `H0-BASE-REVA` / `H0-HEAD-REVA`
 
 ## 1. 结论与使用边界
 
-当前嘉立创工程有 **46 个已保存对象**。`01POWERUSB` 的 PD 入口、主 Buck、3.3V Buck、音频 LDO、两路 eFuse、USB-C/ESD 和首轮主 Buck R/C/L 已放置；其他页主要仍是核心芯片或连接器骨架。
+2026-08-12 最新嘉立创 EDA 树显示，`H0-BASE-SCH-REVA` 为 **122 个已保存对象**（这是该图页的对象计数，不是 ERC、BOM 或可生产性结论）。已落图范围包括：PD 入口、主 Buck、3.3V Buck、音频 LDO、两路 eFuse、USB-C/ESD、Base-S3 启动/I²C 扩展、ES7210/ES8311/NS4150B 去耦、Motion-C3/DRV8833 的 VM 去耦与安全默认位、旋钮/静音/调试连接器候选，以及底座/头部两端的 FFC 与 bulk 候选。`H0-HEAD-REVA` 仍只允许保留 `H-IO-001` 所需的框图、FFC Gate 与调试占位，不得虚构 AMOLED 或摄像头接口。
 
 因此，**不能说“全部放置好了”**。本单把工作拆为三类：
 
@@ -24,14 +24,14 @@
 | 图页 | 从左到右 / 上到下布局 | 当前状态 |
 |---|---|---|
 | `00_SYSTEM` | 只放三域方框、跨页网络端口和版本/安全说明；不放功率环路 | `B`，用于总览，不承担细节连线 |
-| `01POWERUSB` | 左：USB-C、ESD、STUSB4500、TVS；中：P-MOS、输入保护、TPS56637 与其输入/BOOT/电感/输出环；右上：TPS62132→`BASE_3V3`；右中：TPS7A2033→`AUDIO_3V3A`；最右：Head/Motor eFuse 与测试点 | `A` 主件和部分 R/C/L 已放；仍缺 PD/eFuse/次级电源外围 |
-| `02-MCU-DEBUG` | 中：BASE-S3 模组；左：EN/BOOT/USB；右：UART、I2C、Head SPI、Motion UART；下：TCA9554、调试口、测试点 | `B`，仅 U1 骨架，不得先接未分配 GPIO |
-| `03-AUDIO-IN` | 左：MIC1/MIC2 与模拟滤波；中：ES7210；右：I2S、AEC 参考和调试点；模拟电源从下方进入 | `B`，ES7210 已放；模拟麦、去耦、偏置、滤波未完成 |
-| `04-AUDIO-OUT` | 左：ES8311；中：Codec→功放的调节/测试位；右：NS4150B、扬声器座；功放 bulk 在右下 | `B`，U3/U2 已放；外围未完成 |
-| `05-HEAD-LINK` | 左：BASE-S3 侧串阻/ESD；中：30Pin FFC；右：头部端口与测试点；电源针放上，SPI/UART 放中，GND 回流针夹在信号间 | `B`，连接器型号、同面/异面和线束仍为 `H-FFC-001` Gate |
-| `06-MOTION-IO` | 左：MOTION-C3、刷写/心跳/kill；中：DRV8833 与 VM bulk；右上：PAN 电机与编码器/限位；右下：TILT 电机与编码器/限位 | `B`，U8/U9 已放；电机、编码器、限位、栅极/输入保护未完成 |
-| `07-CONNECTORS-TEST` | 左：EC11、锁定静音；中：红灯/TCA9554；右：Base/Motion/Head 服务调试口；下：按电源、USB、音频、运动分组的测试点 | `B`，当前只保留结构占位 |
-| `H0-HEAD-REVA` | 左：`HEAD-S3` AMOLED 计算模组座/供电；中：摄像头、隐私灯、快门检测；右：Base FFC、头部调试口；模组天线区域留空 | `GATE`，必须先完成 `H-IO-001`；在此之前不选定扩展 GPIO、不连接摄像头 DVP |
+| `01POWERUSB` | 左：USB-C、ESD、STUSB4500、TVS；中：P-MOS、输入保护、TPS56637 与其输入/BOOT/电感/输出环；右上：TPS62132→`BASE_3V3`；右中：TPS7A2033→`AUDIO_3V3A`；最右：Head/Motor eFuse 与测试点 | `A+B`：70 个器件已落图且主件已按功能块收拢；含已实放的 CC 双路低电容 ESD `D4`。PD 上拉/检测、两路 eFuse 的限流、默认关断、OVLO、软启动、故障上拉及输入去耦已确定并落图。尚未连线、ERC 或转 PCB |
+| `02-MCU-DEBUG` | 中：BASE-S3 模组；左：EN/BOOT/USB；右：UART、I2C、Head SPI、Motion UART；下：TCA9554、调试口、测试点 | `A+B`：Base-S3 入口 `22µF+10µF+100nF`、TCA9554、两颗 I²C 上拉、EN/BOOT 默认件，以及 TCA9554 中断上拉 `R45` 已落图；接口 ESD 与未分配 GPIO 仍不可猜接 |
+| `03-AUDIO-IN` | 左：MIC1/MIC2 与模拟滤波；中：ES7210；右：I2S、AEC 参考和调试点；模拟电源从下方进入 | `A+B`：ES7210 数字/模拟两域各一组 `1µF+100nF` 已落图；模拟麦、偏置、滤波与完整 pin mapping 仍为 Gate |
+| `04-AUDIO-OUT` | 左：ES8311；中：Codec→功放的调节/测试位；右：NS4150B、扬声器座；功放 bulk 在右下 | `A+B`：ES8311 两域去耦、NS4150B 的 `10µF+100nF+220µF` bulk、PA 默认关断/信号调节位已落图；Codec 模拟链路外围仍待 datasheet 复核 |
+| `05-HEAD-LINK` | 左：BASE-S3 侧九颗 22Ω 源端串阻候选；中：30Pin FFC；右：头部端口与测试点；电源针放上，SPI/UART 放中，GND 回流针夹在信号间 | `A+GATE`：底座 FFC、9 个串阻和 `100µF+1µF+100nF` bulk 候选已放；料号、同异面、针位方向和 ESD 为 `H-FFC-001` Gate |
+| `06-MOTION-IO` | 左：MOTION-C3、刷写/心跳/kill；中：DRV8833 与 VM bulk；右上：PAN 电机与编码器/限位；右下：TILT 电机与编码器/限位 | `A+B`：U8/U9、VM `10µF+100nF+470µF`、nSLEEP/nFAULT 默认位已放；电机、编码器、限位连接器和输入保护仍待 Gate |
+| `07-CONNECTORS-TEST` | 左：EC11、锁定静音；中：红灯/TCA9554；右：Base/Motion/Head 服务调试口；下：按电源、USB、音频、运动分组的测试点 | `B+GATE`：EC11、红 LED/限流位、三组 1×6 服务口、扬声器/电机/编码器/限位座候选已放；锁定式静音实际型号和所有线束针序未冻结 |
+| `H0-HEAD-REVA` | 左：`HEAD-S3` AMOLED 计算模组座/供电；中：摄像头、隐私灯、快门检测；右：Base FFC、头部调试口；模组天线区域留空 | `GATE`：FFC、头部 bulk 和服务口候选仅作为接口验证载体；必须先完成 `H-IO-001`，不选定扩展 GPIO、不连接摄像头 DVP |
 
 ### 2.1 页内连线规则
 
@@ -47,7 +47,7 @@
 
 ### 3.1 入口、PD 和受控功率路径
 
-先补放 `B` 项：CC ESD 阵列、`STUSB4500` 的两颗 1µF 稳压去耦、I2C/开漏上拉、`VBUS_VS_DISCH` 串联限流电阻、输入保险/限流位、USB D+/D− 22Ω 串阻。下表中 `J_USB1.VBUS` 指 Type-C 连接器所有 VBUS 触点的同名汇合网，`J_USB1.GND` 同理。
+`R5=22Ω` 与 `R14=22Ω` 已在本页落图，分别作为 USB D+/D− 串阻。PD 的两颗 4.7kΩ I²C 上拉、ALERT/POWER_OK3 上拉、`VBUS_VS_DISCH=470Ω`、输入保险与 CC/USB ESD 均已落图；仅可按本单实际连线，不能把“已落图”当作已连通。下表中 `J_USB1.VBUS` 指 Type-C 连接器所有 VBUS 触点的同名汇合网，`J_USB1.GND` 同理。
 
 | 序号 | 源引脚 | 目标引脚 / 网络 | 状态 | 规则 |
 |---:|---|---|---|---|
@@ -78,7 +78,7 @@
 
 ### 3.2 12V→5.1V 主 Buck：TPS56637
 
-`TPS56637` 引脚号以 RPA-10 为准。`C1/C2/C3/C4/L1/R3/R4/C5…C8` 已放置；连线完成后，用局部网络标签而不是穿越整个页面的长线。
+`TPS56637` 引脚号以 RPA-10 为准。`C1/C2/C3/C4/L1/R3/R4/C5…C8` 与 `R32=0Ω`（EN 默认配置位）已放置；连线完成后，用局部网络标签而不是穿越整个页面的长线。
 
 | 序号 | 源引脚 | 目标引脚 / 网络 | 状态 | 规则 |
 |---:|---|---|---|---|
@@ -102,39 +102,39 @@
 
 ### 3.3 5V→BASE_3V3：TPS62132
 
-先补放：`L2=2.2µH`、`C9=10µF/10V`、`C10=100nF/10V`、`C11=22µF/6.3V`、`C12=3.3nF/25V`、`R5=100k`。固定 3.3V 型的 `FB` 不使用分压。
+已放 `L2` 候选、`C_3V3_IN_10U`、`C_3V3_IN_100N`、`C_3V3_OUT_22U`，以及 `C_SS_3V3=3.3nF/25V/0603`（嘉立创 `C2838745`）；仍需确认 `R_PG3V3=100k`。这里使用**功能位名**，避免同一工程的全局位号与 `02-MCU-DEBUG` 中的 C9…C13 混淆。固定 3.3V 型的 `FB` 不使用分压。`R5` 已被占用为 USB 22Ω 串阻，不能再把它当作 PG 上拉。
 
 | 源引脚 | 目标引脚 / 网络 | 规则 |
 |---|---|---|
-| `U7.AVIN`（pin 10）、`PVIN`（pins 11,12） | `5V_SYS` | C9/C10 正端同点、近端 |
-| `C9.2`、`C10.2` | `GND` | 回 U7 PGND/EP 邻近 |
+| `U7.AVIN`（pin 10）、`PVIN`（pins 11,12） | `5V_SYS` | `C_3V3_IN_10U/C_3V3_IN_100N` 正端同点、近端 |
+| `C_3V3_IN_10U.2`、`C_3V3_IN_100N.2` | `GND` | 回 U7 PGND/EP 邻近 |
 | `U7.SW`（pins 1,2,3） | `L2.1` | 仅局部 `SW_3V3` |
 | `L2.2` | `BASE_3V3` | 输出节点 |
-| `C11.1`、`U7.VOS`（pin 14） | `BASE_3V3` | 输出采样与输出电容同一安静节点 |
+| `C_3V3_OUT_22U.1`、`U7.VOS`（pin 14） | `BASE_3V3` | 输出采样与输出电容同一安静节点 |
 | `U7.FSW`（pin 7） | `FSW_3V3_CFG` 测试焊盘/配置位 | `GATE`：不在本轮把 FSW 接到 `BASE_3V3` 或 GND；先完成 datasheet 复核和 EMI 决策，再指定唯一连接 |
-| `C11.2` | `GND` | 输出电容回路最短 |
+| `C_3V3_OUT_22U.2` | `GND` | 输出电容回路最短 |
 | `U7.FB`（pin 5） | `U7.AGND`（pin 6） | TPS62132 固定输出型要求 |
 | `U7.DEF`（pin 8） | `GND` | 保持标称 3.3V，不要拉高到 +5% |
-| `U7.SS/TR`（pin 9） | `C12.1`；`C12.2→GND` | 首轮软启动位 |
+| `U7.SS/TR`（pin 9） | `C_SS_3V3.1`；`C_SS_3V3.2→GND` | 首轮软启动位 |
 | `U7.EN`（pin 13） | `5V_SYS` | 先直连；如需由 `5V_SYS_PG` 延迟，再改为受控位 |
-| `U7.PG`（pin 4） | `BASE_3V3_PG` + `R5.1`；`R5.2→BASE_3V3` | 开漏上拉 |
+| `U7.PG`（pin 4） | `BASE_3V3_PG` + `R_PG3V3.1`；`R_PG3V3.2→BASE_3V3` | 开漏上拉 |
 | `U7.AGND`（pin 6）、`PGND`（pins 15,16）、EP | `GND` | EP 必焊接地 |
 
 ### 3.4 5V→AUDIO_3V3A：TPS7A2033
 
-先补放 `C13=2.2µF/10V`、`C14=2.2µF/6.3V`、`R6=100k`（可选 PG 上拉）。严格按 `TPS7A2033PDBVR` 的实际符号 pin name 落图；若 EDA 符号与 datasheet 不一致，停下并记录，不以猜测编号连线。
+已放 `C_LDO_IN_2U2`、`C_LDO_OUT_2U2` 候选；`R_PG_AUDIO=100k` 为可选上拉/测试位。严格按 `TPS7A2033PDBVR` 的实际符号 pin name 落图；若 EDA 符号与 datasheet 不一致，停下并记录，不以猜测编号连线。
 
 | 源引脚 | 目标引脚 / 网络 | 规则 |
 |---|---|---|
-| `U10.IN` | `5V_SYS` + `C13.1` | 音频电源入口 |
-| `C13.2` | `GND` | 近端 |
-| `U10.OUT` | `AUDIO_3V3A` + `C14.1` | 仅 ES7210、ES8311、麦克风模拟敏感域 |
-| `C14.2`、`U10.GND` | `GND` | 不切割地平面 |
+| `U10.IN` | `5V_SYS` + `C_LDO_IN_2U2.1` | 音频电源入口 |
+| `C_LDO_IN_2U2.2` | `GND` | 近端 |
+| `U10.OUT` | `AUDIO_3V3A` + `C_LDO_OUT_2U2.1` | 仅 ES7210、ES8311、麦克风模拟敏感域 |
+| `C_LDO_OUT_2U2.2`、`U10.GND` | `GND` | 不切割地平面 |
 | `U10.EN` | `5V_SYS` | 本轮唯一默认连接；`AUDIO_EN` 仅保留 DNP 配置位，需单独 Gate 后才替换 |
 
 ### 3.5 Head / Motor eFuse：TPS259470
 
-U11 与 U12 使用相同 pinout；必须先补 `EN/UVLO`、`OVLO`、`ILM`、`DVDT` 的设定电阻/电容，不能悬空。初始限流 2.0A / 3.0A 仍是 `H-PWR-001` Gate，电阻值按当次 TI datasheet 曲线计算并记录，不能凭经验填值。
+U11 与 U12 使用相同 pinout；`EN/UVLO`、`OVLO`、`ILM`、`DVDT`、`ITIMER` 的首轮设定器件均已落图，不能悬空。首轮限流按 TI 公式 `R_ILM≈3334/I_LIMIT` 取 `R33=1.69kΩ`（Head，约 1.97A）与 `R34=1.10kΩ`（Motor，约 3.03A）。这些是样机初始值，`H-PWR-001` 仍须以实测浪涌、热、动作负载与误保护结果冻结。
 
 | 器件 | 源引脚 | 目标引脚 / 网络 | 规则 |
 |---|---|---|---|
@@ -142,17 +142,42 @@ U11 与 U12 使用相同 pinout；必须先补 `EN/UVLO`、`OVLO`、`ILM`、`DVD
 | U11 Head | `OUT`（pin 6） | `HEAD_5V` → FFC pins 5–8 | FFC 两端另放 47–100µF + 1µF + 100nF |
 | U11 Head | `EN/UVLO`（pin 1） | `HEAD_PWR_EN` + 默认下拉/分压 | BASE-S3 GPIO16 控制；不上电默认关闭 |
 | U11 Head | `FLT`（pin 4） | `HEAD_OC_N` → TCA9554.P4 + 3.3V 上拉 | 开漏低有效 |
-| U11 Head | `ILM`（pin 9） | `R_ILIM_HEAD → GND` | 目标 2.0A，值待 Gate |
-| U11 Head | `DVDT`（pin 7） | `C_DVDT_HEAD → GND` | 软启动值待 Gate |
-| U11 Head | `ITIMER`（pin 10） | 不连接；只留 `C_TIMER_HEAD` DNP 焊盘至 GND | 本轮采用 TI 的最快故障响应默认；`H-PWR-001` 通过前不得装电容 |
+| U11 Head | `ILM`（pin 9） | `R33=1.69kΩ → GND` | 初始限流约 1.97A |
+| U11 Head | `DVDT`（pin 7） | `C48=2.2nF → GND` | 首轮软启动位 |
+| U11 Head | `ITIMER`（pin 10） | `C49=2.2nF → GND` | 首轮过流计时位；台架实测后冻结 |
 | U11 Head | `OVLO`（pin 2）、`GND`（pin 8） | OVLO 分压到 `5V_SYS`/GND；GND→GND | OVLO 不悬空 |
 | U12 Motor | `IN`（pin 5） | `5V_SYS` | Motor 域独立输入去耦 |
 | U12 Motor | `OUT`（pin 6） | `MOTOR_5V` → DRV8833 VM | U12 后先到 470µF + 10µF + 100nF bulk |
 | U12 Motor | `EN/UVLO`（pin 1） | `MOTOR_PWR_EN` + 默认下拉/分压 | 默认关闭；仅限位/心跳正常后允许 |
 | U12 Motor | `FLT`（pin 4） | `MOTOR_OC_N` → TCA9554.P5 + 3.3V 上拉 | 开漏低有效 |
-| U12 Motor | `ILM`（pin 9） | `R_ILIM_MOTOR → GND` | 目标 3.0A，值待 Gate |
-| U12 Motor | `DVDT`（pin 7）、`OVLO`（pin 2）、`GND`（pin 8） | 同 U11 相应规则 | `OVLO`、`ILM` 不得浮空 |
-| U12 Motor | `ITIMER`（pin 10） | 不连接；只留 `C_TIMER_MOTOR` DNP 焊盘至 GND | 本轮采用最快故障响应默认；`H-PWR-001` 通过前不得装电容 |
+| U12 Motor | `ILM`（pin 9） | `R34=1.10kΩ → GND` | 初始限流约 3.03A |
+| U12 Motor | `DVDT`（pin 7）、`OVLO`（pin 2）、`GND`（pin 8） | `C50=2.2nF → GND`；OVLO 与 GND 同 U11 对应规则 | `OVLO`、`ILM` 不得浮空 |
+| U12 Motor | `ITIMER`（pin 10） | `C51=2.2nF → GND` | 首轮过流计时位；台架实测后冻结 |
+
+### 3.6 2026-08-13 已补齐元件清单（必须按功能名接线）
+
+下表对应 `01POWERUSB` 当前 70 个器件的本轮新增/冻结项。位号已经在 EDA 中复核；接线时同时核对“功能”和“值”，不可只凭自动位号推断用途。`C52=2.2nF` 为此前已存在的页面元件，不属于本轮两路 eFuse 的计时/斜率设定。
+
+| 功能块 | 位号 | 已选器件/值 | 连接意图 |
+|---|---|---|---|
+| PD VBUS 检测/泄放 | `R29` | `1206W4F4700T5E`，470Ω，250mW | `VBUS_RAW → U5.VBUS_VS_DISCH`；按 STUSB4500 参考应用 |
+| Type-C CC ESD | `D4` | `TPD2E2U06DRLR`，SOT-553-5，LCSC `C1972959` | 已实放；后续仅按 CC1、CC2 与 GND 的接线表连接，不可替代 USB 数据线 ESD `D2` |
+| IO 扩展中断上拉 | `R45`（`R_IOEXP_INT`） | `0603WAF1002T5E`，10kΩ，1%，LCSC `C25804` | 已实放；后续仅连接 `TCA9554.INT → BASE_3V3`，只能保留这一颗上拉 |
+| PD I²C | `R30`、`R31` | `0603WAF4701T5E`，4.7kΩ | `SYS_I2C_SCL/SDA → BASE_3V3` 上拉，各一颗 |
+| 主 Buck 使能 | `R32` | `0603WAF0000T5E`，0Ω | `VBUS_PD → U6.EN` 的唯一默认配置位 |
+| Head 限流 | `R33` | `0603WAF1691T5E`，1.69kΩ，1% | `U11.ILM → GND`，首轮约 1.97A |
+| Motor 限流 | `R34` | `0603WAF1101T5E`，1.10kΩ，1% | `U12.ILM → GND`，首轮约 3.03A |
+| 分支使能保护 | `R35`、`R36` | `0603WAF1001T5E`，1kΩ | Base GPIO 至 `U11/U12.EN` 串联保护位 |
+| 默认关断 | `R37`、`R38` | `0603WAF1003T5E`，100kΩ | `U11/U12.EN → GND`，掉电/复位默认关闭 |
+| Head/Motor OVLO 下臂 | `R39`、`R40` | `0603WAF1003T5E`，100kΩ | `U11/U12.OVLO → GND` |
+| Head/Motor OVLO 上臂 | `R41`、`R42` | `0603WAF3903T5E`，390kΩ | `5V_SYS → U11/U12.OVLO`；首轮上升阈值约 5.88V |
+| eFuse 故障读取 | `R43`、`R44` | `0603WAF1002T5E`，10kΩ | `U11/U12.FLT → BASE_3V3` 开漏上拉，各一颗 |
+| Head/Motor eFuse 输入 bulk | `C44`、`C45` | `GRM31CR71E106KA12L`，10µF，25V | 各自 `IN → GND`，贴近 eFuse 输入脚 |
+| Head/Motor eFuse 高频去耦 | `C46`、`C47` | `GRM188R71H104KA93D`，100nF，50V | 各自 `IN → GND`，贴近 eFuse 输入脚 |
+| Head 斜率/计时 | `C48`、`C49` | `GRM1885C1H222JA01D`，2.2nF，50V | 分别 `U11.DVDT/ITIMER → GND` |
+| Motor 斜率/计时 | `C50`、`C51` | `GRM1885C1H222JA01D`，2.2nF，50V | 分别 `U12.DVDT/ITIMER → GND` |
+
+本表代表“器件选择与落图已完成”，不代表这些网络已经连通，也不取消 `H-PWR-001` 的实测 Gate。
 
 ## 4. 其余页：现在只接批准的核心网络
 
@@ -160,7 +185,7 @@ U11 与 U12 使用相同 pinout；必须先补 `EN/UVLO`、`OVLO`、`ILM`、`DVD
 
 ### 4.1 `02-MCU-DEBUG`：BASE-S3
 
-`U1=ESP32-S3-WROOM-1-N16R8` 的 GPIO 只能按 10 第 8.1 节使用。人工先补齐模组的 3.3V 入口、EN RC、BOOT/RESET、USB/UART 和去耦；天线禁布区不画任何连接器/铜皮含义的占位。
+`U1=ESP32-S3-WROOM-1-N16R8` 的 GPIO 只能按 10 第 8.1 节使用。Base-S3 的 `C9=10µF`、`C10=22µF`、`C11=100nF`、EN/BOOT 默认件及 TCA9554 去耦均已落图，人工按下表接到 `BASE_3V3/GND` 与相应启动节点；USB/UART 服务口的防护与未分配 GPIO 仍不得猜接。天线禁布区不画任何连接器/铜皮含义的占位。
 
 | U1 引脚/信号 | 连接对象 | 约束 |
 |---|---|---|
@@ -174,7 +199,38 @@ U11 与 U12 使用相同 pinout；必须先补 `EN/UVLO`、`OVLO`、`ILM`、`DVD
 | `GPIO47` | `MOTION_KILL_N` | 默认下拉，未运行即关闭驱动 |
 | `GPIO48` | `PA_ENABLE` | 默认下拉，先关功放再关 Codec |
 
+#### 4.1.1 Base-S3 启动、复位、I2C 与服务口：引脚到引脚表
+
+以下是该页已落图的 `R_EN_BASE`、`C_EN_BASE`、`R_BOOT_BASE`、`C_IOEXP_BASE` 等外围应执行的唯一默认接法；位号以 EDA 实际标注为准，功能名优先。不得因全局自动位号变化而改动功能/数值。
+
+| 功能件/源引脚 | 目标引脚 / 网络 | 装配或接线约束 |
+|---|---|---|
+| `U1.EN` | `R_EN_BASE.1` + `C_EN_BASE.1` + `SW_RESET.1` | 同一 `EN_BASE` 节点；不要直接把 EN 绑死到 3.3V |
+| `R_EN_BASE.2` | `BASE_3V3` | 10kΩ 上拉候选；必须靠模组 |
+| `C_EN_BASE.2`、`SW_RESET.2` | `GND` | `C_EN_BASE=1µF` 复位 RC；复位开关按下拉低 EN |
+| `U1.GPIO0/BOOT_N` | `R_BOOT_BASE.1` + `SW_BOOT.1` | 启动绑定节点；不接普通外设 |
+| `R_BOOT_BASE.2` | `BASE_3V3` | 10kΩ 上拉候选 |
+| `SW_BOOT.2` | `GND` | 按下进入下载条件；与 EN 的操作时序由调试 SOP 规定 |
+| `U13.TCA9554.VCC` | `BASE_3V3` + `C_IOEXP_BASE.1` | `C_IOEXP_BASE=100nF`，去耦贴近 VCC |
+| `U13.TCA9554.GND`、`C_IOEXP_BASE.2` | `GND` | 不经由音频敏感域串接 |
+| `U13.TCA9554.SCL` | `U1.GPIO18 / SYS_I2C_SCL` + `R_I2C_SCL.1` | 开漏总线；只保留一颗对应上拉 |
+| `R_I2C_SCL.2` | `BASE_3V3` | 4.7kΩ 起始值，线长/电容实测后可调整 |
+| `U13.TCA9554.SDA` | `U1.GPIO17 / SYS_I2C_SDA` + `R_I2C_SDA.1` | 与 ES7210、ES8311、STUSB4500 共用总线 |
+| `R_I2C_SDA.2` | `BASE_3V3` | 4.7kΩ 起始值；不得再为每个从设备重复上拉 |
+| `U13.TCA9554.A0/A1/A2` | `GND` | 固定候选地址 `0x20`；若地址表变更，必须重开 Gate |
+| `U13.TCA9554.INT` | `U1.GPIO40 / IOEXP_IRQ_N` + 10kΩ 上拉至 `BASE_3V3` | 开漏低有效；10k 上拉件可在本页或中断源页落图，但只能有一处 |
+| `U13.P0` | `ENC1.SW` | 旋钮按压输入；开关另一端 `GND` |
+| `U13.P1` | `MUTE_LED_AUX` | 只作辅助状态，不得成为静音红灯唯一驱动路径 |
+| `U13.P3` | `PD_INT_N` | STUSB4500 `ALERT` 的诊断输入，保留 3.3V 上拉 |
+| `U13.P4`、`U13.P5` | `HEAD_OC_N`、`MOTOR_OC_N` | 分别来自两颗 eFuse 的 `FLT`；各自独立上拉 |
+| `J_BASE_DBG.3V3/GND` | `BASE_3V3/GND` | 服务盖板内部口；不允许用于向未隔离外设供电 |
+| `J_BASE_DBG.RX` | `U1.GPIO43/U0TXD` | 调试座用“RX”表示主机接收端，丝印必须注明交叉方向 |
+| `J_BASE_DBG.TX` | `U1.GPIO44/U0RXD` | 同上；调试器 TX 接此点 |
+| `J_BASE_DBG.EN/BOOT` | `EN_BASE` / `BOOT_N` | 仅恢复和烧录；不得与业务 GPIO 共用 |
+
 ### 4.2 `03-AUDIO-IN`：ES7210 与双模拟 MEMS
+
+已放置的 `C14=1µF`、`C15=100nF` 为 ES7210 数字域去耦；`C16=100nF`、`C17=1µF` 为模拟域去耦。每一对必须紧贴对应电源脚：`.1→` 相应电源、`.2→GND`。**不要**把这四颗电容接到 MIC 信号线上，也不要把数字域去耦替代模拟域去耦。
 
 ES7210 的模拟输入模式、MICBIAS、AC 耦合/偏置和 AEC 参考输入必须按 Korvo-2 V3.1 + ES7210 datasheet 逐脚核对后再连。当前不写伪精确的 MIC 脚号。
 
@@ -185,7 +241,11 @@ ES7210 的模拟输入模式、MICBIAS、AC 耦合/偏置和 AEC 参考输入必
 | `AUDIO_3V3A` / `GND` | U4 模拟电源、双麦供电和本地去耦 | MIC 料号冻结前先只留去耦焊盘 |
 | `AEC_REF` | ES8311 DAC 模拟输出、功放前分支 → ES7210 参考输入 | 禁止从 NS4150B 喇叭输出取样 |
 
+待 `H-MIC-001` 通过后，人工将 `MIC1/MIC2` 的同型号模拟 MEMS、各自的偏置/RC/ESD 与 `U4` 的实际模拟脚按 datasheet 原理图逐针补齐；在此之前，任何悬空的 `MICBIAS/MICxP/MICxN` 都应显式标为 Gate，不能为了消灭 ERC 错误而接地。
+
 ### 4.3 `04-AUDIO-OUT`：ES8311、NS4150B 与扬声器
+
+已放置的去耦/储能件按功能接线，自动位号不得替代功能核对：`C18=1µF`、`C19=100nF` 只服务 ES8311 数字域；`C20=1µF`、`C21=100nF` 只服务 ES8311 模拟域；`C22=10µF`、`C23=100nF`、`C24=220µF` 并联在 `U2` 的 `5V_SYS` 功放入口与 `GND` 之间。每组回流在所属 IC 电源脚附近闭合。
 
 | 源 | 目标 | 规则 |
 |---|---|---|
@@ -197,7 +257,28 @@ ES7210 的模拟输入模式、MICBIAS、AC 耦合/偏置和 AEC 参考输入必
 
 ### 4.4 `05-HEAD-LINK`：30Pin FFC
 
-完全按 10 第 7.2 节 Pin 1–30 表连。底座侧 `HEAD_PWR_EN` 只接 U11 的控制网络；FF C pin 18 只传逻辑状态，不承载 eFuse 电流。摄像头 DVP 和 AMOLED QSPI 不经过这条 FFC。
+底座及 Head Carrier 两端均已放置 `H-FFC-001` 候选与 `100µF+1µF+100nF` 头部 bulk 候选；底座侧另放九颗 `22Ω` 源端串阻候选。候选料号、翻盖方向、同面/异面和 pin-1 方向在 `H-FFC-001` 通过前都不可冻结，故此处只按**信号名称**接表，位号以当前 EDA 实物为准。
+
+| FFC pin | 底座端接线 | Head Carrier 端接线 | 串阻/默认约束 |
+|---:|---|---|---|
+| 1–4、10、14、29–30 | `GND` | `GND` | 所有地针同网；不可省略中间回流针 |
+| 5–8 | `U11.OUT / HEAD_5V` | `HEAD_5V` + 本地 bulk | 不跨 FFC 传 eFuse 设定或故障电流 |
+| 9 | `U1 → HEAD_SPI_SCLK` | `HEAD_SPI_SCLK` | 22Ω 源端候选 |
+| 11 | `U1 → HEAD_SPI_MOSI` | `HEAD_SPI_MOSI` | 22Ω 源端候选 |
+| 12 | `HEAD_SPI_MISO → U1` | `HEAD_SPI_MISO` | 22Ω 源端候选，须位于实际驱动端 |
+| 13 | `U1 → HEAD_SPI_CS_N` | `HEAD_SPI_CS_N` | 22Ω 候选；默认上拉待 Head 模组 GPIO Gate |
+| 15 | `HEAD_IRQ_N → U1` | `HEAD_IRQ_N` | 开漏优先；上拉归属在 `H-IO-001` 冻结 |
+| 16 | `HEAD_READY → U1` | `HEAD_READY` | 不作为直接上电判据，须由底座状态机读取 |
+| 17 | `U1 → HEAD_RESET_N` | `HEAD_RESET_N` | 22Ω 候选；默认上拉待 Gate |
+| 18 | `U1 GPIO16 → U11.EN/UVLO` 的本地控制网 | 仅状态/接口名，不驱动负载 | 不把 eFuse 电流、ILIM 或 OUT 经此针传递 |
+| 19–20 | `U1 TX/RX` | `HEAD_UART_RX/TX` | TX/RX 交叉；各留 22Ω 候选 |
+| 21–22 | `CAM_ACTIVE_LED_SENSE`、`SHUTTER_CLOSED_N` → U1 | 对应 Head 状态检测 | 未选定头部模组/快门件前只接到 Gate 测试位 |
+| 23 | `HEAD_TEMP_ALERT_N` | DNP/测试位 | Rev A DNP，不能被普通 GPIO 占用 |
+| 24 | `U1 → HEAD_BOOT_N` | `HEAD_BOOT_N` | 仅服务模式；默认上拉待 Gate |
+| 25–26 | `SPARE_DIFF_P/N` | 成对 DNP | 不能拆成普通单端杂线 |
+| 27–28 | `SPARE_GPIO0/1` | DNP/测试位 | 各留 22Ω 串阻候选 |
+
+摄像头 DVP 和 AMOLED QSPI 不经过这条 FFC。
 
 ### 4.5 `06-MOTION-IO`：MOTION-C3 与 DRV8833
 
@@ -218,8 +299,9 @@ ES7210 的模拟输入模式、MICBIAS、AC 耦合/偏置和 AEC 参考输入必
 
 ### 4.6 `07-CONNECTORS-TEST` 与 Head Carrier
 
-- EC11：`A/B → U1 GPIO1/2`，`SW → TCA9554.P0`，共同端接 GND；A/B 以 RC/软件消抖二选一，不能双重造成迟滞。
-- 静音锁定开关：一组触点硬件关闭麦克风有效供电/ES7210 MICBIAS，另一组触点形成 `MUTE_SENSE → U1 GPIO39`；红灯由独立硬件路径点亮，TCA9554.P1 只读/辅助显示。
+- EC11（`C202365` 候选）：`A/B → U1 GPIO1/2`，`SW → TCA9554.P0`，共同端接 GND；A/B 以 RC/软件消抖二选一，不能双重造成迟滞。
+- 静音锁定开关：已放 `SS-12D07` 候选及红 LED/`1kΩ` 限流候选，但该开关是否满足锁定、触点数、额定电流和机械开孔仍为 Gate。通过后，一组触点硬件关闭麦克风有效供电/ES7210 MICBIAS，另一组触点形成 `MUTE_SENSE → U1 GPIO39`；红灯由独立硬件路径点亮，TCA9554.P1 只读/辅助显示。
+- 服务口：Base、Motion、Head 均已放一组 `1×6` 候选。针序固定为 `GND / 3V3 / TX / RX / EN(or RESET) / BOOT`；Base 采用 U1 GPIO43/44，Motion/Head 仅在各自模块 datasheet 核对后接入。扬声器、PAN/TILT 电机、两路编码器和两路限位均已放 VH 系候选座，具体壳体/线束针序冻结前不得把相邻针位短接。
 - Head Carrier：头部计算单元固定为 `HEAD-S3`。只在完成 `H-IO-001` 后，根据 Waveshare 34Pin 原理图把 `HEAD_SPI_*`、`HEAD_UART_*`、`HEAD_READY`、`SHUTTER_CLOSED_N` 接到已验证的 `HEAD-S3` 扩展脚；当前禁止把摄像头直接并到未知 GPIO。
 
 ## 5. 人工连线后的检查顺序
@@ -235,12 +317,40 @@ ES7210 的模拟输入模式、MICBIAS、AC 耦合/偏置和 AEC 参考输入必
 
 | 页 | 必补项目 | 停止条件 |
 |---|---|---|
-| `01POWERUSB` | STUSB4500 的 CC ESD、VREG 1µF×2、I2C/开漏上拉、放电限流、输入保险、USB 22Ω；TPS62132/TPS7A20/eFuse 全部设定件 | 没有这些项不得跑 ERC 并宣称电源完整 |
-| `02-MCU-DEBUG` | EN/BOOT/RESET、电源入口 bulk/去耦、USB/UART 服务口、TCA9554 | 绑带和 PSRAM 占脚通过复核 |
-| `03/04-AUDIO` | 两只同型号模拟 MEMS、ES7210/ES8311/NS4150B 的 datasheet 级供电/模拟外围 | `H-MIC-001` 与音频 pin mapping 通过 |
-| `05-HEAD-LINK` | 30Pin FFC 具体料号、ESD、串阻、头部 bulk | `H-FFC-001` 通过 |
-| `06-MOTION-IO` | 电机/编码器/限位连接器、VM bulk、输入保护、编码器与限位滤波 | `H-MOT-001`、`H-ENC-001` 通过 |
-| Head Carrier | 模组座、摄像头/隐私件和头部调试口 | `H-IO-001` 通过 |
+| `01POWERUSB` | CC ESD、PD I2C/开漏上拉、VBUS 放电限流、输入保险/限浪涌位、U6 EN/PG、TPS62132 `SS/PG`、eFuse `ILIM/DVDT/OVLO/ITIMER` 设定件 | 两颗 USB 串阻、STUSB VREG 1µF×2、各电源主去耦和 eFuse IN/EN/FLT 默认位已放；Gate 设定值未通过不得宣称电源完整 |
+| `02-MCU-DEBUG` | TCA9554 INT 上拉、USB/UART 保护及最终服务口针序 | Base-S3 bulk/去耦、TCA9554 本体/去耦、两颗 I²C 上拉、EN/BOOT 默认件已放；仍须复核绑带和 PSRAM 占脚 |
+| `03/04-AUDIO` | 两只同型号模拟 MEMS、ES7210/ES8311/NS4150B 的 datasheet 级模拟外围、麦静音硬断链 | 四组 codec 去耦、功放 bulk 和 PA 调整位已放；`H-MIC-001` 与音频 pin mapping 未通过不得接模拟脚 |
+| `05-HEAD-LINK` | 30Pin FFC 实际料号/朝向、ESD、Head GPIO 上拉及 pin-1 机械验证 | FFC、九颗 22Ω、底座/头部 bulk 已放；`H-FFC-001` 通过前不得冻结线束 |
+| `06-MOTION-IO` | 电机/编码器/限位连接器针序、输入保护、编码器与限位滤波/施密特 | VM bulk 与 nSLEEP/nFAULT 默认位已放；`H-MOT-001`、`H-ENC-001` 未通过不得接绑带/限位 Gate 脚 |
+| `07-CONNECTORS-TEST` | 静音开关实际型号/触点、全部 VH 座针序、红灯硬件路径 | 连接器与服务口均为候选落图，不能视为线束冻结 |
+| Head Carrier | 模组座、摄像头/隐私件和头部调试口最终针脚 | `H-IO-001` 通过；当前只允许 FFC/bulk/服务口候选 |
+
+### 6.1 剩余实体落图清单：只放焊盘/符号，不得猜接
+
+这一表是恢复嘉立创操作后的**唯一剩余落图队列**。`FROZEN` 项可按给定值/封装入图；`GATE-DNP` 项必须有符号、0603/指定封装焊盘和功能位号，但不填猜测值、不连线到未冻结器件，也不计入可采购 BOM。若某项已经在当前图中存在，先按功能位号核对，禁止重复放置。
+
+| 图页 | 功能位号 | 落图物 | 状态 | 放置与边界 |
+|---|---|---|---|---|
+| `01POWERUSB` | `R_EN0` | 0Ω、0603 | `FROZEN` | TPS56637 EN 默认使能配置位；仅在 `U6.EN` 邻近 |
+| `01POWERUSB` | `R_PG5V`、`R_PG3V3` | 100kΩ、0603 各一 | `FROZEN` | 对应 U6/U7 开漏 PG 上拉；`R_PG3V3` 是当前下一件待放 |
+| `01POWERUSB` | `R29` | 470Ω、1206、250mW | `FROZEN` | STUSB4500 `VBUS_VS_DISCH` 串联限流/泄放位 |
+| `01POWERUSB` | `R33/R34` | 1.69kΩ / 1.10kΩ，0603，1% | `FROZEN` | TPS259470 Head/Motor 初始限流约 1.97A / 3.03A；实测后仍须 Gate 冻结 |
+| `01POWERUSB` | `C48…C51` | 2.2nF、0603 | `FROZEN` | 两颗 eFuse 的 DVDT/ITIMER 首轮设定位；实测后可改值，不再按 DNP 处理 |
+| `01POWERUSB` | `R39…R42` | 100kΩ/390kΩ，0603 | `FROZEN` | 两路 eFuse OVLO 分压，首轮上升阈值约 5.88V |
+| `01POWERUSB` | `F1`、`R_SHIELD`、`C_SHIELD`、`R_SHIELD_0R` | BHFUSE `BSMD1812-200-16V`；其余为 EMI 位 | `A+GATE-DNP` | 输入保险已落图；Shield EMI 网络仍不得以普通跳线替代 |
+| `01POWERUSB` | `D4` | `TPD2E2U06DRLR` | `A`（2026-08-13 已实放） | 双路低电容 ESD；按接线表靠 Type-C 布局，尚未接线 |
+| `02-MCU-DEBUG` | `R45`（`R_IOEXP_INT`） | 10kΩ、0603 | `A`（2026-08-13 已实放） | TCA9554 INT 上拉；尚未接线，且只能有这一颗 |
+| `02-MCU-DEBUG` | `R_USB_DP/DM_DBG`、`D_UART_ESD` | 22Ω 串阻与低电容 ESD 占位 | `GATE-DNP` | 服务口保护，不替代 01 页 USB 主链路的两颗已放 22Ω |
+| `03-AUDIO-IN` | `C_MIC1/2_LOCAL`、`C_MIC_A_ENTRY` | 100nF×2、1µF×1 | `GATE-DNP` | 仅在 `H-MIC-001` 确认模拟麦封装/供电脚后贴近麦克风落位 |
+| `03/04-AUDIO` | `R_AEC_CFG`、`C_AEC_CFG`、`R_CODEC_PA`、`C_CODEC_PA` | 0603 调节/隔直焊盘 | `GATE-DNP` | Codec 模拟链/AEC 增益调整；不允许为消除悬空直接短接 |
+| `05-HEAD-LINK` | `D_FFC_ESD`、`R_HEAD_CS_PU`、`R_HEAD_RST_PU`、`R_HEAD_READY_PD` | FFC ESD 阵列与 0603 上下拉位 | `GATE-DNP` | `H-FFC-001` 与 `H-IO-001` 未通过前只留位，不冻结方向/针序 |
+| `06-MOTION-IO` | `D_MOTOR_P/T`、`R_SNUB_P/T`、`C_SNUB_P/T` | 电机 TVS、RC snubber 位 | `GATE-DNP` | 靠电机座；反电动势实测后选择具体料号与值 |
+| `06-MOTION-IO` | `D_ENC_ESD_P/T`、`D_LIMIT_ESD_P/T` | 低电容 ESD 阵列位 | `GATE-DNP` | 靠对应连接器，等待线缆/编码器输出制式冻结 |
+| `06-MOTION-IO` | `R_LIMIT_PU_P/T`、`C_LIMIT_P/T`、`U_LIMIT_SCHMITT` | 限位上拉、RC、施密特配置位 | `GATE-DNP` | 先完成 C3 绑带/常闭回路上电实测，禁止先接 GPIO8/9 |
+| `07-CONNECTORS-TEST` | `Q_MUTE_SW`、`R_MUTE_SENSE`、`R_LED_MUTE` | 麦克风硬断开/状态检测/红灯限流位 | `GATE-DNP` | 静音开关的实际触点与 MICBIAS 方案未冻结前，只留独立硬件路径位 |
+| `H0-HEAD-REVA` | `J_HEAD_MODULE`、`J_CAM`、`D_HEAD_EXT_ESD`、`R_HEAD_IO_CFG` | 模组座、摄像头座、外部 ESD、GPIO 配置位 | `GATE-DNP` | `H-IO-001` 完成前不可选符号或把 FFC 信号接到未知 HEAD-S3 引脚 |
+
+完成这份表中所有符号落图，仍然只达到“可开始人工接线/复核”的前置条件；实际连线、ERC、PCB 转换、生产文件和采购各自需要后续 Gate。
 
 ## 7. 资料依据
 
