@@ -127,6 +127,7 @@ ESP32-P4 的 MIPI CSI/DSI、ISP、PPA、JPEG/H.264 和更高算力适合未来�
 | Head 5V 开关 | TPS259470ARPWR | `FROZEN-A` | 2.7–23V、5.5A、真反向阻断；`HEAD_PWR_EN`、`HEAD_OC_N` 必须可观测；首版 `ILIM=2.0A`，台架后校正 |
 | Motor 5V 开关 | TPS259470ARPWR | `FROZEN-A` | 与逻辑/音频分支分开，故障时可独立关断；首版 `ILIM=3.0A`，堵转测试后冻结；嘉立创 `C3662799` |
 | USB2 ESD | TPD2EUSB30A 或等效低电容双路器件 | `FROZEN-A` | 靠近 Type-C D+/D− 入口 |
+| Type-C CC short-to-VBUS | `STUSB4500QTR` 内置 CC 高压保护；不另加 D4 | `FROZEN-A` | CC1/CC2 直接进入 U5；原 `TPD2E2U06DRLR` 已从 EDA 删除，不能代替 CC 保护。U5 对 CC 提供 22V short-to-VBUS 保护；系统级 IEC ESD 表现作为 P1 台架验证项，不在本轮叠加另一颗 CC 保护 IC |
 | USB-PD 受控功率路径 | `Q_PD1=AONR21321`（AOS，嘉立创 `C541711`） | `FROZEN-A` | 30V P-MOS，`RDS(on)` 最大 29.5mΩ @ −4.5V、额定 −24A；引脚 `1–3=S`、`4=G`、`5–8=D`。由 STUSB4500 `VBUS_EN_SNK` 的高压开漏直接驱动，保留 ST 参考方案的门极外围 |
 | 入口 TVS | `D_VBUS_TVS=SMBJ15A`（Littelfuse，嘉立创 `C83846`） | `FROZEN-A` | 单向 SMB/DO-214AA；`VRWM=15V`、`VBR=16.7V`、`VC=24.4V @ 24.6A`，低于 TPS56637 28V 绝对最大额定值；阴极接 VBUS、阳极接 GND |
 
@@ -381,7 +382,7 @@ Rev A 头部使用成熟 AMOLED 计算模组。屏幕、触控、IMU、RTC、Fla
 
 ### 10.1 USB-C / PD
 
-- CC1/CC2 按 STUSB4500 参考设计连接，并采用经 short-to-VBUS 额定确认的 CC 专用保护器件；普通 5V USB 数据 ESD 不能替代。采用 PD 控制器时不得再并联普通 5.1kΩ Rd 破坏协商。
+- CC1/CC2 直接按 STUSB4500 参考设计进入 U5；该器件本身对 CC 提供 22V short-to-VBUS 保护。普通 5V USB 数据 ESD 不能替代 CC 保护，`TPD2E2U06DRLR` 已删除。采用 PD 控制器时不得再并联普通 5.1kΩ Rd 破坏协商。系统级 IEC ESD 验证保持为 P1 台架项；未通过时再选择补强方案，不能在当前 CC 链路随意串接器件。
 - VBUS 入口顺序：连接器 → 高压 TVS → `Q_PD1`（由 STUSB4500 控制）→ 输入保险/限流 → 主 Buck。STUSB4500 的 `VDD/VBUS` 监测、CC 及放电相关脚位接在 `Q_PD1` 前侧；不得把 PD 控制器放在被自身开关切断的后侧。
 - USB D+/D− 各放 22Ω 串阻占位，ESD 靠连接器；差分线全程 90Ω，禁止测试点形成长支节。
 - Shield 通过 1nF/1MΩ/可选 0Ω 网络接机壳/数字地，首板留 EMI 调整位，不在连接器处形成细长地颈。

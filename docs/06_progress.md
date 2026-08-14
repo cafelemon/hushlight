@@ -99,6 +99,8 @@
 - `02-MCU-DEBUG` 已实放并保存 `R45=R_IOEXP_INT=10kΩ / 0603WAF1002T5E / C25804`。它是 TCA9554 `INT` 的唯一上拉位，后续只允许按 `TCA9554.INT → R45 → BASE_3V3` 接线；尚未接线或 ERC。
 - 已将 `09_jlceda_placement_guide.md` 标为历史放置清单，避免其早期单主控/5V 基线与现行 H0C Rev A 三域、12V PD 基线混用；后续 EDA 操作以 `10_hardware_board_design_spec.md` 和 `11_h0c_reva_schematic_wiring_handoff.md` 为准。
 - 完成 H0C Rev A G0 只读原理图审计并形成 `12_h0c_reva_g0_schematic_audit.md`。发现两项 P0：`D4=TPD2E2U06DRLR` 的 5.5V 耐压不适合作 Type-C CC 的 short-to-VBUS 保护；01 与 02 页存在两组 `SYS_I2C` 4.7kΩ 上拉候选。两项关闭前，不开始 CC 或 I²C 接线；并补齐 DRV8833 的 VCP/VINT/ISEN/PowerPAD 接线约束。
+- 已关闭上述两项 P0 并保存 EDA：删除 `01POWERUSB.D4/R30/R31`。CC 采用 `J_USB1.CC1/CC2 → STUSB4500.CC1/CC2` 直连，依赖 U5 的内置 22V short-to-VBUS 防护；`SYS_I2C` 唯一上拉固定为 02 页 `R_I2C_SCL/R_I2C_SDA=4.7kΩ`。系统级 CC IEC ESD 验证降为 P1 台架项，不得以恢复 D4 代替。
+- 接线交接单更新至 V0.7：`01POWERUSB` 改为按全页连续序号、单源端点到单目标端点的 A 级接线单；`A+B/B/GATE` 与尚未映射为实际位号的 3.3V、音频 LDO、eFuse 功能项不再混入可执行表，防止人工连线时误接。
 - 本轮未新增任何导线、未运行 ERC、未转 PCB、未生成 BOM、未采购或下单。
 
 ## 4. 当前待办
