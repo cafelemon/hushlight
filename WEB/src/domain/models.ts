@@ -31,6 +31,17 @@ export interface CompanionSettings {
   quietHours: string
 }
 
+export interface AccountSummary {
+  state: 'preview' | 'signed_out' | 'authenticated'
+  displayName?: string
+}
+
+export interface SubscriptionSummary {
+  status: 'unavailable' | 'trial' | 'active' | 'paused'
+  planName?: string
+  usageLabel?: string
+}
+
 export interface MemoryItem {
   id: string
   title: string
@@ -39,6 +50,8 @@ export interface MemoryItem {
   updatedAt: string
   pinned: boolean
 }
+
+export type MemoryUpdate = Pick<MemoryItem, 'title' | 'detail' | 'pinned'>
 
 export interface ActivityItem {
   id: string
@@ -52,6 +65,8 @@ export interface ActivityItem {
 export interface HushlightSnapshot {
   source: DataSource
   userName: string
+  account: AccountSummary
+  subscription: SubscriptionSummary
   device: Device | null
   bridges: Bridge[]
   permissions: Permission[]
@@ -59,4 +74,3 @@ export interface HushlightSnapshot {
   memories: MemoryItem[]
   activities: ActivityItem[]
 }
-

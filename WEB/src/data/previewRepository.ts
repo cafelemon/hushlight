@@ -1,9 +1,11 @@
 import type { HushlightRepository } from '../domain/repository'
-import type { CompanionSettings, HushlightSnapshot } from '../domain/models'
+import type { CompanionSettings, HushlightSnapshot, MemoryUpdate } from '../domain/models'
 
 const initialSnapshot: HushlightSnapshot = {
   source: 'preview',
   userName: '晚上好',
+  account: { state: 'preview' },
+  subscription: { status: 'unavailable' },
   device: null,
   bridges: [
     { platform: 'macOS', state: 'not_connected' },
@@ -61,6 +63,13 @@ class PreviewRepository implements HushlightRepository {
     return clone(this.snapshot)
   }
 
+  async updateMemory(id: string, memory: MemoryUpdate) {
+    this.snapshot.memories = this.snapshot.memories.map((item) => item.id === id
+      ? { ...item, ...memory, updatedAt: '刚刚' }
+      : item)
+    return clone(this.snapshot)
+  }
+
   async deleteMemory(id: string) {
     this.snapshot.memories = this.snapshot.memories.filter((memory) => memory.id !== id)
     return clone(this.snapshot)
@@ -69,4 +78,3 @@ class PreviewRepository implements HushlightRepository {
 
 export const previewRepository = new PreviewRepository()
 export const createPreviewRepository = () => new PreviewRepository()
-

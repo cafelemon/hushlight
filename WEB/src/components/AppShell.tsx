@@ -1,4 +1,4 @@
-import { Activity, Bot, Brain, HeartHandshake, Home, Laptop, Sparkles } from 'lucide-react'
+import { Activity, Bot, Brain, HeartHandshake, Home, Laptop, Sparkles, UserRound } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router'
 import { useHushlight } from '../app/HushlightContext'
 
@@ -9,6 +9,7 @@ const navigation = [
   { to: '/bridge', label: 'Bridge 与权限', icon: Laptop },
   { to: '/memories', label: '记忆', icon: Brain },
   { to: '/activity', label: '活动记录', icon: Activity },
+  { to: '/account', label: '账户与订阅', icon: UserRound },
 ]
 
 export function AppShell() {
@@ -45,4 +46,3 @@ export function AppShell() {
     </div>
   )
 }
-

@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hushlight.local/schemas/bridge-v1.schema.json",
+  "title": "Hushlight bridge-v1 envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "message_type",
+    "message_id",
+    "source",
+    "issued_at",
+    "expires_at",
+    "nonce",
+    "payload"
+  ],
+  "properties": {
+    "protocol_version": {
+      "const": "1.0"
+    },
+    "message_type": {
+      "enum": [
+        "hello",
+        "heartbeat",
+        "capability.snapshot",
+        "command.request",
+        "command.ack",
+        "command.result",
+        "pair.begin",
+        "pair.complete",
+        "error"
+      ]
+    },
+    "message_id": {
+      "$ref": "#/$defs/uuidV7"
+    },
+    "request_id": {
+      "anyOf": [
+        { "$ref": "#/$defs/uuidV7" },
+        { "type": "null" }
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": {
+          "enum": ["device", "cloud", "debug_console"]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 256
+    },
+    "auth": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["key_id", "mac"],
+          "properties": {
+            "key_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "mac": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 256
+            }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "payload": {}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "message_type": { "const": "command.request" }
+        }
+      },
+      "then": {
+        "required": ["request_id"],
+        "properties": {
+          "payload": { "$ref": "#/$defs/commandRequest" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "uuidV7": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "confirmation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "confirmation_id",
+        "action",
+        "issued_at",
+        "expires_at",
+        "user_id",
+        "device_id",
+        "bridge_id",
+        "session_id",
+        "provider",
+        "target_id",
+        "draft_sha256",
+        "key_id",
+        "signature"
+      ],
+      "properties": {
+        "confirmation_id": { "$ref": "#/$defs/uuidV7" },
+        "action": { "const": "chat.send" },
+        "issued_at": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "user_id": { "$ref": "#/$defs/identifier" },
+        "device_id": { "$ref": "#/$defs/identifier" },
+        "bridge_id": { "$ref": "#/$defs/identifier" },
+        "session_id": { "$ref": "#/$defs/identifier" },
+        "provider": { "const": "wechat" },
+        "target_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "draft_sha256": { "$ref": "#/$defs/sha256" },
+        "key_id": { "$ref": "#/$defs/identifier" },
+        "signature": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" }
+      }
+    },
+    "emptyParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "maxProperties": 0
+    },
+    "volumeSetParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
+      "properties": {
+        "value": { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "volumeAdjustParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["delta"],
+      "properties": {
+        "delta": { "type": "number", "minimum": -100, "maximum": 100 }
+      }
+    },
+    "timerCreateParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timer_id", "fire_at", "label"],
+      "properties": {
+        "timer_id": { "$ref": "#/$defs/identifier" },
+        "fire_at": { "type": "string", "format": "date-time" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 256 }
+      }
+    },
+    "timerUpdateParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timer_id"],
+      "anyOf": [{ "required": ["fire_at"] }, { "required": ["label"] }],
+      "properties": {
+        "timer_id": { "$ref": "#/$defs/identifier" },
+        "fire_at": { "type": "string", "format": "date-time" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 256 }
+      }
+    },
+    "timerCancelParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timer_id"],
+      "properties": { "timer_id": { "$ref": "#/$defs/identifier" } }
+    },
+    "reminderCreateParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reminder_id", "title", "due_at"],
+      "properties": {
+        "reminder_id": { "$ref": "#/$defs/identifier" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "due_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "reminderUpdateParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reminder_id"],
+      "anyOf": [{ "required": ["title"] }, { "required": ["due_at"] }],
+      "properties": {
+        "reminder_id": { "$ref": "#/$defs/identifier" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "due_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "reminderCancelParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reminder_id"],
+      "properties": { "reminder_id": { "$ref": "#/$defs/identifier" } }
+    },
+    "contentOpenParameters": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bundle_id"],
+          "properties": {
+            "bundle_id": {
+              "type": "string",
+              "maxLength": 255,
+              "pattern": "^[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["url"],
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "maxLength": 2048,
+              "pattern": "^https://"
+            }
+          }
+        }
+      ]
+    },
+    "mediaParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "enum": ["system", "netease_music"] }
+      }
+    },
+    "musicSearchParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "query"],
+      "properties": {
+        "provider": { "const": "netease_music" },
+        "query": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "artist": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "album": { "type": "string", "minLength": 1, "maxLength": 256 }
+      }
+    },
+    "chatDraftParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "content"],
+      "oneOf": [{ "required": ["target_name"] }, { "required": ["target_id"] }],
+      "properties": {
+        "provider": { "const": "wechat" },
+        "target_name": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "target_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "content": { "type": "string", "minLength": 1, "maxLength": 2000 }
+      }
+    },
+    "chatSendParameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "user_id",
+        "device_id",
+        "session_id",
+        "target_id",
+        "draft_sha256"
+      ],
+      "properties": {
+        "provider": { "const": "wechat" },
+        "user_id": { "$ref": "#/$defs/identifier" },
+        "device_id": { "$ref": "#/$defs/identifier" },
+        "session_id": { "$ref": "#/$defs/identifier" },
+        "target_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "draft_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "commandRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "risk_level", "parameters", "confirmation"],
+      "properties": {
+        "action": { "type": "string" },
+        "risk_level": { "enum": ["L0", "L1", "L2", "L3"] },
+        "parameters": { "type": "object" },
+        "confirmation": {
+          "anyOf": [{ "$ref": "#/$defs/confirmation" }, { "type": "null" }]
+        }
+      },
+      "oneOf": [
+        { "properties": { "action": { "const": "system.volume.get" }, "risk_level": { "const": "L0" }, "parameters": { "$ref": "#/$defs/emptyParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "system.volume.set" }, "risk_level": { "const": "L1" }, "parameters": { "$ref": "#/$defs/volumeSetParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "system.volume.adjust" }, "risk_level": { "const": "L1" }, "parameters": { "$ref": "#/$defs/volumeAdjustParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "timer.create" }, "risk_level": { "const": "L2" }, "parameters": { "$ref": "#/$defs/timerCreateParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "timer.update" }, "risk_level": { "const": "L2" }, "parameters": { "$ref": "#/$defs/timerUpdateParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "timer.cancel" }, "risk_level": { "const": "L2" }, "parameters": { "$ref": "#/$defs/timerCancelParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "reminder.create" }, "risk_level": { "const": "L2" }, "parameters": { "$ref": "#/$defs/reminderCreateParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "reminder.update" }, "risk_level": { "const": "L2" }, "parameters": { "$ref": "#/$defs/reminderUpdateParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "reminder.cancel" }, "risk_level": { "const": "L2" }, "parameters": { "$ref": "#/$defs/reminderCancelParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "content.open" }, "risk_level": { "const": "L1" }, "parameters": { "$ref": "#/$defs/contentOpenParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "media.play" }, "risk_level": { "const": "L1" }, "parameters": { "$ref": "#/$defs/mediaParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "media.pause" }, "risk_level": { "const": "L1" }, "parameters": { "$ref": "#/$defs/mediaParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "media.previous" }, "risk_level": { "const": "L1" }, "parameters": { "$ref": "#/$defs/mediaParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "media.next" }, "risk_level": { "const": "L1" }, "parameters": { "$ref": "#/$defs/mediaParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "music.search_and_play" }, "risk_level": { "const": "L2" }, "parameters": { "$ref": "#/$defs/musicSearchParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "chat.draft" }, "risk_level": { "const": "L2" }, "parameters": { "$ref": "#/$defs/chatDraftParameters" }, "confirmation": { "type": "null" } } },
+        { "properties": { "action": { "const": "chat.send" }, "risk_level": { "const": "L3" }, "parameters": { "$ref": "#/$defs/chatSendParameters" }, "confirmation": { "$ref": "#/$defs/confirmation" } } }
+      ]
+    }
+  }
+}

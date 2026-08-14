@@ -1,0 +1,14 @@
+{
+  "routes": [
+    { "name": "home", "path": "/", "actions": [] },
+    { "name": "devices", "path": "/devices", "actions": [] },
+    { "name": "companion", "path": "/companion", "actions": [] },
+    { "name": "companion-toggle", "path": "/companion", "actions": [{ "type": "click", "selector": "button[aria-label='主动关怀']" }] },
+    { "name": "bridge", "path": "/bridge", "actions": [] },
+    { "name": "memories", "path": "/memories", "actions": [] },
+    { "name": "memory-edit", "path": "/memories", "actions": [{ "type": "click", "selector": "button[aria-label='编辑音乐偏好示例']" }] },
+    { "name": "memory-confirm", "path": "/memories", "actions": [{ "type": "click", "selector": "button[aria-label='删除音乐偏好示例']" }] },
+    { "name": "activity", "path": "/activity", "actions": [] },
+    { "name": "account", "path": "/account", "actions": [] }
+  ]
+}

@@ -1,9 +1,9 @@
 # Hushlight Bridge V1 协议规格
 
-> 协议名：`bridge-v1`  
-> 版本：`1.0`  
-> 更新日期：2026-08-13  
-> 状态：设计基线；JSON Schema 文件尚未实现
+> 协议名：`bridge-v1`
+> 版本：`1.0`
+> 更新日期：2026-08-14
+> 状态：实现中；逐 action Schema 与 L3 确认参考实现已建立，Transport 与 LAN 鉴权待实现
 
 ## 1. 目标和消费者
 
@@ -94,12 +94,15 @@
 | `parameters` | 按 action 的独立 Schema 严格校验 |
 | `confirmation` | L3 必填；L0–L2 必须为空 |
 
+所有参数对象默认拒绝未知字段。标识最长 128 字符并限制为 ASCII 字母、数字、`.`、`_`、`:`、`-`；展示文本拒绝空白并设置动作级长度上限。精确字段以 JSON Schema 与 `09_local_adapter_spec.md` 为准。
+
 公共动作集：
 
 | Action | 风险 | 适配器 |
 | --- | --- | --- |
 | `system.volume.get` | L0 | System Volume |
 | `system.volume.set` | L1 | System Volume |
+| `system.volume.adjust` | L1 | System Volume |
 | `timer.create/update/cancel` | L2 | Local Timer |
 | `reminder.create/update/cancel` | L2 | EventKit Reminder |
 | `content.open` | L1 | Content Open |
@@ -153,6 +156,7 @@ Ack 不包含 `status: succeeded`，也不能被设备播报为完成。
 | --- | --- | --- |
 | `unsupported_protocol` | rejected | 协议版本不支持 |
 | `invalid_schema` | rejected | 消息或参数不合法 |
+| `payload_too_large` | rejected | 消息超过 64 KiB |
 | `unauthenticated` | rejected | 未配对或令牌无效 |
 | `request_expired` | rejected | 已超过有效期 |
 | `replay_detected` | rejected | nonce 或签名重放 |
@@ -164,6 +168,8 @@ Ack 不包含 `status: succeeded`，也不能被设备播报为完成。
 | `target_ambiguous` | rejected | 联系人或内容不唯一 |
 | `confirmation_required` | rejected | L3 无有效确认 |
 | `confirmation_expired` | rejected | 确认过期或失效 |
+| `confirmation_invalid` | rejected | 签名、声明或绑定字段无效 |
+| `confirmation_used` | rejected | 确认 ID 已被其他请求占用 |
 | `execution_timeout` | failed/unknown | 适配器超时，按是否可能产生副作用决定 |
 | `result_unverifiable` | unknown | 无法取得可靠成功证据 |
 | `internal_error` | failed | 内部错误，不暴露敏感细节 |
@@ -172,7 +178,7 @@ Ack 不包含 `status: succeeded`，也不能被设备播报为完成。
 
 ## 7. L3 确认凭据
 
-`chat.send` 的 `confirmation` 至少绑定：
+`chat.send` 的 `confirmation` 绑定：
 
 - 用户、设备、Bridge 和会话标识。
 - `action`、聊天 provider、联系人稳定标识。
@@ -180,7 +186,11 @@ Ack 不包含 `status: succeeded`，也不能被设备播报为完成。
 - 签发时间、过期时间和唯一确认 ID。
 - 单次使用标志和签发方签名。
 
-阶段一由受信设备/Debug 测试链生成开发确认凭据；阶段二由云端策略在用户明确确认后签发。Bridge 必须验证签名、绑定字段、有效期和使用状态。任何字段变化均要求重新确认。
+确认字段固定为 `confirmation_id/action/issued_at/expires_at/user_id/device_id/bridge_id/session_id/provider/target_id/draft_sha256/key_id/signature`。有效期最长 60 秒；SHA-256 使用 64 位小写十六进制；签名输入为移除 `key_id/signature` 后按键排序、ISO 8601 日期编码的 canonical JSON claims。
+
+阶段一参考实现使用 256 位 HMAC-SHA256 密钥和 base64url 无填充签名，通过 `ConfirmationVerifying` 接口注入。阶段二由云端策略在用户明确确认后签发；正式密钥取得、轮换和签发接口仍由云端/Web Owner 冻结，但必须验证相同 claims 语义或通过新 ADR 升级协议。
+
+Bridge 在调用适配器前原子占用 `confirmation_id`。相同 `request_id` 返回幂等结果；不同 `request_id` 复用同一确认返回 `confirmation_used`。已用确认最多保留 500 条或 7 天，存储满时失败关闭。签名、绑定字段、有效期或使用状态任一不符均不得调用适配器。
 
 ## 8. 配对和传输安全
 
@@ -202,6 +212,8 @@ Ack 不包含 `status: succeeded`，也不能被设备播报为完成。
 - Bridge 同时支持新旧版本的窗口由阶段发布计划定义；未知版本默认拒绝。
 - JSON Schema、Swift 类型、设备类型和 Windows 类型必须通过同一组契约样例。
 - MCP 网关输出合法 `bridge-v1 command.request`，并接收同一 `command.result`；不得定义旁路成功语义。
+
+当前 Schema 文件位于 `Sources/HushlightMac/Resources/bridge-v1.schema.json`，Swift 入口位于 `BridgeProtocolValidator` 和 `BridgeCommandProcessor`。17 个公共 action 的参数、风险和确认要求已进入 Schema 与运行时校验；L3 HMAC 参考实现位于 `ConfirmationSecurity.swift`。LAN Envelope HMAC、配对密钥和云端正式签发接口仍待实现。
 
 ## 11. 必测协议场景
 

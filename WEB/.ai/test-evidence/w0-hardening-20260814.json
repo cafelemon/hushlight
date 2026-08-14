@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "subject": "Hushlight Web W0 frontend hardening without live device or Bridge",
+  "checks": [
+    {
+      "id": "WEB-W0-STATIC",
+      "name": "TypeScript project check",
+      "status": "pass",
+      "command": "npm run typecheck",
+      "evidence": ["exit 0 on 2026-08-14"],
+      "owner": "Web"
+    },
+    {
+      "id": "WEB-W0-UNIT",
+      "name": "Repository, context recovery and component tests",
+      "status": "pass",
+      "command": "npm test",
+      "evidence": ["4 files, 9 tests passed on 2026-08-14"],
+      "owner": "Web"
+    },
+    {
+      "id": "WEB-W0-BROWSER",
+      "name": "Routes, preview boundary, memory and companion interactions",
+      "status": "pass",
+      "command": "npm run test:ui",
+      "evidence": ["41 passed, 3 desktop-only conditional skips across four viewport projects"],
+      "owner": "Web"
+    },
+    {
+      "id": "WEB-W0-UI-EVIDENCE",
+      "name": "Formal screenshot, accessibility, request and overflow matrix",
+      "status": "pass",
+      "command": "capture-ui-evidence.mjs --run-id w0-hardening-20260814-final2",
+      "evidence": [".ai/ui-evidence/w0-hardening-20260814-final2/evidence.json: 40 of 40 passed"],
+      "owner": "Web"
+    },
+    {
+      "id": "WEB-W0-BUILD",
+      "name": "Production build",
+      "status": "pass",
+      "command": "npm run build",
+      "evidence": ["Vite production build exit 0 on 2026-08-14"],
+      "owner": "Web"
+    },
+    {
+      "id": "WEB-W0-DEPENDENCY",
+      "name": "npm dependency vulnerability audit",
+      "status": "pass",
+      "command": "npm audit --audit-level=high",
+      "evidence": ["found 0 vulnerabilities on 2026-08-14"],
+      "owner": "Web"
+    }
+  ],
+  "remainingRisk": [
+    "No real account, cloud API, device or PC Bridge was connected.",
+    "No local application action or L3 message confirmation was executed.",
+    "Subscription payment and production deployment remain untested."
+  ]
+}

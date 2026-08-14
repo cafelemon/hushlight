@@ -18,8 +18,8 @@
 - Typography: 系统无衬线字体；标题 28/34，页面标题 26/32，正文 14–16/1.6；数字使用 tabular nums。
 - Logo asset and language variant: W0 使用文字标识 `Hushlight / 小熙` 与自绘光点图形；正式 Logo 待品牌资产确认。
 - Logo surface and minimum display size: 暖白或深墨色平面，文字标识最小宽度 112px。
-- Brand colors: Ink `#232220`，Warm white `#fbfaf7`，Apricot `#ef9b69`，Amber `#e8b558`，Sage `#6d8b7b`。
-- Semantic colors: success `#34745b`，warning `#a96819`，danger `#a84943`，info `#456a8f`；状态同时使用文字与图标。
+- Brand colors: Ink `#252421`，Warm white `#fbfaf7`，Apricot `#e98f5a`，可访问文字杏橙 `#8f4524`，Amber `#e8b558`，Sage `#547565`。
+- Semantic colors: success `#276449`，warning `#794706`，danger `#943c37`，info `#456a8f`；状态同时使用文字与图标。深色侧栏强调文字使用 `#f2a373`，不复用浅色表面的深杏橙。
 - Icon library: Lucide，线宽统一 1.8；所有图标按钮必须有可访问名称。
 
 ## Components And States

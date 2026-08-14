@@ -6,6 +6,7 @@ import { CompanionPage } from '../pages/CompanionPage'
 import { DashboardPage } from '../pages/DashboardPage'
 import { DevicesPage } from '../pages/DevicesPage'
 import { MemoriesPage } from '../pages/MemoriesPage'
+import { AccountPage } from '../pages/AccountPage'
 
 export function App() {
   return (
@@ -17,9 +18,9 @@ export function App() {
         <Route path="bridge" element={<BridgePage />} />
         <Route path="memories" element={<MemoriesPage />} />
         <Route path="activity" element={<ActivityPage />} />
+        <Route path="account" element={<AccountPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
   )
 }
-

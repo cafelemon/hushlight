@@ -53,7 +53,7 @@
 |---|---|---|---:|---|
 | B-01 | Base 主控 | `ESP32-S3-WROOM-1-N16R8` | 5 | Base 域；天线布局仍由 PCB Gate 控制 |
 | B-02 | Motion 主控 | `ESP32-C3-MINI-1-N4` | 5 | 运动域；GPIO2/8/9 启动电平须先在原理图核对 |
-| B-03 | 电机驱动 | `DRV8833PWP` | 5 | 必须使用带 PowerPAD 的 PWP 封装与正确散热焊盘 |
+| B-03 | 电机驱动 | `DRV8833PWPR` / 嘉立创 `C50506` | 5 | 当前 EDA 已用该卷带订货号；必须使用带 PowerPAD 的 PWP 封装与正确散热焊盘 |
 | B-04 | PD Sink | `STUSB4500QTR` | 5 | 到货后先做 NVM PDO 编程/读取台架 |
 | B-05 | 主 Buck | `TPS56637RPAR` | 5 | 12V→5.1V/6A；外围按 G1 计算与波形冻结 |
 | B-06 | 3.3V Buck | `TPS62132RGTR` / 嘉立创 `C81563` | 5 | 不得误购固定 5V 的 TPS62133 |

@@ -11,7 +11,12 @@ let package = Package(
         .executable(name: "HushlightMac", targets: ["HushlightMac"])
     ],
     targets: [
-        .executableTarget(name: "HushlightMac"),
+        .executableTarget(
+            name: "HushlightMac",
+            resources: [
+                .process("Resources")
+            ]
+        ),
         .testTarget(
             name: "HushlightMacTests",
             dependencies: ["HushlightMac"]

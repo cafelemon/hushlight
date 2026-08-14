@@ -1,22 +1,22 @@
 # 小熙 Hushlight H0C Rev A G0 原理图审计与接线收敛单
 
 > 日期：2026-08-13  
-> 状态：两项 P0 已关闭；2026-08-13 已在嘉立创 EDA 删除 `D4/R30/R31` 并保存。仍不代表 ERC、PCB、BOM、打板或采购放行
-> 范围：审计、器件核对、EDA 定向修复与文档收敛；未新增任何导线、未运行 ERC、未转 PCB
+> 状态：两项 P0 与 06 页器件级 P1-02 已关闭；2026-08-14 已完成 03 页冻结外围落图及 06 页 C25/C28 实物级替换。仍不代表 ERC、PCB、BOM、打板或采购放行
+> 范围：审计、器件核对、EDA 定向修复与文档收敛；01 页本轮只读，03 页仅新增器件并保留既有未审导线对象；未运行 ERC、未转 PCB
 
 ## 1. 结论
 
-原先阻止接线的两项 P0 已闭环：CC 不再使用错误的 `D4`，而是直连具备 22V short-to-VBUS 能力的 STUSB4500；`SYS_I2C` 已物理删除 01 页的重复上拉，只保留 02 页唯一一对 4.7kΩ。两项均在画线前完成，尚未造成 PCB 或物料损失。
+原先阻止接线的两项 P0 已闭环：CC 不再使用错误的 `D4`，而是直连具备 22V short-to-VBUS 能力的 STUSB4500；`SYS_I2C` 已物理删除 01 页的重复上拉，只保留 02 页唯一一对 4.7kΩ。06 页 `P1-02` 也已通过真实器件替换关闭：C25/C28 已分别成为 `C86018/2.2µF` 与 `C77053/10nF`。这些动作均在相关错误网络画线前完成，尚未造成 PCB 或物料损失。
 
 ## 2. 审计证据与当前状态
 
 | 项 | 结果 |
 |---|---|
-| EDA 基础工程 | `H0-BASE-REVA` 与 `H0-HEAD-REVA` 均存在；Base 页 01/02/04 可见，Head 页仍为 Gate 占位 |
+| EDA 基础工程 | `H0-BASE-REVA` 的 `01POWERUSB、02-MCU-DEBUG、03-AUDIO-IN、04-AUDIO-OUT、05-HEAD-LINK、06-MOTION-IO、07-CONNECTORS-TEST` 与系统页均存在；`H0-HEAD-REVA` 四页存在但尚未开始放件 |
 | `01POWERUSB` | 已删除 `D4/R30/R31` 并保存；CC 与 I²C P0 已关闭，尚无可验收的完整电源网络 |
 | `02-MCU-DEBUG` | 21 件已落图，`R45=10kΩ` 存在且未接线 |
 | `04-AUDIO-OUT` | 存在若干未命名绿线片段；不能据此认定功放 bulk 或 Codec 网络已正确连接 |
-| Head Carrier | 空白/Gate 状态符合当前 `H-IO-001` 约束；没有把未知显示或摄像头 GPIO 伪接入 |
+| Head Carrier | 2026-08-14 逐页打开确认 `00-SYSTEM`、`01-DISPLAY-TOUCH`、`02-CAMERA-PRIVACY`、`03-FLEX-TEST` 均为 0 元件、0 网络、0 导线；空白/Gate 状态符合当前 `H-IO-001` 约束，没有把未知显示或摄像头 GPIO 伪接入 |
 
 ## 3. 审计问题
 
@@ -26,7 +26,7 @@
 | `P0-02` | Closed | `01.R30/R31` 与 `02.R_I2C_SCL/SDA` 会形成两组 4.7kΩ 上拉候选 | `11` 第 3.1、3.6、4.1 节与 GPIO/I²C 表 | 已删除 `R30/R31` 并保存。`SYS_I2C` 唯一实体上拉为 02 页的 `R_I2C_SCL/R_I2C_SDA=4.7kΩ`；允许接入 STUSB4500、TCA9554 和 Codec |
 | `P1-00` | P1 | STUSB4500 的 short-to-VBUS 能力不等于整机已完成 IEC 61000-4-2 端口级认证 | [STUSB4500 datasheet](https://www.st.com/resource/en/datasheet/stusb4500.pdf) | 首板对 CC1/CC2 进行系统级 ESD 台架验证；若不通过，基于实测选择补强，而非恢复 D4 或在当前链路随机串接保护器件 |
 | `P1-01` | P1 | `04-AUDIO-OUT` 已有未命名导线片段，连接范围未能由网名或器件引脚证明 | EDA 只读画布 | 逐段复核。只有明确的 `5V_SYS`、`AUDIO_3V3A`、`GND` 或获批信号网可以保留；不明片段不得参与后续连接 |
-| `P1-02` | P1 | DRV8833 的 `VCP`、`VINT`、`AISEN/BISEN`、PowerPAD 未在原清单逐脚列出，易在手工接线中遗漏 | [DRV8833 datasheet](https://www.ti.com/lit/ds/symlink/drv8833.pdf) | 按 11 第 4.5.1 节补齐；先以现有 C25…C29/R12/R13 的值核对功能位，不能按自动位号猜接 |
+| `P1-02` | Closed | 06 页原 `C25=1µF`、`C28=100nF` 与 DRV8833 的 `VINT=2.2µF`、`VCP–VM=10nF` 要求不一致 | EDA 对象树/属性与 [DRV8833 datasheet](https://www.ti.com/lit/ds/symlink/drv8833.pdf) | 2026-08-14 已保留位号和唯一 ID，把 C25 实物器件替换为 `GRM188R71A225KE15D/C86018/2.2µF`，C28 替换为 `GRM188R71H103KA01D/C77053/10nF`，逐项属性复核并保存。06 第一批 `06-A01…A33` 已发布；GPIO2、电机、编码器、限位仍保持 Gate |
 | `P1-03` | P1 | 两颗 TPS259470 的 `AUXOFF` 未进入功能连线表 | [TPS25947 datasheet](https://www.ti.com/lit/ds/symlink/tps25947.pdf) | Rev A 不做电源 MUX 时显式标 `NC`；不得误接成 `FLT` 或 `PG`。`FLT` 仅 pin 4，`AUXOFF` 为 pin 3 |
 | `GATE-01` | 保持 Gate | 模拟麦、Codec 模拟外围、静音硬断开、FFC 方向、Head GPIO、相机、电机/编码器/限位接口仍未冻结 | `10` Gate 表、`11` 待补放表 | 不为消除 ERC 或“先跑起来”而接线 |
 
@@ -47,7 +47,7 @@
 | CC | D4 已删除；U5 内置 22V short-to-VBUS 能力已核对 | `J_USB1.CC1/CC2` 直连 U5 对应 CC；无 5.1kΩ Rd；IEC ESD 台架项另行记录 |
 | I²C | 01 `R30/R31` 已删除；02 唯一 4.7kΩ 上拉对已确认 | 每线只有一只等效上拉；地址表 `0x18/0x20/0x28/0x40` 无冲突 |
 | eFuse | ILM、OVLO、EN/UVLO、DVDT、ITIMER、FLT/AUXOFF 角色已核对 | ILM 无 ADC/长线分支；AUXOFF 显式 NC；FLT 各自一只上拉 |
-| DRV8833 | C25…C29/R12/R13 已按功能而非位号核对 | VM/VCP/VINT/ISEN/PowerPAD 完整；nSLEEP 默认低；nFAULT 开漏上拉 |
+| DRV8833 | C25/C28 的真实器件、值、封装、制造商料号和 LCSC 料号均已替换复核；PWP 引脚表已纠正 GND=pin 11 | VM/VCP/VINT/ISEN/PowerPAD 完整；nSLEEP 默认低；nFAULT 开漏上拉；pin 13 只作 AIN2 |
 | 音频 | 04 的已有线段均有命名和端点证明 | PA bulk 只跨 5V_SYS/GND；BTL 输出无任一端接地 |
 | Gate | 未冻结项均标记 | ERC 中只豁免有 ID 的 Gate/NC 项 |
 
@@ -56,3 +56,18 @@
 - CC 的系统级 IEC ESD 台架结果及是否需要基于实测补强。
 - Head 模组、摄像头、模拟麦、编码器、限位、静音开关和线束的最终型号/针序。
 - PCB、BOM、Gerber、采购和下单。
+
+## 7. 2026-08-14 B 项自动化审计结果
+
+| 项 | 处理结果 | 后续边界 |
+|---|---|---|
+| `01POWERUSB` | 只读核对为 68 个器件；本轮未移动、增删或改线 | 用户继续按 11 的 A 表人工接线；完成后再做局部 ERC |
+| 双模拟麦 | `U14/U15=IM73A135V01XTSA1 / C3171831` 已落图并移入 03 图框 | `H-MIC-001` 仍负责封装朝向、声学结构、相位与增益实测 |
+| 麦克风独立 LDO | `U16=TPS7A2028PDBVR / C2869847` 已落图 | 3PDT 切断位置、EN 默认态和 MIC_2V8 网络未接线 |
+| LDO 去耦 | `C52/C53=GRM188R71A225KE15D / C86018`，2.2µF×2 已落图 | 连线时分别映射 U16 IN/OUT，不允许串入信号路径 |
+| 麦克风本地去耦 | `C54/C55=GRM188R71H104KA93D / C77055`，100nF×2 已落图 | 每颗只服务一颗麦克风 VDD/GND，靠近器件布局 |
+| 03 未命名导线 | EDA 报告 3 个导线/总线对象，未作为完成连接 | 人工逐条确认端点；不明片段删除后再按 A 表建立网络 |
+| MT6701 | 不放在 Base 主板 06 页 | 两颗传感器属于独立 `H0-ENCODER-PAN/TILT-REVA` 小板；等待磁铁、气隙、安装位样件 Gate 后建小板原理图 |
+| 30Pin FFC、3PDT、相机/快门、最终线束座 | 未自动落具体量产件 | 仍依赖实物针序、机构尺寸与触点逻辑；保持 `GATE-DNP`，避免错误进入 BOM |
+
+本轮关闭的是“已经由已批准选型直接决定、无需样品尺寸才能放置”的 B 项。所有机械耦合、线束针序、磁路、相机扩展口和硬隐私触点仍保留 Gate，不能因元件库中存在候选符号而提前转为 A。

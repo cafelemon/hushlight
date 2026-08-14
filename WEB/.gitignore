@@ -1,6 +1,8 @@
 node_modules/
 dist/
 coverage/
+playwright-report/
+test-results/
+.ai/ui-evidence/
 *.local
 .DS_Store
-

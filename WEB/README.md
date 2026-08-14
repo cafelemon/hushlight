@@ -16,8 +16,10 @@ npm run dev
 ```bash
 npm run typecheck
 npm test
+npm run test:ui
 npm run build
 ```
 
-产品、架构和验收入口见 [`docs/00_overview.md`](docs/00_overview.md)。
+`npm run test:ui` 会自动启动仅供测试使用的本地 Vite 服务，并检查四个固定视口。完整顺序可使用 `npm run test:all`。
 
+产品、架构和验收入口见 [`docs/00_overview.md`](docs/00_overview.md)。

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Hushlight">
+  <rect width="64" height="64" rx="20" fill="#e98f5a"/>
+  <path d="M32 13v8M32 43v8M13 32h8M43 32h8M18.6 18.6l5.7 5.7M39.7 39.7l5.7 5.7M45.4 18.6l-5.7 5.7M24.3 39.7l-5.7 5.7" fill="none" stroke="#2c3034" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="8" fill="#2c3034"/>
+</svg>

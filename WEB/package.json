@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:ui": "playwright test",
+    "test:all": "npm run typecheck && npm test && npm run test:ui && npm run build"
   },
   "dependencies": {
     "lucide-react": "1.31.0",
@@ -17,6 +19,8 @@
     "react-router": "8.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@playwright/test": "^1.61.1",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.2",
     "@types/react": "19.2.18",

@@ -7,8 +7,8 @@ import { PageState } from '../components/PageState'
 import { StatusPill } from '../components/StatusPill'
 
 export function DashboardPage() {
-  const { snapshot, loading, error } = useHushlight()
-  if (!snapshot) return <PageState loading={loading} error={error} />
+  const { snapshot, loading, error, reload } = useHushlight()
+  if (!snapshot) return <PageState loading={loading} error={error} onRetry={() => void reload()} />
   const enabledPermissions = snapshot.permissions.filter((item) => item.enabled).length
   return <>
     <PageHeader eyebrow="你的 Hushlight" title={`${snapshot.userName}，这里是小熙的大本营`} description="查看连接、陪伴设置和最近发生的事情。日常交流仍然交给小熙。" />
@@ -27,4 +27,3 @@ export function DashboardPage() {
     </div>
   </>
 }
-

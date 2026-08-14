@@ -1,8 +1,8 @@
 # Hushlight Mac 本地适配器功能规格
 
-> 版本：V1.0  
-> 更新日期：2026-08-13  
-> 状态：设计基线；适配器均尚未实现
+> 版本：V1.1
+> 更新日期：2026-08-14
+> 状态：参数契约已实现；真实适配器均尚未实现
 
 ## 1. 通用契约
 
@@ -10,12 +10,15 @@
 
 统一执行顺序：参数校验 → 暂停/权限/版本/白名单/确认校验 → 执行 → 回读 → 归一结果。适配器不得直接建立 LAN/Cloud 连接、签发确认或修改公共协议。
 
+参数对象严格拒绝未知字段；内部 ID 只允许 ASCII 字母、数字、`.`、`_`、`:`、`-`，最长 128 字符。日期使用 RFC 3339，SHA-256 使用 64 位小写十六进制。Schema 和 Swift 运行时必须同时更新并由 17-action 契约测试对齐。
+
 ## 2. System Volume Adapter
 
 | Action | 参数 | 成功证据 | 失败/边界 |
 | --- | --- | --- | --- |
-| `system.volume.get` | 无 | 返回当前输出设备和 0–100 音量 | 无默认输出设备则 failed |
-| `system.volume.set` | `mode=absolute/step`；`value` | 执行后回读值在允许误差内 | 绝对值限制 0–100；步进越界截断并回读 |
+| `system.volume.get` | `{}` | 返回当前输出设备和 0–100 音量 | 无默认输出设备则 failed |
+| `system.volume.set` | `value`，0–100 | 执行后回读值在允许误差内 | 越界参数拒绝 |
+| `system.volume.adjust` | `delta`，-100–100 | 执行后回读值在允许误差内 | 结果越界时截断并回读 |
 
 - 优先 Core Audio 正式接口。
 - 不切换输出设备，不控制麦克风，不绕过系统静音策略。
@@ -47,10 +50,10 @@
 
 ## 5. Content Open Adapter
 
-`content.open` 只接受以下一种目标：
+`content.open` 只接受以下一种目标，且不得同时提供：
 
-- 已注册 Bundle ID。
-- `https` URL 且主机精确匹配或属于审核通过的子域规则。
+- `bundle_id`：已注册 Bundle ID。
+- `url`：`https` URL 且主机精确匹配或属于审核通过的子域规则。
 
 执行前规范化 URL，拒绝 `file`、`javascript`、`data`、自定义脚本 Scheme、IP 字面量、用户名密码、重定向到非白名单和本地文件路径。应用未安装时不自动安装，返回 `app_not_installed`。
 
@@ -60,10 +63,10 @@
 
 | Action | 参数 | 成功证据 |
 | --- | --- | --- |
-| `media.play` | 可选 provider | 播放状态变为 playing，或返回 unknown |
-| `media.pause` | 可选 provider | 播放状态变为 paused，或返回 unknown |
-| `media.previous` | 可选 provider | 曲目标识变化或返回 unknown |
-| `media.next` | 可选 provider | 曲目标识变化或返回 unknown |
+| `media.play` | 可选 `provider=system/netease_music` | 播放状态变为 playing，或返回 unknown |
+| `media.pause` | 可选 `provider=system/netease_music` | 播放状态变为 paused，或返回 unknown |
+| `media.previous` | 可选 `provider=system/netease_music` | 曲目标识变化或返回 unknown |
+| `media.next` | 可选 `provider=system/netease_music` | 曲目标识变化或返回 unknown |
 
 优先系统媒体接口或应用正式接口。仅触发媒体键但无法读取状态时不能返回 `succeeded`；应根据证据返回 `unknown`。
 
@@ -117,7 +120,7 @@ provider 为 `wechat`。阶段一只允许微信测试账号和测试联系人�
 
 ### 8.3 发送
 
-`chat.send` 参数：provider、联系人稳定标识、草稿摘要和 confirmation。
+`chat.send` 参数：`provider=wechat`、`user_id`、`device_id`、`session_id`、联系人 `target_id` 和 `draft_sha256`；confirmation 位于 Command 顶层，不重复放入 parameters。
 
 执行规则：
 
