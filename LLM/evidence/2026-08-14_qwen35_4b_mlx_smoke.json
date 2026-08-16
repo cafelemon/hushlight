@@ -1,0 +1,74 @@
+{
+  "evidence_type": "local_mlx_inference_and_api_smoke_test",
+  "tested_at": "2026-08-14",
+  "machine": {
+    "chip": "Apple M5",
+    "unified_memory_gb": 24,
+    "python": "3.11.9"
+  },
+  "runtime": {
+    "mlx": "0.32.0",
+    "mlx_lm": "0.31.3",
+    "mlx_vlm": "0.6.13",
+    "fastapi": "0.141.1"
+  },
+  "model": {
+    "id": "mlx-community/Qwen3.5-4B-MLX-4bit",
+    "weight_bytes": 3034300695,
+    "weight_sha256": "5fb9acd0246866381cf8c5c354c6db1019f6498eec4ccb4f5edcc71ffeacb2db",
+    "integrity_passed": true
+  },
+  "prompt_iteration": {
+    "first_run": "Schema and tired classification passed, but need was the generic companionship value, so the semantic gate failed.",
+    "change": "Tightened the fatigue rule to prefer rest or low_stimulation_companionship, non-positive valence, acknowledge and a light choice.",
+    "second_run_passed": true
+  },
+  "case": {
+    "input": "今天有点累。",
+    "passed": true,
+    "checks": {
+      "schema_valid": true,
+      "emotion_is_tired": true,
+      "valence_is_not_positive": true,
+      "need_is_appropriate": true,
+      "strategy_is_supportive": true,
+      "reply_is_brief_and_natural": true,
+      "temporary_emotion_not_written": true,
+      "no_unapproved_action": true
+    },
+    "state": {
+      "schema_version": "companion-state-v1",
+      "emotion": [{"name": "tired", "confidence": 0.95}],
+      "valence": -0.2,
+      "arousal": 0.3,
+      "emotion_intensity": 0.6,
+      "need": "rest",
+      "need_confidence": 0.85,
+      "interaction_mode": "quiet_companion",
+      "strategy": ["acknowledge", "offer_choice", "quiet"],
+      "avoid": ["advice", "encourage", "ask"],
+      "reply": "听起来今天辛苦了。想先歇会儿，还是想安静陪一会儿？",
+      "expression": "soft_concern",
+      "motion": {"intent": "slight_head_tilt", "intensity": 0.4},
+      "action_candidate": null,
+      "memory_candidate": {"should_write": false, "reason": "临时情绪不写入"},
+      "follow_up": {"should_continue": true, "wait_for_user": true},
+      "confidence": 0.92
+    },
+    "metrics": {
+      "elapsed_seconds": 7.06,
+      "prompt_tokens": 689,
+      "generation_tokens": 214,
+      "peak_memory_gb": 4.339747986
+    }
+  },
+  "local_api": {
+    "bind": "127.0.0.1:8765",
+    "health_status": 200,
+    "respond_status": 200,
+    "response_matches_cli_state": true,
+    "server_stopped_after_test": true
+  },
+  "evidence_boundary": "One fixed text case passed local inference and API smoke testing. This is not Gold Set, long-run, LoRA, device-loop, user or production acceptance."
+}
+

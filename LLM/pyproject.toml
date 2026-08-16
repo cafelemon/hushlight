@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hushlight-llm"
+version = "0.1.0"
+description = "Hushlight local MLX inference, evaluation and training workspace"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "fastapi==0.141.1",
+  "huggingface-hub==1.27.0",
+  "hf-xet==1.6.0",
+  "jsonschema==4.26.0",
+  "mlx-lm==0.31.3",
+  "mlx-vlm==0.6.13",
+  "uvicorn[standard]==0.52.3",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

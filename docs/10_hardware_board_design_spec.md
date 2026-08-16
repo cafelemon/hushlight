@@ -297,6 +297,8 @@ GPIO 表是 Rev A 原理图权威。任何变更先更新本节，再改图。
 
 TCA9554：`P0=ENC_SW`、`P1=MUTE_LED`、`P2=USER_LED`、`P3=PD_INT_N`、`P4=HEAD_OC_N`、`P5=MOTOR_OC_N`、`P6=SPARE`、`P7=SPARE`。
 
+两路 eFuse 控制固定为：`GPIO16/HEAD_PWR_EN → 1kΩ → U11.EN/UVLO`，EN 节点以 100kΩ 下拉；`GPIO47/MOTION_KILL_N → 1kΩ → U12.EN/UVLO`，EN 节点以 100kΩ 下拉。两路均为主动高使能，MCU 复位、未配置或断线时必须关闭。U11/U12 的 `FLT#` 分别接 TCA9554 P4/P5，并各自只保留一颗 10kΩ 到 `BASE_3V3` 的上拉。
+
 ### 8.2 HEAD-S3
 
 Rev A 头部使用成熟 AMOLED 计算模组。屏幕、触控、IMU、RTC、Flash/PSRAM 的内部 GPIO **以该模组官方原理图为准，不在自研载板重新分配**。自研载板只使用官方 34Pin 扩展口已经引出的信号。冻结前必须在 `H-IO-001` Gate 用实物 + 原理图逐针通断验证。

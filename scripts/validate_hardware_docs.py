@@ -20,7 +20,7 @@ def fail(message: str) -> None:
 
 def validate_a_rows(text: str) -> None:
     start = text.index("### 3.1")
-    end = text.index("### 3.5")
+    end = text.index("### 3.6")
     section = text[start:end]
     rows = []
     for line in section.splitlines():
@@ -29,18 +29,37 @@ def validate_a_rows(text: str) -> None:
             rows.append((int(match.group(1)), line))
 
     numbers = [number for number, _ in rows]
-    expected = list(range(1, 78))
+    expected = list(range(1, 44)) + list(range(46, 126))
     if numbers != expected:
-        fail(f"01POWERUSB A rows must be continuous 1..77; got {numbers}")
+        fail(f"01POWERUSB A rows must be 1..43 and 46..125; 44/45 are revoked; got {numbers}")
 
-    forbidden = ("D4-", "R30-", "R31-", "`U7-PG`", "`U10-NC`", "U11-", "U12-")
+    forbidden = (
+        "D4-",
+        "R30-",
+        "R31-",
+        "R32-",
+        "F1-",
+        "F2-",
+        "C39-",
+        "C40-",
+        "`U7-PG`",
+        "`U10-NC`",
+        "U11-PG/AUXOFF",
+        "U12-PG/AUXOFF",
+    )
     for number, line in rows:
         for token in forbidden:
             if token in line:
                 fail(f"forbidden or deferred token {token!r} appears in A row {number}")
 
-    if "### 3.5 两路 eFuse：等待 44–77 截图复核后发布" not in text:
-        fail("eFuse deferral heading is missing")
+    if "### 3.5 两路 eFuse：78–125（仅 TPS259470A 变体）" not in text:
+        fail("eFuse executable heading is missing")
+
+    if "`U11-PG/AUXOFF（pin 3）`、`U12-PG/AUXOFF（pin 3）` 均保持无网络标签、无导线" not in text:
+        fail("TPS259470A AUXOFF NC rule is missing")
+
+    if "原第 44、45 项已撤销" not in section or "`R32` | 已删除" not in text:
+        fail("R32/EN overvoltage correction record is missing")
 
 
 def validate_02_a_rows(text: str) -> None:
@@ -52,9 +71,9 @@ def validate_02_a_rows(text: str) -> None:
         match = re.match(r"^\|\s*02-A(\d{2})\s*\|", line)
         if match:
             numbers.append(int(match.group(1)))
-    expected = list(range(1, 39))
+    expected = list(range(1, 43))
     if numbers != expected:
-        fail(f"02-MCU-DEBUG A rows must be continuous 01..38; got {numbers}")
+        fail(f"02-MCU-DEBUG A rows must be continuous 01..42; got {numbers}")
 
     deferred = ("J5-", "TP1-", "TP2-", "TP3-", "TP4-", "TP5-", "TP6-")
     for token in deferred:
@@ -120,9 +139,9 @@ def main() -> int:
     validate_02_a_rows(text)
     validate_06_a_rows(text)
     validate_markdown_links()
-    print("PASS: 01 A rows are continuous 1..77")
+    print("PASS: 01 A rows are 1..43 and 46..125; revoked 44/45 are absent")
     print("PASS: deferred/removed parts are absent from executable A rows")
-    print("PASS: 02 A rows are continuous 01..38 and exclude deferred connectors/test points")
+    print("PASS: 02 A rows are continuous 01..42 and exclude deferred connectors/test points")
     print("PASS: 06 A rows are continuous 01..33, use corrected PWP pins, and exclude Gate outputs")
     print("PASS: local Markdown document links resolve")
     return 0

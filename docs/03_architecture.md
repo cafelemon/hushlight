@@ -1,7 +1,7 @@
 # 小熙 Hushlight 技术架构
 
-> 文档版本：V0.4
-> 更新日期：2026-08-13
+> 文档版本：V0.5
+> 更新日期：2026-08-14
 > 状态：立项基线，待架构评审  
 > 上游依据：[01_prd.md](01_prd.md)
 > H0 专项依据：[08_hardware_prototype_plan.md](08_hardware_prototype_plan.md)
@@ -26,8 +26,8 @@ flowchart LR
 
     subgraph Cloud[云端]
         C1[实时会话网关]
-        C2[ASR/LLM/TTS 路由]
-        C3[情绪与回应策略]
+        C2[ASR/TTS 与模型路由]
+        C3[Hushlight Companion Model]
         C4[记忆服务]
         C5[工具策略与确认令牌]
     end
@@ -88,6 +88,28 @@ Korvo-2 参考线用于立即开展 macOS、Windows 软件联调；自研线由�
 | 视觉 | 摄像头启停、遮挡状态、目标位置/置信度 | 只接收结构化位置，不接收或上传原始帧 |
 | 运动 | 休息位、跟随目标、角色动作、限位、急停 | 视觉坐标必须经过滤波和轨迹规划，不逐帧直驱电机 |
 | 平台 | 供电状态、版本、日志、诊断、刷机恢复 | 上层不得散落板卡条件分支 |
+
+### 3.2 情感引擎与训练边界
+
+Hushlight 的情感核心不只依赖厂商原版模型和系统提示词。项目建设自有 Gold Set、情感交互数据、偏好数据、评测协议和可迁移的 SFT/DPO 训练流程；采用 4B 级主力与 9B 级/强模型 Fallback 分层路线，具体基座、训练平台和推理供应商仍由 O-006 决策。
+
+```mermaid
+flowchart LR
+    A[ASR + 声学弱信号] --> C[Hushlight Companion Model]
+    M[确认记忆检索] --> C
+    C --> S[CompanionState 候选]
+    S --> P[Policy Engine]
+    P --> R[回复/TTS]
+    P --> D[设备表情与动作意图]
+    P --> W[Memory Policy]
+    P --> B[Tool Policy + Bridge]
+```
+
+- Companion Model 默认一次产生理解、策略和回复，避免多次大模型调用的延迟与状态漂移。
+- Policy Engine 拥有安全、记忆写入、工具确认和结果真实性边界。
+- 声学情绪只能作为不确定弱信号，不能产生心理诊断。
+- 表情和 Motion Intent 是有限语义；设备端状态机、轨迹规划和限位拥有最终控制权。
+- 详细训练路线、Schema、评测和数据许可统一见 `LLM/docs/` 专项目录。
 
 ## 4. PC Bridge 架构
 
@@ -229,16 +251,24 @@ sequenceDiagram
 
 ```json
 {
-  "emotion": ["frustrated", "tired"],
-  "current_need": "companionship",
-  "confidence": 0.76,
-  "response_strategy": ["reflect", "offer_music"],
-  "avoid": ["premature_advice"],
-  "action_candidate": "music.search_and_play"
+  "schema_version": "companion-state-v1",
+  "emotion": [
+    {"name": "frustrated", "confidence": 0.82},
+    {"name": "tired", "confidence": 0.77}
+  ],
+  "need": "low_stimulation_companionship",
+  "interaction_mode": "quiet_companion",
+  "strategy": ["acknowledge", "offer_choice"],
+  "reply": "听起来今天是真没电了。要不要先什么都不管，我陪你待会儿？",
+  "expression": "soft_concern",
+  "motion": {"intent": "slight_head_tilt", "intensity": 0.35},
+  "action_candidate": null,
+  "memory_candidate": {"should_write": false, "reason": "temporary_emotion"},
+  "confidence": 0.86
 }
 ```
 
-Schema 名称和枚举必须版本化。实现阶段可以调整字段，但不得改变 PRD 的权限和可见行为。
+该结构是 `companion-state-v1` 评审候选，完整枚举与权威边界见 [LLM/docs/16_companion_state_schema.md](../LLM/docs/16_companion_state_schema.md)。Schema 名称和枚举必须版本化；实现阶段可以调整字段，但不得改变 PRD 的权限和可见行为。
 
 ## 8. 数据与存储
 
@@ -253,6 +283,9 @@ Schema 名称和枚举必须版本化。实现阶段可以调整字段，但不�
 | 摄像头原始图像 | 仅设备端短时处理 | 不进入 Bridge | 不保存 | 已确认 H0 隐私规则 |
 | 人脸目标位置 | 仅设备运行内存 | 不进入 Bridge | 对话结束即清除 | 已确认 H0 跟随规则 |
 | 诊断日志 | 本地 | 本地 | 滚动保留 | 保留周期待定 |
+| Gold Set | 云端受控数据仓库 | 不进入 Bridge | 项目生命周期 | 只评测、不训练 |
+| SFT/DPO 数据 | 云端受控训练仓库 | 不进入 Bridge | 按数据治理策略 | 许可证/授权 Gate 后使用 |
+| 模型产物与评测 | 模型仓库与证据库 | 不进入 Bridge | 按版本策略 | 版本、哈希、数据 lineage 必须可追溯 |
 
 关系与偏好记忆以云端为权威，以保证 Bridge 离线或更换电脑后的陪伴连续性。Bridge 只保存运行所需缓存；本地应用上下文、工具明细和敏感数据不因该决策自动进入云端，具体同步字段仍需独立评审。
 
@@ -298,12 +331,15 @@ Schema 名称和枚举必须版本化。实现阶段可以调整字段，但不�
 - 两端共享工具、权限、确认和结果契约，但可以采用不同本地实现。
 - 关系与偏好记忆以云端为权威，Bridge 保存必要缓存。
 - macOS Bridge 使用原生 SwiftUI 和三阶段开发；阶段一局域网、阶段二云端长连接、阶段三正式产品准备。
+- 情感引擎建设自有训练数据、偏好数据和评测集；原版模型 API 只能作为基座、Teacher、Benchmark 或 Fallback 候选。
+- V0/V1 Alpha 不接入声纹家庭多用户；待机摄像头关闭，只有主动唤醒或对话期间才允许定位和跟随。
+- 本机允许推理与 4B Seed QLoRA POC；第三方 GPU 只允许使用合成或彻底脱敏数据。
 
 ### 待下一轮技术研判
 
 - Windows Bridge 的具体技术框架。
 - Windows 对网易云音乐和微信的正式接口、系统接口与 UI 自动化边界；macOS 具体支持版本仍需 S1 实机冻结。
-- ASR、LLM、TTS、成本路由和降级策略。
+- ASR、TTS、主力/Teacher/Fallback 模型、训练资源、成本路由和降级策略。
 - 自研板摄像头、电机/驱动/编码或限位方案、PCB/BSP 细节、首板排期与独立预算。
 
 ### 仍为架构建议
@@ -311,6 +347,7 @@ Schema 名称和枚举必须版本化。实现阶段可以调整字段，但不�
 - Web 与云端先采用模块化单体，避免过早拆微服务。
 - PostgreSQL 存账户、配置和结构化记忆；对象存储只保存必要资源。
 - 模型、音乐和聊天适配均通过接口隔离，避免绑定单一供应商。
+- Companion Model 优先采用可训练、可版本化、可替换基座；SFT/DPO 产物必须通过 Gold Set 和安全 Gate。
 
 未冻结技术栈必须在项目搭建前通过 ADR 冻结；macOS Bridge 已由 D-020 和 `MACsoftware/docs/07_decisions.md` 完成决策。
 
@@ -334,6 +371,8 @@ Schema 名称和枚举必须版本化。实现阶段可以调整字段，但不�
 - 云端实时会话协议和生产确认凭据签发接口；Bridge 工具执行采用 `bridge-v1`。
 - 记忆数据生命周期和本地敏感字段同步范围。
 - Bridge 云端同步字段；macOS 本地动作元数据和诊断保留已冻结为 7 天上限。
-- 模型供应商、成本路由和降级策略。
+- 主力/Teacher/Fallback 模型与版本、训练平台、推理供应商、成本路由和降级策略。
+- `companion-state-v1` 枚举、置信度校准和 API Schema。
+- 声纹识别/家庭多用户是否进入 V0 或后续阶段。
 - 消费版外观、在场传感器和量产硬件方案。
 - 自研板具体摄像头、电机/驱动/限位、原理图、BOM、首板排期和独立预算。

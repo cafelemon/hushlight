@@ -1,19 +1,19 @@
 # 小熙 Hushlight H0C Rev A G0 原理图审计与接线收敛单
 
 > 日期：2026-08-13  
-> 状态：两项 P0 与 06 页器件级 P1-02 已关闭；2026-08-14 已完成 03 页冻结外围落图及 06 页 C25/C28 实物级替换。仍不代表 ERC、PCB、BOM、打板或采购放行
+> 状态：三项已接网络的电气 P0 与 06 页器件级 P1-02 已关闭；2026-08-14 整页截图新增发现 01 图框外残留、入口保险和 STUSB4500 完整外围三项开放 P0。仍不代表 ERC、PCB、BOM、打板或采购放行
 > 范围：审计、器件核对、EDA 定向修复与文档收敛；01 页本轮只读，03 页仅新增器件并保留既有未审导线对象；未运行 ERC、未转 PCB
 
 ## 1. 结论
 
-原先阻止接线的两项 P0 已闭环：CC 不再使用错误的 `D4`，而是直连具备 22V short-to-VBUS 能力的 STUSB4500；`SYS_I2C` 已物理删除 01 页的重复上拉，只保留 02 页唯一一对 4.7kΩ。06 页 `P1-02` 也已通过真实器件替换关闭：C25/C28 已分别成为 `C86018/2.2µF` 与 `C77053/10nF`。这些动作均在相关错误网络画线前完成，尚未造成 PCB 或物料损失。
+三项已接网络的电气错误已经闭环：CC 当前直连 STUSB4500、01 未接入第二对 I²C 上拉、主 Buck 已撤销 `VBUS_PD → R32(0Ω) → TPS56637.EN`。2026-08-14 22:33 的只读对象搜索进一步确认 `D4=0/0`、`R31=0/0`，两者已经真正删除；`F2=1/1` 仍是图框外重复保险，必须在 BOM/ERC 前删除。入口保险额定/位置和 STUSB4500 完整外围也尚未完成。06 页 `P1-02` 仍保持 Closed。
 
 ## 2. 审计证据与当前状态
 
 | 项 | 结果 |
 |---|---|
 | EDA 基础工程 | `H0-BASE-REVA` 的 `01POWERUSB、02-MCU-DEBUG、03-AUDIO-IN、04-AUDIO-OUT、05-HEAD-LINK、06-MOTION-IO、07-CONNECTORS-TEST` 与系统页均存在；`H0-HEAD-REVA` 四页存在但尚未开始放件 |
-| `01POWERUSB` | 已删除 `D4/R30/R31` 并保存；CC 与 I²C P0 已关闭，尚无可验收的完整电源网络 |
+| `01POWERUSB` | R32 及其过压接线已删除；对象搜索确认 D4/R31 已删除、F2 仍存在。已发布 78–125 eFuse 表；删除 F2、冻结保险、补 PD/USB 表后才进入整页 ERC |
 | `02-MCU-DEBUG` | 21 件已落图，`R45=10kΩ` 存在且未接线 |
 | `04-AUDIO-OUT` | 存在若干未命名绿线片段；不能据此认定功放 bulk 或 Codec 网络已正确连接 |
 | Head Carrier | 2026-08-14 逐页打开确认 `00-SYSTEM`、`01-DISPLAY-TOUCH`、`02-CAMERA-PRIVACY`、`03-FLEX-TEST` 均为 0 元件、0 网络、0 导线；空白/Gate 状态符合当前 `H-IO-001` 约束，没有把未知显示或摄像头 GPIO 伪接入 |
@@ -24,6 +24,10 @@
 |---|---|---|---|---|
 | `P0-01` | Closed | `D4=TPD2E2U06DRLR` 的 5.5V 耐压不适合作 CC，原方案错误 | [TPD2E2U06 datasheet](https://www.ti.com/lit/ds/symlink/tpd2e2u06.pdf)、[STUSB4500 datasheet](https://www.st.com/resource/en/datasheet/stusb4500.pdf) | 已删除 D4 并保存。STUSB4500 已对 CC 内置 22V short-to-VBUS 防护，因此 Rev A CC 为 `J_USB1.CC1/CC2 → U5.CC1/CC2` 直连；不叠加 TPD2S300，避免其额外 VPWR/VM/VBIAS/死电池链路 |
 | `P0-02` | Closed | `01.R30/R31` 与 `02.R_I2C_SCL/SDA` 会形成两组 4.7kΩ 上拉候选 | `11` 第 3.1、3.6、4.1 节与 GPIO/I²C 表 | 已删除 `R30/R31` 并保存。`SYS_I2C` 唯一实体上拉为 02 页的 `R_I2C_SCL/R_I2C_SDA=4.7kΩ`；允许接入 STUSB4500、TCA9554 和 Codec |
+| `P0-03` | Closed | 原第 44/45 项以 `R32=0Ω` 把最高 12V 的 `VBUS_PD` 直接送入 TPS56637.EN，超过 EN 推荐 5.5V/绝对最大 6V | [TPS56637 datasheet](https://www.ti.com/lit/ds/symlink/tps56637.pdf) | 2026-08-14 已删除相关导线与 R32，截图确认 U6.EN 悬空；内部上拉负责默认启用。44/45 永久撤销，不得复用编号 |
+| `P0-04` | Open | `D4/R31` 已经删除，但对象搜索仍命中 `F2=1/1`；未接不等于不会进入 BOM/后续误接 | 2026-08-14 用户整页截图与 22:33 对象搜索 | 物理删除 F2，随后以对象搜索 `F2=0/0` 和整页截图双证据关闭；禁止只移到更远位置 |
+| `P0-05` | Open | `F1/F2=BSMD1812-200-16V` 标称 2A hold，与正式 12V/3A 输入上限和启动浪涌边界未形成可审查配合，串联位置/前后网名也未冻结 | 10 第 6.1/9 节、电源预算 | 暂不连接 F1/F2；硬件工程师冻结保险类型、额定值、I²t/温升、位置和网络名 |
+| `P0-06` | Open | 已发布 1–125 仍未覆盖 USB-C VBUS/GND/D+/D− 与 STUSB4500 的 VDD/VSYS/VREG/DB/RESET/ADDR/ALERT/POWER_OK3/VBUS 检测和放电完整外围 | [STUSB4500 datasheet](https://www.st.com/resource/en/datasheet/stusb4500.pdf) | 完成真实位号复核和下一批单点表；未完成前不得称 01 页完成 |
 | `P1-00` | P1 | STUSB4500 的 short-to-VBUS 能力不等于整机已完成 IEC 61000-4-2 端口级认证 | [STUSB4500 datasheet](https://www.st.com/resource/en/datasheet/stusb4500.pdf) | 首板对 CC1/CC2 进行系统级 ESD 台架验证；若不通过，基于实测选择补强，而非恢复 D4 或在当前链路随机串接保护器件 |
 | `P1-01` | P1 | `04-AUDIO-OUT` 已有未命名导线片段，连接范围未能由网名或器件引脚证明 | EDA 只读画布 | 逐段复核。只有明确的 `5V_SYS`、`AUDIO_3V3A`、`GND` 或获批信号网可以保留；不明片段不得参与后续连接 |
 | `P1-02` | Closed | 06 页原 `C25=1µF`、`C28=100nF` 与 DRV8833 的 `VINT=2.2µF`、`VCP–VM=10nF` 要求不一致 | EDA 对象树/属性与 [DRV8833 datasheet](https://www.ti.com/lit/ds/symlink/drv8833.pdf) | 2026-08-14 已保留位号和唯一 ID，把 C25 实物器件替换为 `GRM188R71A225KE15D/C86018/2.2µF`，C28 替换为 `GRM188R71H103KA01D/C77053/10nF`，逐项属性复核并保存。06 第一批 `06-A01…A33` 已发布；GPIO2、电机、编码器、限位仍保持 Gate |
@@ -61,7 +65,7 @@
 
 | 项 | 处理结果 | 后续边界 |
 |---|---|---|
-| `01POWERUSB` | 只读核对为 68 个器件；本轮未移动、增删或改线 | 用户继续按 11 的 A 表人工接线；完成后再做局部 ERC |
+| `01POWERUSB` | A 表 1–43、46–77 已由用户接线并完成分段截图复核，44/45 永久撤销；D4/R31 已删除，F2 仍存在 | 执行 78–125 两路 eFuse；删除 F2、补完整入口/PD 后再做整页 ERC |
 | 双模拟麦 | `U14/U15=IM73A135V01XTSA1 / C3171831` 已落图并移入 03 图框 | `H-MIC-001` 仍负责封装朝向、声学结构、相位与增益实测 |
 | 麦克风独立 LDO | `U16=TPS7A2028PDBVR / C2869847` 已落图 | 3PDT 切断位置、EN 默认态和 MIC_2V8 网络未接线 |
 | LDO 去耦 | `C52/C53=GRM188R71A225KE15D / C86018`，2.2µF×2 已落图 | 连线时分别映射 U16 IN/OUT，不允许串入信号路径 |

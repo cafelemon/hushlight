@@ -1,7 +1,7 @@
 # 小熙 Hushlight 版本路线图
 
-> 文档版本：V0.4
-> 更新日期：2026-08-13
+> 文档版本：V0.5
+> 更新日期：2026-08-14
 > 状态：立项基线  
 > 上游依据：[01_prd.md](01_prd.md)、[03_architecture.md](03_architecture.md)
 
@@ -34,12 +34,14 @@
 - 批准固定底座 + 双轴屏幕/摄像头形态；待机不跟随，唤醒和对话时跟随。
 - 批准 H0 双线硬件策略：Korvo-2 参考设备保障软件进度，硬件工程师并行负责自研 PCB、3D 结构和云台。
 - 冻结 macOS Bridge 原生 SwiftUI、三阶段开发、局域网研发/云端上市主通道和官网 DMG 方向。
+- 确认自建情感交互数据、偏好数据、评测集和 SFT/DPO 训练流程为 AI 核心资产；具体模型和资源保持 O-006 开放。
+- 冻结 4B 主力 + 9B/强模型 Fallback、声纹保持 V2、主动唤醒后才视觉定位、第三方 GPU 仅使用合成/彻底脱敏数据。
 
 ### 待完成
 
 - 架构评审。
 - Windows Bridge 技术研判与框架决策；macOS 方案已冻结。
-- 模型与成本路由技术研判。
+- CompanionState 评审、500 条 Gold Set、基座 Benchmark 与模型/成本路由技术研判。
 - V0 原型交互评审。
 - 团队、预算和开发周期评估。
 - 自研主线原理图、BOM、结构、云台、首板排期和独立预算评审。
@@ -50,7 +52,7 @@
 - [ ] `03_architecture.md` 评审结果为 `approved` 或 `approved-with-actions`。
 - [x] V0 平台、首批适配器和记忆边界记录到 `07_decisions.md`。
 - [x] H0 研发样机方向、成本边界和专项 Gate 记录到 `08_hardware_prototype_plan.md`。
-- [ ] Windows Bridge 框架和模型路由经过技术研判并记录到 `07_decisions.md`；macOS 框架已完成决策。
+- [ ] Windows Bridge 框架和 O-006 模型/训练/成本路由经过技术研判并记录到 `07_decisions.md`；macOS 框架与 AI 训练原则已完成决策。
 - [ ] V0 验收项均有 Owner 和验证方式。
 - [ ] 未冻结事项没有被写成外部承诺。
 
@@ -64,7 +66,8 @@ macOS Bridge 的 S1+S2 按 1 名全职开发者为 14 至 18 周，不含外部�
 
 | 工作包 | 范围 | 依赖 | 完成证据 |
 |---|---|---|---|
-| V0-W1 对话原型 | 流式语音、打断、情绪与需要判断、三种陪伴策略 | 模型供应商决策 | 场景回放和延迟数据 |
+| V0-W1A AI 基线 | CompanionState、500 条 Gold Set、Base/Teacher/Character Benchmark、数据许可证 Gate | D-029、O-006 候选清单 | Schema 评审、评测报告、失败分类和成本初表 |
+| V0-W1B 对话与训练原型 | 流式语音、打断、SFT/DPO 候选、情绪→需要→策略、安静/表情/动作协同 | W1A、训练资源和 ASR/TTS 决策 | 场景回放、Pairwise、延迟、成本和安全 Gate |
 | V0-W2 Web 大本营 | 登录、设备、角色、模式、记忆、权限、Bridge 下载 | 账户与设备模型 | 浏览器验收记录 |
 | V0-W3M macOS Bridge | 按 `MACsoftware/docs/02_roadmap.md` 完成局域网全部能力、云端完整闭环和功能冻结 | `bridge-v1`、设备/云端接口、测试账号与应用版本 | Mac S1/S2 Gate 证据；正式签名/DMG 在 Alpha 准备阶段完成 |
 | V0-W3W Windows Bridge | 安装、绑定、托盘、权限、更新骨架、诊断 | Bridge 共享契约和 Windows 框架决策 | Windows 全新环境安装录像 |
@@ -87,6 +90,8 @@ macOS Bridge 的 S1+S2 按 1 名全职开发者为 14 至 18 周，不含外部�
 7. Go/No-Go 评审：依据 `04_acceptance_checklist.md`。
 
 macOS Bridge 内部使用 S1 局域网研发、S2 云端完整闭环、S3 正式产品准备三阶段。S1/S2 属于 V0 软件验证；S3 在功能冻结后形成 V1 Alpha 可交付基线，不改变项目级阶段名称。
+
+AI 原方案的 12 周计划只作为一条并行工作线假设：第 1 周 Schema、第 2～3 周 Gold Set、第 3 周基线、第 4～6 周 Seed SFT、第 7～11 周扩展和 DPO、第 12 周设备闭环。它不替代项目总周期，也不能绕过数据许可、训练资源、模型收益和安全 Gate。
 
 ### V0 No-Go
 

@@ -1,0 +1,17 @@
+.venv/
+.cache/
+__pycache__/
+*.py[cod]
+
+# Large local artifacts stay under LLM but are not committed.
+models/*
+!models/.gitkeep
+adapters/*
+!adapters/.gitkeep
+runs/*
+!runs/.gitkeep
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
