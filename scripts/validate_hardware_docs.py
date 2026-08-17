@@ -29,9 +29,9 @@ def validate_a_rows(text: str) -> None:
             rows.append((int(match.group(1)), line))
 
     numbers = [number for number, _ in rows]
-    expected = list(range(1, 44)) + list(range(46, 126))
+    expected = list(range(1, 44)) + list(range(46, 213))
     if numbers != expected:
-        fail(f"01POWERUSB A rows must be 1..43 and 46..125; 44/45 are revoked; got {numbers}")
+        fail(f"01POWERUSB A rows must be 1..43 and 46..212; 44/45 are revoked; got {numbers}")
 
     forbidden = (
         "D4-",
@@ -40,8 +40,6 @@ def validate_a_rows(text: str) -> None:
         "R32-",
         "F1-",
         "F2-",
-        "C39-",
-        "C40-",
         "`U7-PG`",
         "`U10-NC`",
         "U11-PG/AUXOFF",
@@ -54,6 +52,17 @@ def validate_a_rows(text: str) -> None:
 
     if "### 3.5 两路 eFuse：78–125（仅 TPS259470A 变体）" not in text:
         fail("eFuse executable heading is missing")
+
+    if "### 3.5.1 USB、STUSB4500 与主输入 eFuse：126–212（仅 A）" not in text:
+        fail("USB/STUSB4500/main-input-eFuse executable heading is missing")
+
+    if "旧 19–22 的 `VBUS_PD` 标签必须原位改名" not in text:
+        fail("main-input eFuse bypass-prevention correction is missing")
+
+    for number in (19, 20, 21, 22, 209, 210, 211, 212):
+        row = next(line for row_number, line in rows if row_number == number)
+        if "NET-VBUS_BUCK_IN" not in row:
+            fail(f"row {number} must terminate at VBUS_BUCK_IN to prevent bypassing U17")
 
     if "`U11-PG/AUXOFF（pin 3）`、`U12-PG/AUXOFF（pin 3）` 均保持无网络标签、无导线" not in text:
         fail("TPS259470A AUXOFF NC rule is missing")
@@ -139,7 +148,7 @@ def main() -> int:
     validate_02_a_rows(text)
     validate_06_a_rows(text)
     validate_markdown_links()
-    print("PASS: 01 A rows are 1..43 and 46..125; revoked 44/45 are absent")
+    print("PASS: 01 A rows are 1..43 and 46..212; revoked 44/45 are absent")
     print("PASS: deferred/removed parts are absent from executable A rows")
     print("PASS: 02 A rows are continuous 01..42 and exclude deferred connectors/test points")
     print("PASS: 06 A rows are continuous 01..33, use corrected PWP pins, and exclude Gate outputs")

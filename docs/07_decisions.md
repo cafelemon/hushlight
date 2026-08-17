@@ -1,6 +1,6 @@
 # 小熙 Hushlight 决策记录
 
-> 更新日期：2026-08-14
+> 更新日期：2026-08-16
 > 规则：重大产品、架构、范围和发布取舍必须在此记录；待决策不得被实现默认为已确认。
 
 ## 1. 已冻结决策
@@ -326,6 +326,16 @@
 | 决策 | U11 Head eFuse 由 BASE-S3 GPIO16 `HEAD_PWR_EN` 主动高使能；U12 Motor eFuse 由 BASE-S3 GPIO47 `MOTION_KILL_N` 主动高授权。两路均经 1kΩ 串联，并在 eFuse EN 节点用 100kΩ 下拉。FLT# 分别接 TCA9554 P4/P5。 |
 | 原因 | Head/Motor 必须在主控未运行、复位或控制线断开时保持断电；Motor-C3 的 nSLEEP 只负责驱动级，不能替代分支电源硬关断。 |
 | 影响 | 01 页 eFuse 接线可从 78 发布，02 页新增 A39–A42；最终 ILIM、DVDT、ITIMER 仍由 H-PWR-001 台架 Gate 冻结。 |
+
+### D-035 主输入采用锁存 eFuse，并冻结 5V/9V/12V 模式边界
+
+| 项目 | 内容 |
+|---|---|
+| 状态 | Accepted |
+| 日期 | 2026-08-16 |
+| 决策 | 删除 F1/F2 的 2A PTC，占位不进入 Rev A BOM；主输入固定为 `U17=TPS259474LRPWR/C2864845`，形成 `VBUS_PD → U17 → VBUS_BUCK_IN → TPS56637`。首轮配置为 3.5A、UVLO≈7.6V、OVLO≈15.2V，并保留 DV/DT、ITIMER、PGTH、PG、输出 SS34 与输入/输出去耦。USB Shield 使用 `1MΩ + 1nF/2kV + 0Ω DNP` 并联网络。 |
+| 原因 | 2A PTC 与 12V/3A 输入和启动浪涌不匹配；eFuse 能把限流、欠压/过压、浪涌、热保护、反向阻断和状态观测收敛为可验证链路。 |
+| 影响 | 5V 默认合同只维持 STUSB4500/PD 前端，9V 启动主系统但进入限功率模式，12V 才允许全性能。U13.P6/P7 分别读取 `PD_12V_OK_N/VBUS_EFUSE_PG`。原理图接线与 ERC 完成不替代 3.5A 限流、9V/12V 协商、浪涌、温升、锁存恢复和 USB Shield EMC 台架 Gate。 |
 
 ## 2. 待决策
 

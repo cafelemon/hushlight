@@ -120,7 +120,8 @@ ESP32-P4 的 MIPI CSI/DSI、ISP、PPA、JPEG/H.264 和更高算力适合未来�
 
 | 功能 | Rev A 选择 | 状态 | 备注 |
 |---|---|---|---|
-| USB-PD Sink | STUSB4500QTR | `FROZEN-A` | NVM 配置 12V 首选、9V 兼容、5V 故障诊断；无 MCU 也可协商 |
+| USB-PD Sink | STUSB4500QTR | `FROZEN-A` | NVM 配置 12V 首选、9V 兼容、5V 默认合同；5V 只维持 PD 前端，9V 为限功率主系统，12V 为全性能；无 MCU 也可协商 |
+| 主输入保护 | TPS259474LRPWR，LCSC `C2864845` | `FROZEN-A` | 锁存关断 eFuse；`VBUS_PD → VBUS_BUCK_IN`；首轮 3.5A、UVLO≈7.6V、OVLO≈15.2V，带 DV/DT、ITIMER、PGTH、PG 与反向阻断；实测 Gate 未关闭 |
 | 主降压 12V→5V | TPS56637RPAR，目标 5.1V/6A | `FROZEN-A` | 4.5–28V 输入、6A；电感与补偿/输出电容按 TI 推荐值计算并仿真/台架验证 |
 | 底座 5V→3V3 | TPS62132RGTR，固定 3.3V/3A | `FROZEN-A` | 给 BASE-S3 与数字域，留 Wi-Fi 峰值余量；`TPS62133` 是固定 5.0V 型号，禁止混用 |
 | 低噪声音频 3V3 | TPS7A2033PDBVR | `FROZEN-A` | 固定 3.3V、300mA、低噪声、高 PSRR；仅供音频模拟/麦克风敏感域；嘉立创 `C2862740` |
@@ -148,11 +149,11 @@ ESP32-P4 的 MIPI CSI/DSI、ISP、PPA、JPEG/H.264 和更高算力适合未来�
 ### 6.1 输入规格
 
 - 正式 Rev A 电源：USB-C PD 适配器，**12V/3A（36W）**。
-- STUSB4500 PDO：`PDO1=5V`、`PDO2=9V`、`PDO3=12V`。`POWER_OK3` 是整机的全性能使能条件：仅 12V 合同成功后允许全亮屏 + 摄像头 + 双电机同时工作；9V 合同只能进入受限诊断模式。
+- STUSB4500 PDO：`PDO1=5V`、`PDO2=9V`、`PDO3=12V`。`POWER_OK3/PD_12V_OK_N` 是全性能判据：仅 12V 合同成功后允许全亮屏、摄像头和双电机同时工作；9V 合同允许主系统启动但必须进入限功率模式；5V 只维持 STUSB4500/PD 前端，不启动主系统。
 - `POWER_ONLY_ABOVE_5V=1`：`VBUS_EN_SNK` 仅在 PDO2/PDO3 的显式合同建立后拉低，驱动 `Q_PD1` 导通；因此它不是“仅 12V”判据。`POWER_OK3` 必须进入 BASE 的电源状态/功耗管理；`5V` 附着、掉线、PD 协商失败和 20V 非请求 PDO 均不得让主 Buck 输入上电。
-- 入口执行链固定为 `J_USB1 VBUS → D_VBUS_TVS → Q_PD1 (P-MOS) → VBUS_PD → 输入限流/主 Buck`；`STUSB4500` 的 VBUS 检测/供电脚留在 `Q_PD1` 前侧，不能接到受控输出侧。
+- 入口执行链固定为 `J_USB1 VBUS → D_VBUS_TVS → Q_PD1 (P-MOS) → VBUS_PD → TPS259474L → VBUS_BUCK_IN → TPS56637`；`STUSB4500` 的 VBUS 检测/供电脚留在 `Q_PD1` 前侧，不能接到受控输出侧。`TPS56637.VIN` 及其输入电容只能属于 `VBUS_BUCK_IN`，不得直接回接 `VBUS_PD` 旁路 eFuse。
 - `Q_PD1` 门极最小外围：`R_GS=100kΩ`（Gate-Source 默认关断）、`R_GATE=100Ω`（`VBUS_EN_SNK` 串联）、`D_GS=15V` 齐纳钳位占位；后级总输入电容按 ST 参考和 TPS56637 启动波形复核，不能仅靠 P-MOS 导通瞬态假定安全。
-- 5V/3A 非 PD 仅作为受限诊断模式：禁用电机、限制屏幕亮度和扬声器音量；不得悄悄进入全功能状态。
+- 5V 默认合同仅允许 STUSB4500/PD 前端存活，主系统不启动。9V 合同启动主系统但必须限制屏幕、扬声器、电机并禁止峰值并发；12V 合同才允许全性能模式。不得把月卡、固件配置或 UI 选项作为绕过这一硬件功率边界的手段。
 - USB-C 数据使用同一接口连接 BASE-S3 的 USB2 D+/D−；PD 协商与 USB2 数据共存。
 
 ### 6.1.1 首轮主电源外围（原理图实施值，待台架冻结）
@@ -161,12 +162,13 @@ ESP32-P4 的 MIPI CSI/DSI、ISP、PPA、JPEG/H.264 和更高算力适合未来�
 
 | 电路 | 首轮外围/数值 | 依据与待验证项 |
 |---|---|---|
-| `TPS56637`：`VBUS_PD → 5V_SYS` | `CIN1/CIN2=10µF/25V X7R`、`CIN_HF=100nF/50V X7R`、`CBOOT=100nF/16V X7R`、`L_SYS=3.3µH`（首轮候选：Coilcraft `XAL5030-332MEC` / 嘉立创 `C5342047`）、`COUT1…4=22µF/10V X7R`（候选：Taiyo Yuden、1206、嘉立创 `C524990`）、`RFB_H=75.0kΩ 1%`、`RFB_L=10.0kΩ 1%` | 采用 TI 8–28V→5V/6A Figure 17 的电容、电感和启动基线；反馈式 `VOUT=0.6×(1+RFB_H/RFB_L)` 推导为约 `5.10V`。候选电感为 3.3µH、典型 `Isat=8.7A`、`Irms=5.9A`（40°C 升温）：饱和裕量可用，但 6A 连续满载温升必须实测，未通过不得冻结。输出电容的有效值、纹波和 UVLO/PG 细节也必须在 5.1V 直流偏压、输入浪涌和 6A 负载测试后确认。 |
+| `TPS259474L`：`VBUS_PD → VBUS_BUCK_IN` | `RILM=953Ω/1%`；UVLO/OVLO 链 `470kΩ/44.2kΩ/44.2kΩ`；`CDV/DT=3.3nF`；`CITIMER=2.2nF`；PGTH `47kΩ/9.09kΩ`；输入 `10µF/25V+100nF/50V`；输出 `10µF/25V+100nF/50V`；输出对地反向 `SS34` | 首轮目标 3.5A、UVLO≈7.6V、OVLO≈15.2V、输出有效约 7.4V。原理图实施位号为 `U17、D5、R46…R52、C56…C59`；`R19=10kΩ` 把 PG 上拉至 `BASE_3V3`。限流精度、浪涌、短路锁存、热关断、恢复方式和 SS34 瞬态能力均需台架验证。 |
+| `TPS56637`：`VBUS_BUCK_IN → 5V_SYS` | `CIN1/CIN2=10µF/25V X7R`、`CIN_HF=100nF/50V X7R`、`CBOOT=100nF/16V X7R`、`L_SYS=3.3µH`（首轮候选：Coilcraft `XAL5030-332MEC` / 嘉立创 `C5342047`）、`COUT1…4=22µF/10V X7R`（候选：Taiyo Yuden、1206、嘉立创 `C524990`）、`RFB_H=75.0kΩ 1%`、`RFB_L=10.0kΩ 1%` | 采用 TI 8–28V→5V/6A Figure 17 的电容、电感和启动基线；反馈式 `VOUT=0.6×(1+RFB_H/RFB_L)` 推导为约 `5.10V`。候选电感为 3.3µH、典型 `Isat=8.7A`、`Irms=5.9A`（40°C 升温）：饱和裕量可用，但 6A 连续满载温升必须实测，未通过不得冻结。输出电容的有效值、纹波和 PG 细节也必须在 5.1V 直流偏压、输入浪涌和 6A 负载测试后确认。 |
 | `TPS62132`：`5V_SYS → BASE_3V3` | `L_3V3=2.2µH`、`CIN=10µF/10V X7R`、`COUT=22µF/6.3V X7R`、`CFF=3.3nF/25V`、`RPG=100kΩ`、`CIN_HF=100nF/10V X7R` | 采用 TI 3.3V 固定输出典型应用值；布局须让输入回路、SW 电感回路和输出回路最小化。 |
 | `TPS7A2033`：`5V_SYS → AUDIO_3V3A` | `CIN=2.2µF/10V X7R`、`COUT=2.2µF/6.3V X7R`；每个音频 IC 再按自身 datasheet 本地去耦 | TI 要求输入、输出各至少 1µF 才保证稳定；2.2µF 是首轮余量而非替代 Codec/MIC 的本地电容。 |
 
 - `TPS56637` 的输入去耦、`CBOOT` 和功率回路只能布在器件/电感近端；不得通过长窄线或跨音频地岛返回。主 Buck 的 SW 节点面积最小，禁止让其从 Type-C CC、音频、MICBIAS、晶振或天线下方/旁边穿过。
-- 在 12V PD 合同建立、P-MOS 导通的最坏条件下，必须采集 `VBUS_PD`、`5V_SYS`、`BASE_3V3` 的启动波形；若入口快速熔断器与输入总电容的浪涌配合不成立，应改用经核对的慢断/可恢复方案或在受控路径加入限浪涌，不得仅凭额定电流放行。
+- 在 9V/12V PD 合同建立、P-MOS 与 U17 导通的最坏条件下，必须采集 `VBUS_PD`、`VBUS_BUCK_IN`、`5V_SYS`、`BASE_3V3` 的启动波形。F1/F2 的 2A PTC 已删除并由 U17 取代；不得恢复 PTC 作为入口保护，也不得仅凭 3.5A 标称值放行。
 
 ### 6.2 功耗预算（首板设计值，不是实测值）
 
@@ -183,12 +185,13 @@ ESP32-P4 的 MIPI CSI/DSI、ISP、PPA、JPEG/H.264 和更高算力适合未来�
 
 ### 6.3 电源时序
 
-1. PD 合同成功，`PD_OK=1` 后开启 12V→5V 主 Buck。
-2. `5V_SYS_PG=1` 后开启 `BASE_3V3`；BASE-S3 完成自检。
-3. BASE-S3 拉高 `HEAD_PWR_EN`，等待 `HEAD_READY`，超时则关闭并报告故障。
-4. `MOTOR_5V` 默认关闭；MOTION-C3 自检、限位输入有效且底座授权后才开启。
-5. `DRV8833_nSLEEP` 必须有硬件下拉；MOTION-C3 未启动、失联或看门狗复位时电机保持关闭。
-6. 物理静音立即关闭 `MIC_3V3A_SW` 或 ES7210/MICBIAS 有效硬件通路，并由独立红灯显示；解除后仍需再次主动唤醒。
+1. 5V 默认合同仅保持 STUSB4500/PD 前端，Q1/U17/主 Buck 不启动；9V 或 12V 合同建立后，Q1 与 U17 才允许向 `VBUS_BUCK_IN` 供电。
+2. U17 `VBUS_EFUSE_PG=1` 后，TPS56637 依内部上拉启动；9V 进入限功率模式，12V 且 `PD_12V_OK_N` 有效时才进入全性能模式。
+3. `5V_SYS` 建立后开启 `BASE_3V3`；BASE-S3 完成自检并读取 `PD_12V_OK_N/VBUS_EFUSE_PG`。
+4. BASE-S3 拉高 `HEAD_PWR_EN`，等待 `HEAD_READY`，超时则关闭并报告故障。
+5. `MOTOR_5V` 默认关闭；MOTION-C3 自检、限位输入有效且底座授权后才开启。
+6. `DRV8833_nSLEEP` 必须有硬件下拉；MOTION-C3 未启动、失联或看门狗复位时电机保持关闭。
+7. 物理静音立即关闭 `MIC_3V3A_SW` 或 ES7210/MICBIAS 有效硬件通路，并由独立红灯显示；解除后仍需再次主动唤醒。
 
 ## 7. 板卡与接口定义
 
@@ -295,7 +298,7 @@ GPIO 表是 Rev A 原理图权威。任何变更先更新本节，再改图。
 | 47 | `MOTION_KILL_N` | 输出 | 硬件下拉，MCU 未配置时关闭电机 |
 | 48 | `PA_ENABLE` | 输出 | 下拉；静音/故障先关功放 |
 
-TCA9554：`P0=ENC_SW`、`P1=MUTE_LED`、`P2=USER_LED`、`P3=PD_INT_N`、`P4=HEAD_OC_N`、`P5=MOTOR_OC_N`、`P6=SPARE`、`P7=SPARE`。
+TCA9554：`P0=ENC_SW`、`P1=MUTE_LED`、`P2=USER_LED`、`P3=PD_INT_N`、`P4=HEAD_OC_N`、`P5=MOTOR_OC_N`、`P6=PD_12V_OK_N`、`P7=VBUS_EFUSE_PG`。
 
 两路 eFuse 控制固定为：`GPIO16/HEAD_PWR_EN → 1kΩ → U11.EN/UVLO`，EN 节点以 100kΩ 下拉；`GPIO47/MOTION_KILL_N → 1kΩ → U12.EN/UVLO`，EN 节点以 100kΩ 下拉。两路均为主动高使能，MCU 复位、未配置或断线时必须关闭。U11/U12 的 `FLT#` 分别接 TCA9554 P4/P5，并各自只保留一颗 10kΩ 到 `BASE_3V3` 的上拉。
 
@@ -387,7 +390,7 @@ Rev A 头部使用成熟 AMOLED 计算模组。屏幕、触控、IMU、RTC、Fla
 ### 10.1 USB-C / PD
 
 - CC1/CC2 直接按 STUSB4500 参考设计进入 U5；该器件本身对 CC 提供 22V short-to-VBUS 保护。普通 5V USB 数据 ESD 不能替代 CC 保护，`TPD2E2U06DRLR` 已删除。采用 PD 控制器时不得再并联普通 5.1kΩ Rd 破坏协商。系统级 IEC ESD 验证保持为 P1 台架项；未通过时再选择补强方案，不能在当前 CC 链路随意串接器件。
-- VBUS 入口顺序：连接器 → 高压 TVS → `Q_PD1`（由 STUSB4500 控制）→ 输入保险/限流 → 主 Buck。STUSB4500 的 `VDD/VBUS` 监测、CC 及放电相关脚位接在 `Q_PD1` 前侧；不得把 PD 控制器放在被自身开关切断的后侧。
+- VBUS 入口顺序：连接器 → 高压 TVS → `Q_PD1`（由 STUSB4500 控制）→ `TPS259474L` eFuse → 主 Buck。STUSB4500 的 `VDD/VBUS` 监测与 CC 在 `Q_PD1` 前侧，`DISCH` 经 1kΩ 接 eFuse 输出 `VBUS_BUCK_IN`；不得把 PD 控制器放在被自身开关切断的后侧。
 - USB D+/D− 各放 22Ω 串阻占位，ESD 靠连接器；差分线全程 90Ω，禁止测试点形成长支节。
 - Shield 通过 1nF/1MΩ/可选 0Ω 网络接机壳/数字地，首板留 EMI 调整位，不在连接器处形成细长地颈。
 - USB 口暴露网络、CC、VBUS 的 TVS/ESD 必须核对 VRWM、钳位电压、电容和封装方向。
@@ -395,7 +398,7 @@ Rev A 头部使用成熟 AMOLED 计算模组。屏幕、触控、IMU、RTC、Fla
 ### 10.2 电源分支
 
 - `HEAD_5V` 与 `MOTOR_5V` 各自使用限流、软启动、过温和反向阻断器件；故障信号返回 BASE-S3。
-- 主输入设置可恢复保险或 eFuse；额定值必须高于正常峰值而低于连接器、线缆与铜箔安全上限。
+- 主输入固定使用 `TPS259474L` eFuse；F1/F2 的 2A PTC 已删除，不得回填。3.5A 首轮限流必须通过连接器、线缆、铜箔、浪涌和温升台架验证后才可冻结。
 - 电机连接器旁放合适的 TVS/RC snubber/DNP 位；具体值依据示波器实测反电动势冻结。
 - DRV8833 内部续流不能替代良好回流、VM bulk、热焊盘和近端去耦。
 - 所有跨板输出在未供电时不得通过 IO 保护二极管回灌；必要时用串阻、bus switch 或具有 partial-power-down 的电平器件。
