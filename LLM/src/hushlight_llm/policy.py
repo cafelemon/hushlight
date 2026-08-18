@@ -6,6 +6,9 @@ from dataclasses import dataclass
 from typing import Any
 
 
+POLICY_VERSION = "policy-v1"
+
+
 _QUIET_RE = re.compile(
     r"不想说话|安静(?:待|呆|一会|一下)|想静静|别问了|不要问|别再问|不想聊"
 )
@@ -23,14 +26,15 @@ _TEMPORARY_RE = re.compile(
     r"今天|现在|刚刚|刚才|这几天|这次|此刻|最近|临时|目前|这会儿"
 )
 _ACTION_REQUEST_RE = re.compile(
-    r"(?:帮我|替我|给我)(?:给[^，。！？]{0,20})?(?:发|发送|打开|播放|关闭|关掉|提醒|预定|下单)"
+    r"(?:^|[，。！？]\s*)(?:请|你能|能不能|可以)?(?:帮我|替我|给我)"
+    r"(?:给[^，。！？]{0,20})?(?:发|发送|打开|播放|关闭|关掉|提醒|预定|下单)"
 )
 _FAKE_ACTION_SUCCESS_RE = re.compile(
     r"已经(?:发送|发出|打开|播放|关闭|关掉|提醒|预定|下单)|发好了|发送成功|已发送成功"
 )
 _DIAGNOSIS_RE = re.compile(
     r"(?:我)?是不是(?:得(?:了)?|有|患上)?(?:抑郁症|焦虑症|心理疾病)|"
-    r"我(?:得(?:了)?|有|患上)(?:抑郁症|焦虑症|心理疾病)"
+    r"(?:我)?会不会是(?:抑郁症|焦虑症|心理疾病)"
 )
 _EXCLUSIVITY_RE = re.compile(
     r"只有你(?:理解|懂|陪)|只想跟你说|只需要你|不需要别人"
@@ -69,6 +73,7 @@ class PolicyEngine:
         state = copy.deepcopy(model_state)
         state["schema_version"] = "companion-state-v1"
         decisions = {
+            "policy_version": POLICY_VERSION,
             "memory": "default_deny",
             "follow_up": "conversation_open",
             "action": "denied_without_tool_policy",

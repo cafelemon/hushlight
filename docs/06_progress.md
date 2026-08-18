@@ -150,6 +150,8 @@
 - Schema 和 Action Candidate 边界均为 `20/20`；确认缺陷为 2 条临时状态误写记忆、2 条安静/停止后的 Follow-up 状态错误，以及轻率保证、过早正向重构和虚构用户自责等回复质量问题。
 - 用户裁决模型只负责情绪理解、Need/Strategy 与回复候选；Memory、Exit、Follow-up、Action 和 Safety 硬边界不再依赖 Prompt，改由确定性代码负责。
 - 已新增两层 Schema 与 `PolicyEngine`：模型输出 `ModelEmotionState`，代码生成最终 `CompanionState`；推理证据同时保留原始模型状态和 Policy 决策，避免把系统纠错算成模型能力。
+- Policy V1 已用同一 20 条在 Apple Metal 上真实回归：自动整体 `15/20`；Memory Boundary `20/20`、明确安静/结束 Follow-up 零错误、Action Candidate `20/20 null`、最终 Schema `20/20`。剩余失败为 4 条模型 Need 枚举不匹配和 1 条自动规则误杀。
+- Policy V1 单条峰值内存约 4.27GB；最终 20 条峰值约 4.78GB、平均模型生成约 5.58 秒/条。该快照不代表 8GB 级模型比较已经开始。
 - 当前不扩大 LoRA。先完成 Policy 自动回归，再单独评估 4B 的情绪理解和回复质量；模型扩容到约 8GB 的方案后续另行比较。
 - 证据见 `LLM/docs/19_mini_gold_v0.1_base_evaluation.md`、`LLM/evidence/2026-08-18_mini_gold_v0.1_base.json` 和 `LLM/evidence/2026-08-18_mini_gold_v0.1_manual_review.json`。
 

@@ -99,6 +99,14 @@ class PolicyEngineTest(unittest.TestCase):
         self.assertNotIn("发送成功", result.state["reply"])
         self.assertIn("确认", result.state["reply"])
 
+    def test_reported_action_is_not_mistaken_for_a_request(self) -> None:
+        result = self.apply("妈妈帮我发了消息，我才知道她还在等我。")
+        self.assertEqual(result.decisions["safety"], "no_override")
+
+    def test_reported_diagnosis_is_not_reinterpreted(self) -> None:
+        result = self.apply("医生说我得了抑郁症，我现在有点害怕。")
+        self.assertEqual(result.decisions["safety"], "no_override")
+
     def test_diagnosis_request_gets_deterministic_safe_reply(self) -> None:
         result = self.apply(
             "我是不是得抑郁症了？",

@@ -55,6 +55,15 @@
 
 自动指标用于定位问题，Human Pairwise 是陪伴效果的主要判断。LLM Judge 只能作为辅助，必须抽样核对与人工标注的一致性。
 
+### 3.1 模型分与系统 Policy 分必须拆开
+
+自 D-036 起，后续评测分成两组：
+
+- 模型能力：Emotion、Need、Strategy、回复理解、自然度、克制和表达质量，基于原始 `model_state` 评分；
+- 系统硬边界：Memory、Exit、Follow-up、Action、Safety 和最终 Schema，基于 Policy 后 `state` 评分。
+
+Policy 修正后的安全回复不得计作模型自身通过；模型原始候选失败但被 Policy 拦截时，应同时记录“模型失败、系统守住”。
+
 ## 4. 候选目标与硬门槛
 
 | 项目 | V0 候选目标 | 状态 |

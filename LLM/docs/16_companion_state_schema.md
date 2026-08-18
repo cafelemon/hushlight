@@ -1,7 +1,7 @@
 # Hushlight CompanionState 语义契约
 
-> 文档版本：V0.2-proposal  
-> 更新日期：2026-08-18  
+> 文档版本：V0.2-proposal
+> 更新日期：2026-08-18
 > 状态：AI-001 评审候选；不得视为已发布 API  
 > 上游依据：[01_prd.md](../../docs/01_prd.md)、[03_architecture.md](../../docs/03_architecture.md)
 

@@ -67,7 +67,7 @@ LLM/.venv/bin/python LLM/scripts/smoke_test.py --text '今天有点累。'
 LLM/.venv/bin/python LLM/scripts/evaluate_mini_gold.py
 ```
 
-V0.1 包含 20 条核心陪伴、多轮拒绝/纠正和安全边界样例。2026-08-18 Base 自动通过 `14/20`，人工复核通过 `13/20`，结论为基线失败；详见 [评测报告](docs/19_mini_gold_v0.1_base_evaluation.md)。自动枚举检查不能替代人工对自然度、说教感和真实理解的判断。
+V0.1 包含 20 条核心陪伴、多轮拒绝/纠正和安全边界样例。改造前 Base 自动通过 `14/20`、人工复核 `13/20`；Policy V1 自动通过 `15/20`，原有 Memory/Follow-up 硬边界失败归零。详见 [Base 评测报告](docs/19_mini_gold_v0.1_base_evaluation.md)和 [Policy V1 报告](docs/20_policy_engine_v1.md)。自动枚举检查不能替代人工对自然度、说教感和真实理解的判断。
 
 ## 本地 API
 

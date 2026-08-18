@@ -22,7 +22,10 @@ from hushlight_llm.evaluation import evaluate_state, load_jsonl, summarize_resul
 
 
 DEFAULT_DATASET = LLM_ROOT / "data" / "eval" / "mini_gold_v0.1.jsonl"
-DEFAULT_OUTPUT = LLM_ROOT / "evidence" / "2026-08-18_mini_gold_v0.1_base.json"
+DEFAULT_POLICY_PATH = LLM_ROOT / "src" / "hushlight_llm" / "policy.py"
+DEFAULT_OUTPUT = (
+    LLM_ROOT / "evidence" / "2026-08-18_mini_gold_v0.1_policy_v1.json"
+)
 
 
 def _sha256(path: Path) -> str:
@@ -113,6 +116,7 @@ def main() -> int:
             "prompt_sha256": _sha256(DEFAULT_PROMPT_PATH),
             "model_schema_sha256": _sha256(DEFAULT_MODEL_SCHEMA_PATH),
             "schema_sha256": _sha256(DEFAULT_SCHEMA_PATH),
+            "policy_sha256": _sha256(DEFAULT_POLICY_PATH),
             "dataset_path": str(args.dataset),
             "dataset_sha256": _sha256(args.dataset),
         },
