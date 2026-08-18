@@ -9,16 +9,23 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
+from .policy import PolicyEngine
+
 
 LLM_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_PATH = LLM_ROOT / "config" / "model.json"
 DEFAULT_PROMPT_PATH = LLM_ROOT / "prompts" / "xiaoxi_companion_v1.md"
 DEFAULT_SCHEMA_PATH = LLM_ROOT / "schemas" / "companion_state_v1.schema.json"
+DEFAULT_MODEL_SCHEMA_PATH = (
+    LLM_ROOT / "schemas" / "model_emotion_state_v1.schema.json"
+)
 
 
 @dataclass(frozen=True)
 class InferenceResult:
     state: dict[str, Any]
+    model_state: dict[str, Any]
+    policy_decisions: dict[str, str]
     raw_text: str
     elapsed_seconds: float
     prompt_tokens: int | None
@@ -55,7 +62,10 @@ class CompanionEngine:
         self.model_path = LLM_ROOT / self.config["local_path"]
         self.system_prompt = DEFAULT_PROMPT_PATH.read_text(encoding="utf-8").strip()
         self.schema = _read_json(DEFAULT_SCHEMA_PATH)
+        self.model_schema = _read_json(DEFAULT_MODEL_SCHEMA_PATH)
         self.validator = Draft202012Validator(self.schema)
+        self.model_validator = Draft202012Validator(self.model_schema)
+        self.policy = PolicyEngine()
         self._model = None
         self._processor = None
 
@@ -80,21 +90,35 @@ class CompanionEngine:
         self._model, self._processor = load(str(self.model_path))
 
     def infer(self, user_text: str) -> InferenceResult:
-        if not user_text.strip():
-            raise ValueError("user_text must not be empty")
+        return self.infer_messages([{"role": "user", "content": user_text}])
+
+    def infer_messages(self, messages: list[dict[str, str]]) -> InferenceResult:
+        if not messages:
+            raise ValueError("messages must not be empty")
+        normalized_messages: list[dict[str, str]] = []
+        for index, message in enumerate(messages):
+            role = message.get("role")
+            content = message.get("content", "").strip()
+            if role not in {"user", "assistant"}:
+                raise ValueError(f"messages[{index}].role must be user or assistant")
+            if not content:
+                raise ValueError(f"messages[{index}].content must not be empty")
+            normalized_messages.append({"role": role, "content": content})
+        if normalized_messages[-1]["role"] != "user":
+            raise ValueError("the last message must be from the user")
         self.load()
 
         from mlx_vlm import apply_chat_template, generate
         from mlx_vlm.structured import build_json_schema_logits_processor
 
-        messages = [
+        prompt_messages = [
             {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": user_text.strip()},
+            *normalized_messages,
         ]
         prompt = apply_chat_template(
             self._processor,
             self._model.config,
-            messages,
+            prompt_messages,
             num_images=0,
             enable_thinking=False,
         )
@@ -105,7 +129,7 @@ class CompanionEngine:
         )
         json_logits_processor = build_json_schema_logits_processor(
             tokenizer,
-            self.schema,
+            self.model_schema,
         )
         started = time.perf_counter()
         response = generate(
@@ -120,16 +144,33 @@ class CompanionEngine:
         )
         elapsed = time.perf_counter() - started
         raw_text = response.text.strip()
-        state = extract_json_object(raw_text)
-        errors = sorted(self.validator.iter_errors(state), key=lambda item: list(item.path))
+        model_state = extract_json_object(raw_text)
+        errors = sorted(
+            self.model_validator.iter_errors(model_state),
+            key=lambda item: list(item.path),
+        )
         if errors:
             details = "; ".join(
                 f"{'.'.join(map(str, error.path)) or '$'}: {error.message}"
                 for error in errors
             )
-            raise ValueError(f"CompanionState validation failed: {details}")
+            raise ValueError(f"ModelEmotionState validation failed: {details}")
+        policy_result = self.policy.apply(normalized_messages, model_state)
+        state = policy_result.state
+        errors = sorted(
+            self.validator.iter_errors(state),
+            key=lambda item: list(item.path),
+        )
+        if errors:
+            details = "; ".join(
+                f"{'.'.join(map(str, error.path)) or '$'}: {error.message}"
+                for error in errors
+            )
+            raise ValueError(f"Policy CompanionState validation failed: {details}")
         return InferenceResult(
             state=state,
+            model_state=model_state,
+            policy_decisions=policy_result.decisions,
             raw_text=raw_text,
             elapsed_seconds=round(elapsed, 3),
             prompt_tokens=getattr(response, "prompt_tokens", None),

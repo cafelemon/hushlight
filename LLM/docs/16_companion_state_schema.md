@@ -1,13 +1,15 @@
 # Hushlight CompanionState 语义契约
 
-> 文档版本：V0.1-proposal  
-> 更新日期：2026-08-14  
+> 文档版本：V0.2-proposal  
+> 更新日期：2026-08-18  
 > 状态：AI-001 评审候选；不得视为已发布 API  
 > 上游依据：[01_prd.md](../../docs/01_prd.md)、[03_architecture.md](../../docs/03_architecture.md)
 
 ## 1. 目的
 
-`CompanionState` 连接模型理解、回应、设备表情/动作、记忆候选和工具候选。模型只产生候选语义；Policy Engine、Memory Policy、设备运动控制和 Bridge 分别拥有最终决定权。
+`CompanionState` 是系统最终语义状态，不等同于模型原始输出。模型只产生 `ModelEmotionState`：情绪、Need、Strategy、回复、表情和动作语义候选；代码 `PolicyEngine` 再负责 Memory、Exit、Follow-up、Action 与 Safety 硬边界，并合成为对外 `CompanionState V1`。
+
+这种拆分让模型负责理解和表达，让代码负责守规矩；更换 4B/更大模型时，Policy 行为不会随权重或 Prompt 漂移。
 
 ## 2. V1 候选结构
 
@@ -140,14 +142,18 @@ Emotion 允许多标签。它是交互线索，不是心理诊断。
 
 ## 5. 权威边界
 
-| 输出 | 模型权限 | 最终权威 |
+| 输出 | 模型是否输出 | 最终权威 |
 |---|---|---|
-| Emotion / Need / Strategy | 候选 | 云端会话策略 |
-| Reply | 候选 | 安全与风格过滤后播报 |
-| Expression / Motion | 语义候选 | 设备状态机与运动仲裁 |
-| Memory Candidate | 候选 | Memory Policy + 用户管理 |
-| Action Candidate | 候选 | Tool Policy + 用户确认 + Bridge |
-| Tool Result | 不得生成 | Bridge/适配器真实结果 |
+| Emotion / Need / Strategy | 是，候选 | 会话编排 + 后续校准 |
+| Reply | 是，候选 | Safety/Interaction Policy 后播报 |
+| Expression / Motion | 是，语义候选 | 设备状态机与运动仲裁 |
+| Memory Candidate | **否** | 代码 Memory Policy + 用户管理 |
+| Exit / Follow-up | **否** | 代码 Interaction Policy |
+| Action Candidate | **否** | 代码 Tool Policy + 用户确认 + Bridge |
+| Safety Override | **否** | 代码 Safety Policy；未知风险可升级强模型/人工 |
+| Tool Result | **否** | Bridge/适配器真实结果 |
+
+当前可执行模型 Schema 为 `../schemas/model_emotion_state_v1.schema.json`，最终系统 Schema 为 `../schemas/companion_state_v1.schema.json`。推理证据同时保留 `model_state` 和 `policy_decisions`，不得把 Policy 修正后的结果记作模型自身能力。
 
 ## 6. 兼容性规则
 
@@ -155,11 +161,13 @@ Emotion 允许多标签。它是交互线索，不是心理诊断。
 - 新增可选字段不得改变已有安全语义。
 - 删除、改名或改变枚举含义属于破坏性变更。
 - Schema 校验失败时不得执行工具或写入记忆；允许降级到澄清或基础回复。
-- `action_candidate` 不等于已授权动作；`memory_candidate.should_write=true` 不等于已经写入。
+- `action_candidate` 当前由代码固定为 `null`；模型输出 Schema 中不存在该字段。
+- `memory_candidate.should_write=true` 只允许来自代码识别的“明确记住请求 + 稳定信息”，仍不等于已经写入。
+- 临时事件/情绪默认拒绝记忆；安静、停止追问和结束表达必须由代码关闭 Follow-up。
 
 ## 7. 评审前必须补齐
 
-- 可执行 JSON Schema 已建立在 `../schemas/companion_state_v1.schema.json`；20 个正反样例仍待补齐；
+- 两层可执行 JSON Schema 已建立；正反样例仍需继续扩充；
 - 与设备状态/动作词典的映射；
 - 与 `bridge-v1` 的 Action Candidate 映射；
 - Memory Candidate 类型、敏感级别和确认规则；

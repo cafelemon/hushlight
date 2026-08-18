@@ -1,8 +1,8 @@
 # 小熙 Hushlight 情感引擎训练方案
 
 > 文档版本：V0.1  
-> 更新日期：2026-08-14  
-> 状态：专项设计基线；1A/2C/3A/4B 已决策，具体模型版本与成本待 O-006  
+> 更新日期：2026-08-18
+> 状态：专项设计基线；1A/2C/3A/4B 已决策，4B Base 已完成 20 条 Mini Gold 基线评测但未通过
 > 上游依据：[01_prd.md](../../docs/01_prd.md)、[03_architecture.md](../../docs/03_architecture.md)、[07_decisions.md](../../docs/07_decisions.md)  
 > 配套文档：[16_companion_state_schema.md](16_companion_state_schema.md)、[17_ai_model_evaluation_protocol.md](17_ai_model_evaluation_protocol.md)、[18_ai_dataset_license_registry.md](18_ai_dataset_license_registry.md)
 
@@ -39,7 +39,7 @@ flowchart LR
     G --> A
     A --> C
     M --> C
-    C -->|CompanionState 候选| P
+    C -->|ModelEmotionState 候选| P
     P -->|回复 + 表情 + 动作意图| T
     T --> D
     P -->|经确认的 bridge-v1 请求| B
@@ -47,7 +47,7 @@ flowchart LR
     W <--> M
 ```
 
-默认由一次 Companion Model 推理同时产生理解、策略和回复，减少多次大模型调用造成的延迟与状态漂移。安全、工具确认、记忆写入和电机控制不得并入模型自由生成逻辑。
+默认由一次 Companion Model 推理产生情绪理解、Need、Strategy 和回复候选，减少多次大模型调用造成的延迟与状态漂移。Memory、Exit、Follow-up、Safety、工具确认和电机控制由确定性代码层负责，不进入模型输出 Schema。
 
 ## 3. 自有 AI 资产
 
@@ -84,9 +84,7 @@ flowchart LR
 - Emotion、Need、Interaction Mode 和置信度；
 - Strategy、Avoid、Reply；
 - Expression 和有限 Motion Intent；
-- Action Candidate 与确认要求；
-- Memory Candidate 与写入理由；
-- Follow-up Policy。
+- 用于验证 Action/Memory/Exit/Follow-up/Safety Policy 的系统期望；这些字段不作为模型训练输出标签。
 
 场景矩阵至少覆盖：
 
@@ -102,11 +100,11 @@ Emotion × Need × Intensity × Relationship Stage
 
 ### SFT
 
-- 形成固定 `CompanionState`；
+- 形成固定 `ModelEmotionState`，再由代码合成为 `CompanionState`；
 - 学会 Emotion → Need → Strategy，而非 Emotion → 套话；
 - 将安静、等待和自然结束作为正常输出；
 - 统一回复、表情和动作意图；
-- 学会记忆候选与行动候选，而不是直接写入或执行。
+- 不承担 Memory、Action、Exit、Follow-up 和 Safety 硬边界裁决。
 
 ### DPO
 
@@ -170,6 +168,14 @@ Apple 官方 MLX 文档确认统一内存由 CPU/GPU 共享；MLX-LM 官方支�
 
 - [MLX 统一内存](https://github.com/ml-explore/mlx/blob/main/docs/src/usage/unified_memory.rst)
 - [MLX-LM LoRA/QLoRA 与内存建议](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LORA.md)
+
+### 7.3 2026-08-18 Mini Gold V0.1 Base 结果
+
+- 在 Prompt 不变的前提下，使用同一 4-bit Base 模型完成 20 条核心陪伴、多轮纠正/退出和安全边界测试。
+- 自动规则通过 `14/20`，人工逐条复核通过 `13/20`，低于当前讨论用准入线 `17/20`，结论为 Base 基线失败。
+- 原始 Base Schema 与 `action_candidate=null` 均为 `20/20`；但当时仍让模型输出 Memory/Follow-up，MG-011、MG-014 和 MG-012、MG-013 暴露了职责错误。
+- 2026-08-18 已将 Memory、Exit、Follow-up、Action 与 Safety 从模型输出 Schema 移至代码 PolicyEngine。后续模型准入只统计情绪理解、Need/Strategy 与回复候选质量，系统硬边界单独统计。
+- 完整报告：[Hushlight Mini Gold V0.1 Base 评测报告](19_mini_gold_v0.1_base_evaluation.md)。
 
 ## 8. 路由与降级
 

@@ -337,6 +337,16 @@
 | 原因 | 2A PTC 与 12V/3A 输入和启动浪涌不匹配；eFuse 能把限流、欠压/过压、浪涌、热保护、反向阻断和状态观测收敛为可验证链路。 |
 | 影响 | 5V 默认合同只维持 STUSB4500/PD 前端，9V 启动主系统但进入限功率模式，12V 才允许全性能。U13.P6/P7 分别读取 `PD_12V_OK_N/VBUS_EFUSE_PG`。原理图接线与 ERC 完成不替代 3.5A 限流、9V/12V 协商、浪涌、温升、锁存恢复和 USB Shield EMC 台架 Gate。 |
 
+### D-036 模型理解与系统硬边界分层
+
+| 项目 | 内容 |
+|---|---|
+| 状态 | Accepted；修正 D-029 的模型输出范围 |
+| 日期 | 2026-08-18 |
+| 决策 | Companion Model 只输出 `ModelEmotionState`：Emotion、Need、Strategy、Reply、Expression 和 Motion 语义候选。Memory、Exit、Follow-up、Action 与 Safety 由确定性 `PolicyEngine` 生成或覆盖，再合成为对外 `CompanionState V1`。 |
+| 原因 | 20 条 Base 评测证明临时记忆、停止追问等系统硬规则不应依赖模型权重或 Prompt 稳定性。模型负责理解人，代码负责守规矩，才能在更换 4B/更大模型时保持边界不漂移。 |
+| 影响 | 新增模型内部 Schema 和 Policy 审计输出；对外 CompanionState V1 保持兼容。后续模型评测与系统 Policy 评测分开计分，不把代码纠错记为模型能力。当前 Memory 默认拒绝，只有明确要求记住且内容表现为稳定信息时才产生候选；真实写入仍需后续 Memory 服务与用户管理。 |
+
 ## 2. 待决策
 
 ### O-002 Windows Bridge 框架

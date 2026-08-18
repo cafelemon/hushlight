@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hushlight.local/schemas/model-emotion-state-v1.json",
+  "title": "Hushlight Model Emotion State V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "emotion", "valence", "arousal",
+    "emotion_intensity", "need", "need_confidence", "interaction_mode",
+    "strategy", "avoid", "reply", "expression", "motion", "confidence"
+  ],
+  "properties": {
+    "schema_version": {"const": "model-emotion-state-v1"},
+    "emotion": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "confidence"],
+        "properties": {
+          "name": {"enum": ["happy", "excited", "relaxed", "proud", "grateful", "curious", "sad", "frustrated", "angry", "anxious", "lonely", "disappointed", "tired", "bored", "overwhelmed", "neutral", "mixed", "uncertain"]},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "valence": {"type": "number", "minimum": -1, "maximum": 1},
+    "arousal": {"type": "number", "minimum": 0, "maximum": 1},
+    "emotion_intensity": {"type": "number", "minimum": 0, "maximum": 1},
+    "need": {"enum": ["companionship", "being_heard", "low_stimulation_companionship", "emotional_validation", "information", "advice", "encouragement", "distraction", "entertainment", "rest", "action_help", "reassurance", "privacy", "conversation_end", "unclear"]},
+    "need_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "interaction_mode": {"enum": ["normal_chat", "active_listening", "quiet_companion", "comfort", "playful", "encourage", "advice", "action", "high_energy", "conversation_closing"]},
+    "strategy": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"enum": ["listen", "reflect", "reassure", "acknowledge", "ask", "quiet", "playful", "encourage", "advise", "offer_choice", "offer_action", "redirect", "end_conversation"]}
+    },
+    "avoid": {"type": "array", "items": {"type": "string"}},
+    "reply": {"type": "string", "minLength": 1, "maxLength": 120},
+    "expression": {"enum": ["neutral", "listening", "soft_concern", "happy", "excited", "playful", "thinking", "sleepy", "embarrassed", "apologetic"]},
+    "motion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "intensity"],
+      "properties": {
+        "intent": {"enum": ["rest", "look_at_user", "return_center", "small_nod", "double_nod", "slight_head_tilt", "look_down", "curious_tilt", "small_shake"]},
+        "intensity": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+  }
+}

@@ -9,8 +9,8 @@ LLM/
 ├── .venv/                 # Python 3.11 独立环境，本机生成
 ├── config/                # 模型与运行配置
 ├── prompts/               # 小熙系统 Prompt
-├── schemas/               # CompanionState JSON Schema
-├── src/hushlight_llm/     # 推理引擎和本地 API
+├── schemas/               # ModelEmotionState 与最终 CompanionState Schema
+├── src/hushlight_llm/     # 推理、确定性 Policy Engine 和本地 API
 ├── scripts/               # 下载、烟雾测试与后续训练脚本
 ├── evidence/              # 可提交的模型版本、指标和验收证据
 ├── models/                # 下载模型，不提交 Git
@@ -61,6 +61,14 @@ LLM/.venv/bin/python LLM/scripts/smoke_test.py --text '今天有点累。'
 
 成功条件：JSON Schema 通过；情绪包含 `tired`；valence 不为正；需求属于休息、低刺激陪伴或被倾听；策略具有共情/倾听/选择；回复简短自然；不写入临时情绪记忆；不产生未授权动作。首条真实结果见 [evidence/2026-08-14_qwen35_4b_mlx_smoke.json](evidence/2026-08-14_qwen35_4b_mlx_smoke.json)。
 
+## Mini Gold 批量评测
+
+```bash
+LLM/.venv/bin/python LLM/scripts/evaluate_mini_gold.py
+```
+
+V0.1 包含 20 条核心陪伴、多轮拒绝/纠正和安全边界样例。2026-08-18 Base 自动通过 `14/20`，人工复核通过 `13/20`，结论为基线失败；详见 [评测报告](docs/19_mini_gold_v0.1_base_evaluation.md)。自动枚举检查不能替代人工对自然度、说教感和真实理解的判断。
+
 ## 本地 API
 
 ```bash
@@ -70,4 +78,4 @@ curl --noproxy '*' -sS http://127.0.0.1:8765/v1/companion/respond \
   -d '{"user_text":"今天有点累。"}'
 ```
 
-API 只返回模型候选语义。设备动作、记忆写入和工具执行仍必须经过项目 Policy/Bridge 权威层。
+API 返回 Policy 后的最终 `state`，并同时保留模型原始 `model_state` 和可审计的 `policy_decisions`。设备动作、真实记忆写入和工具执行仍必须经过后续用户确认、Policy/Bridge 权威层。

@@ -5,7 +5,11 @@ from fastapi.testclient import TestClient
 from jsonschema import Draft202012Validator
 
 from hushlight_llm.api import app
-from hushlight_llm.engine import DEFAULT_SCHEMA_PATH, extract_json_object
+from hushlight_llm.engine import (
+    DEFAULT_MODEL_SCHEMA_PATH,
+    DEFAULT_SCHEMA_PATH,
+    extract_json_object,
+)
 
 
 VALID_STATE = {
@@ -38,6 +42,12 @@ class CompanionContractTest(unittest.TestCase):
         raw = "```json\n" + json.dumps(VALID_STATE, ensure_ascii=False) + "\n```"
         self.assertEqual(extract_json_object(raw), VALID_STATE)
 
+    def test_model_schema_excludes_policy_owned_fields(self) -> None:
+        schema = json.loads(DEFAULT_MODEL_SCHEMA_PATH.read_text(encoding="utf-8"))
+        self.assertNotIn("memory_candidate", schema["properties"])
+        self.assertNotIn("follow_up", schema["properties"])
+        self.assertNotIn("action_candidate", schema["properties"])
+
     def test_health_exposes_local_model_status(self) -> None:
         response = TestClient(app).get("/health")
         self.assertEqual(response.status_code, 200)
@@ -46,4 +56,3 @@ class CompanionContractTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
