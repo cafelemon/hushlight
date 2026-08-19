@@ -71,11 +71,19 @@ class CompanionEngine:
 
     @property
     def is_downloaded(self) -> bool:
+        if not (self.model_path / "config.json").is_file():
+            return False
+        weight_files = self.config.get("weight_files")
+        if weight_files:
+            return all(
+                (self.model_path / item["file"]).is_file()
+                and (self.model_path / item["file"]).stat().st_size
+                == item["expected_bytes"]
+                for item in weight_files
+            )
         weight_path = self.model_path / self.config["weight_file"]
-        return (
-            (self.model_path / "config.json").is_file()
-            and weight_path.is_file()
-            and weight_path.stat().st_size == self.config["expected_weight_bytes"]
+        return weight_path.is_file() and (
+            weight_path.stat().st_size == self.config["expected_weight_bytes"]
         )
 
     def load(self) -> None:

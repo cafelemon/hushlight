@@ -24,10 +24,11 @@ LLM/
 
 ## 当前模型
 
-- 模型：`mlx-community/Qwen3.5-4B-MLX-4bit`
-- 上游：`Qwen/Qwen3.5-4B`
+- 当前评测模型：`mlx-community/Qwen3.5-9B-4bit`
+- 本地保留基线：`mlx-community/Qwen3.5-4B-MLX-4bit`
+- 上游：`Qwen/Qwen3.5-9B`
 - 推理框架：`mlx-vlm`
-- 本地模型路径：`LLM/models/Qwen3.5-4B-MLX-4bit`
+- 当前模型路径：`LLM/models/Qwen3.5-9B-4bit`
 
 ## 初始化
 
@@ -38,18 +39,14 @@ sh LLM/scripts/download_model.sh
 LLM/.venv/bin/python LLM/scripts/verify_model.py
 ```
 
-清华 PyPI 镜像只影响 Python 依赖，不负责 Hugging Face 模型权重。若 Hugging Face 下载在开启梯子时出现 TLS/Xet 卡顿，可关闭梯子后明确取消代理变量，并对正式权重执行断点续传：
+清华 PyPI 镜像只影响 Python 依赖，不负责 Hugging Face 模型权重。模型下载入口跟随当前 `config/model.json` 对应版本：
 
 ```bash
-env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
-    -u http_proxy -u https_proxy -u all_proxy \
-  curl -L --fail --retry 10 --retry-all-errors --connect-timeout 30 \
-    -C - \
-    -o LLM/models/Qwen3.5-4B-MLX-4bit/model.safetensors \
-    'https://huggingface.co/mlx-community/Qwen3.5-4B-MLX-4bit/resolve/main/model.safetensors?download=true'
+sh LLM/scripts/download_model.sh
+LLM/.venv/bin/python LLM/scripts/verify_model.py
 ```
 
-断点下载完成后必须重新运行 `verify_model.py`，不能只凭文件存在判断成功。
+9B 使用两个权重分片；下载后必须运行 `verify_model.py` 对每个分片执行大小和 SHA-256 校验，不能只凭文件存在判断成功。
 
 ## 单条验收
 
@@ -67,7 +64,7 @@ LLM/.venv/bin/python LLM/scripts/smoke_test.py --text '今天有点累。'
 LLM/.venv/bin/python LLM/scripts/evaluate_mini_gold.py
 ```
 
-V0.1 包含 20 条核心陪伴、多轮拒绝/纠正和安全边界样例。改造前 Base 自动通过 `14/20`、人工复核 `13/20`；Policy V1 自动通过 `15/20`，原有 Memory/Follow-up 硬边界失败归零。详见 [Base 评测报告](docs/19_mini_gold_v0.1_base_evaluation.md)和 [Policy V1 报告](docs/20_policy_engine_v1.md)。自动枚举检查不能替代人工对自然度、说教感和真实理解的判断。
+V0.1 包含 20 条核心陪伴、多轮拒绝/纠正和安全边界样例。9B 与可比的 4B+Policy 自动结果同为 `15/20`；人工复核最终系统输出为 9B `19/20`、4B `18/20`，但 9B 平均生成延迟约为 4B 的 `2.17` 倍。详见 [9B 对照报告](docs/21_qwen35_9b_comparison_evaluation.md)。自动枚举检查不能替代人工对自然度、说教感和真实理解的判断。
 
 ## 本地 API
 

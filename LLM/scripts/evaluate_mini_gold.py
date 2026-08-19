@@ -24,7 +24,7 @@ from hushlight_llm.evaluation import evaluate_state, load_jsonl, summarize_resul
 DEFAULT_DATASET = LLM_ROOT / "data" / "eval" / "mini_gold_v0.1.jsonl"
 DEFAULT_POLICY_PATH = LLM_ROOT / "src" / "hushlight_llm" / "policy.py"
 DEFAULT_OUTPUT = (
-    LLM_ROOT / "evidence" / "2026-08-18_mini_gold_v0.1_policy_v1.json"
+    LLM_ROOT / "runs" / "mini_gold_latest.json"
 )
 
 
@@ -100,7 +100,9 @@ def main() -> int:
 
     evidence = {
         "schemaVersion": 1,
-        "subject": "Hushlight Qwen3.5-4B MLX Mini Gold V0.1 baseline",
+        "subject": (
+            f"Hushlight {engine.config['model_id']} Mini Gold V0.1 evaluation"
+        ),
         "run": {
             "started_at": datetime.now().astimezone().isoformat(timespec="seconds"),
             "elapsed_seconds": round(time.perf_counter() - run_started, 3),
@@ -112,7 +114,14 @@ def main() -> int:
                 "mlx-vlm": version("mlx-vlm"),
             },
             "model_id": engine.config["model_id"],
-            "model_weight_sha256": engine.config["expected_weight_sha256"],
+            "model_weight_sha256": (
+                {
+                    item["file"]: item["expected_sha256"]
+                    for item in engine.config["weight_files"]
+                }
+                if engine.config.get("weight_files")
+                else engine.config["expected_weight_sha256"]
+            ),
             "prompt_sha256": _sha256(DEFAULT_PROMPT_PATH),
             "model_schema_sha256": _sha256(DEFAULT_MODEL_SCHEMA_PATH),
             "schema_sha256": _sha256(DEFAULT_SCHEMA_PATH),

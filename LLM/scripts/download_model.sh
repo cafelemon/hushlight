@@ -3,8 +3,8 @@ set -eu
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 LLM_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
-MODEL_ID="mlx-community/Qwen3.5-4B-MLX-4bit"
-MODEL_DIR="$LLM_ROOT/models/Qwen3.5-4B-MLX-4bit"
+MODEL_ID="mlx-community/Qwen3.5-9B-4bit"
+MODEL_DIR="$LLM_ROOT/models/Qwen3.5-9B-4bit"
 
 export HF_HOME="$LLM_ROOT/.cache/huggingface"
 export HF_XET_CACHE="$LLM_ROOT/.cache/huggingface/xet"

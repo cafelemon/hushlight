@@ -1,5 +1,7 @@
 import json
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
@@ -9,6 +11,8 @@ from hushlight_llm.api import app
 from hushlight_llm.engine import (
     DEFAULT_MODEL_SCHEMA_PATH,
     DEFAULT_SCHEMA_PATH,
+    LLM_ROOT,
+    CompanionEngine,
     InferenceResult,
     extract_json_object,
 )
@@ -36,6 +40,30 @@ VALID_STATE = {
 
 
 class CompanionContractTest(unittest.TestCase):
+    def test_sharded_model_download_contract(self) -> None:
+        with tempfile.TemporaryDirectory(dir=LLM_ROOT) as temporary_dir:
+            model_dir = Path(temporary_dir) / "model"
+            model_dir.mkdir()
+            (model_dir / "config.json").write_text("{}", encoding="utf-8")
+            (model_dir / "part-1.safetensors").write_bytes(b"one")
+            (model_dir / "part-2.safetensors").write_bytes(b"two!")
+            config_path = Path(temporary_dir) / "model.json"
+            config_path.write_text(
+                json.dumps(
+                    {
+                        "local_path": str(model_dir.relative_to(LLM_ROOT)),
+                        "weight_files": [
+                            {"file": "part-1.safetensors", "expected_bytes": 3},
+                            {"file": "part-2.safetensors", "expected_bytes": 4},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            self.assertTrue(CompanionEngine(config_path).is_downloaded)
+            (model_dir / "part-2.safetensors").write_bytes(b"bad")
+            self.assertFalse(CompanionEngine(config_path).is_downloaded)
+
     def test_schema_accepts_valid_companion_state(self) -> None:
         schema = json.loads(DEFAULT_SCHEMA_PATH.read_text(encoding="utf-8"))
         Draft202012Validator(schema).validate(VALID_STATE)

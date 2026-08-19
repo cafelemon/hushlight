@@ -10,6 +10,7 @@
 | [18_ai_dataset_license_registry.md](18_ai_dataset_license_registry.md) | 数据、模型和第三方训练平台许可证登记 | V0.1；无默认 Production 放行 |
 | [19_mini_gold_v0.1_base_evaluation.md](19_mini_gold_v0.1_base_evaluation.md) | 20 条 Base 自动评测、人工复核、硬门槛与缺陷分流 | 13/20；基线失败，待修正后回归 |
 | [20_policy_engine_v1.md](20_policy_engine_v1.md) | 模型理解与 Memory/Exit/Follow-up/Action/Safety 代码边界、20 条回归 | Policy 硬边界当前回归归零；生产安全未验收 |
+| [21_qwen35_9b_comparison_evaluation.md](21_qwen35_9b_comparison_evaluation.md) | 9B 与同 Prompt/Schema/Policy/Data 的 4B 20 条质量、延迟和内存对照 | 9B 当前配置；自动 15/20，人工系统输出 19/20 |
 | [原始训练架构 V1.0](reference/Hushlight_AI_Emotion_Engine_Training_Architecture_V1.0.md) | 用户提供的输入材料原文，保留用于追溯 | SHA-256 与桌面原件一致 |
 
 可执行资产分别位于：
