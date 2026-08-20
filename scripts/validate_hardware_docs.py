@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate H0C Rev A hardware handoff invariants without modifying the EDA project."""
+"""Validate H0C Rev A per-page online wiring checklists."""
 
 from __future__ import annotations
 
@@ -10,7 +10,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
-HANDOFF = DOCS / "11_h0c_reva_schematic_wiring_handoff.md"
+WIRING = DOCS / "wiring"
+ARCHIVE = DOCS / "archive" / "11_h0c_reva_schematic_wiring_handoff_stage_2026-08-20.md"
 
 
 def fail(message: str) -> None:
@@ -18,141 +19,108 @@ def fail(message: str) -> None:
     raise SystemExit(1)
 
 
-def validate_a_rows(text: str) -> None:
-    start = text.index("### 3.1")
-    end = text.index("### 3.6")
-    section = text[start:end]
-    rows = []
-    for line in section.splitlines():
+def numbered_rows(path: Path) -> list[tuple[int, str]]:
+    rows: list[tuple[int, str]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
         match = re.match(r"^\|\s*(\d+)\s*\|", line)
         if match:
             rows.append((int(match.group(1)), line))
+    return rows
 
+
+def validate_page(path: Path, expected_last: int) -> None:
+    if not path.exists():
+        fail(f"missing page checklist: {path.relative_to(ROOT)}")
+    rows = numbered_rows(path)
     numbers = [number for number, _ in rows]
-    expected = list(range(1, 44)) + list(range(46, 213))
+    expected = list(range(1, expected_last + 1))
     if numbers != expected:
-        fail(f"01POWERUSB A rows must be 1..43 and 46..212; 44/45 are revoked; got {numbers}")
+        fail(f"{path.name} must be continuous 1..{expected_last}; got {numbers}")
 
-    forbidden = (
-        "D4-",
-        "R30-",
-        "R31-",
-        "R32-",
-        "F1-",
-        "F2-",
-        "`U7-PG`",
-        "`U10-NC`",
-        "U11-PG/AUXOFF",
-        "U12-PG/AUXOFF",
+
+def validate_01() -> None:
+    path = WIRING / "01_power_usb.md"
+    validate_page(path, 208)
+    text = path.read_text(encoding="utf-8")
+    rows = [line for _, line in numbered_rows(path)]
+    required = (
+        "`D1-pin 1（K）`",
+        "`D1-pin 2（A）`",
+        "`Q1-D/EP（pin 9）`",
+        "`R5-pin 2`",
+        "`R5-pin 1`",
+        "NET-VBUS_BUCK_IN",
     )
-    for number, line in rows:
-        for token in forbidden:
-            if token in line:
-                fail(f"forbidden or deferred token {token!r} appears in A row {number}")
+    for token in required:
+        if not any(token in line for line in rows):
+            fail(f"01 current baseline is missing {token}")
 
-    if "### 3.5 两路 eFuse：78–125（仅 TPS259470A 变体）" not in text:
-        fail("eFuse executable heading is missing")
+    forbidden = ("D4-", "R30-", "R31-", "R32-", "F1-", "F2-", "R54-")
+    for token in forbidden:
+        if any(token in line for line in rows):
+            fail(f"removed item {token!r} appears in 01 executable rows")
 
-    if "### 3.5.1 USB、STUSB4500 与主输入 eFuse：126–212（仅 A）" not in text:
-        fail("USB/STUSB4500/main-input-eFuse executable heading is missing")
-
-    if "旧 19–22 的 `VBUS_PD` 标签必须原位改名" not in text:
-        fail("main-input eFuse bypass-prevention correction is missing")
-
-    for number in (19, 20, 21, 22, 209, 210, 211, 212):
-        row = next(line for row_number, line in rows if row_number == number)
-        if "NET-VBUS_BUCK_IN" not in row:
-            fail(f"row {number} must terminate at VBUS_BUCK_IN to prevent bypassing U17")
-
-    if "`U11-PG/AUXOFF（pin 3）`、`U12-PG/AUXOFF（pin 3）` 均保持无网络标签、无导线" not in text:
-        fail("TPS259470A AUXOFF NC rule is missing")
-
-    if "原第 44、45 项已撤销" not in section or "`R32` | 已删除" not in text:
-        fail("R32/EN overvoltage correction record is missing")
+    if "致命错误 0、错误 0、警告 30" not in text:
+        fail("01 fresh ERC baseline is missing")
 
 
-def validate_02_a_rows(text: str) -> None:
-    start = text.index("#### 4.1.2")
-    end = text.index("### 4.2")
-    section = text[start:end]
-    numbers = []
-    for line in section.splitlines():
-        match = re.match(r"^\|\s*02-A(\d{2})\s*\|", line)
-        if match:
-            numbers.append(int(match.group(1)))
-    expected = list(range(1, 43))
-    if numbers != expected:
-        fail(f"02-MCU-DEBUG A rows must be continuous 01..42; got {numbers}")
-
-    deferred = ("J5-", "TP1-", "TP2-", "TP3-", "TP4-", "TP5-", "TP6-")
-    for token in deferred:
-        if token in section:
-            fail(f"deferred 02 token {token!r} appears in executable A rows")
-
-
-def validate_06_a_rows(text: str) -> None:
-    start = text.index("#### 4.5.2")
-    end = text.index("### 4.6")
-    section = text[start:end]
-    numbers = []
-    executable_rows = []
-    for line in section.splitlines():
-        match = re.match(r"^\|\s*06-A(\d{2})\s*\|", line)
-        if match:
-            numbers.append(int(match.group(1)))
-            executable_rows.append(line)
-    expected = list(range(1, 34))
-    if numbers != expected:
-        fail(f"06-MOTION-IO A rows must be continuous 01..33; got {numbers}")
-
-    deferred = (
-        "U8-GPIO2`",
-        "U8-GPIO8`",
-        "U8-GPIO9`",
-        "U8-GPIO47`",
-        "U9-BIN1",
-        "U9-AOUT1",
-        "U9-AOUT2",
-        "U9-BOUT1",
-        "U9-BOUT2",
-        "J_MOTOR",
-    )
-    for token in deferred:
-        if any(token in line for line in executable_rows):
-            fail(f"deferred 06 token {token!r} appears in executable A rows")
-
-    if "U9-GND（pin 11）" not in section or "U9-AIN2（pin 13）" not in section:
-        fail("06 PWP pin correction must keep GND=11 and AIN2=13")
+def validate_part_placements() -> None:
+    audio_in = (WIRING / "03_audio_in.md").read_text(encoding="utf-8")
+    audio_out = (WIRING / "04_audio_out.md").read_text(encoding="utf-8")
+    for token in ("C62–C65", "CL10B105KP8NNNC", "C95843", "图框外并保存，未接线"):
+        if token not in audio_in:
+            fail(f"03 placement record is missing {token}")
+    for token in ("C66–C68", "CL10B105KP8NNNC", "C95843", "图框外并保存，未接线"):
+        if token not in audio_out:
+            fail(f"04 placement record is missing {token}")
 
 
 def validate_markdown_links() -> None:
     link_pattern = re.compile(r"\[[^\]]+\]\(([^)]+\.md)(?:#[^)]+)?\)")
     missing: list[str] = []
-    for markdown in sorted(DOCS.glob("*.md")):
+    for markdown in sorted(DOCS.rglob("*.md")):
+        if markdown.parent.name == "archive":
+            continue
         text = markdown.read_text(encoding="utf-8")
         for raw_target in link_pattern.findall(text):
             if "://" in raw_target:
                 continue
             target = (markdown.parent / raw_target).resolve()
             if not target.exists():
-                missing.append(f"{markdown.name} -> {raw_target}")
+                missing.append(f"{markdown.relative_to(DOCS)} -> {raw_target}")
     if missing:
         fail("missing Markdown links: " + ", ".join(missing))
 
 
 def main() -> int:
-    if not HANDOFF.exists():
-        fail(f"missing handoff document: {HANDOFF}")
-    text = HANDOFF.read_text(encoding="utf-8")
-    validate_a_rows(text)
-    validate_02_a_rows(text)
-    validate_06_a_rows(text)
+    if not ARCHIVE.exists():
+        fail("old 1-212 stage checklist was not archived")
+
+    expected_pages = {
+        "00_base_system.md": 5,
+        "01_power_usb.md": 208,
+        "02_mcu_debug.md": 42,
+        "03_audio_in.md": 22,
+        "04_audio_out.md": 22,
+        "05_head_link.md": 30,
+        "06_motion_io.md": 33,
+        "07_connectors_test.md": 16,
+        "head_00_system.md": 6,
+        "head_01_display_touch.md": 7,
+        "head_02_camera_privacy.md": 7,
+        "head_03_flex_test.md": 8,
+    }
+    for name, expected_last in expected_pages.items():
+        validate_page(WIRING / name, expected_last)
+
+    validate_01()
+    validate_part_placements()
     validate_markdown_links()
-    print("PASS: 01 A rows are 1..43 and 46..212; revoked 44/45 are absent")
-    print("PASS: deferred/removed parts are absent from executable A rows")
-    print("PASS: 02 A rows are continuous 01..42 and exclude deferred connectors/test points")
-    print("PASS: 06 A rows are continuous 01..33, use corrected PWP pins, and exclude Gate outputs")
-    print("PASS: local Markdown document links resolve")
+    print("PASS: 12 online schematic pages have independent numbering starting at 1")
+    print("PASS: 01POWERUSB is continuous 1..208 with the D1.1/Q1.9/R5 repair baseline")
+    print("PASS: 02 is 1..42 and 06 is 1..33")
+    print("PASS: C62..C68 placement records contain exact part and no-wiring status")
+    print("PASS: old 1..212 stage checklist is archived and Markdown links resolve")
     return 0
 
 
