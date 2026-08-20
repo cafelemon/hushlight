@@ -5,9 +5,9 @@
 | 文档 | 用途 | 当前状态 |
 |---|---|---|
 | [00_overview.md](00_overview.md) | 项目总览、定位、范围和启动状态 | 当前 |
-| [01_prd.md](01_prd.md) | 产品需求、用户旅程和产品规则 | V0.2 已评审通过 |
-| [02_roadmap.md](02_roadmap.md) | 阶段计划、里程碑和 Go/No-Go Gate | 当前 |
-| [03_architecture.md](03_architecture.md) | 设备、云端、Web 和 PC Bridge 架构 | 当前，待架构评审 |
+| [01_prd.md](01_prd.md) | 产品需求、用户旅程和产品规则 | V0.2 已评审通过；V0.3 K0 基线变更已记录 |
+| [02_roadmap.md](02_roadmap.md) | 阶段计划、里程碑和 Go/No-Go Gate | K0 收口基线 |
+| [03_architecture.md](03_architecture.md) | 设备、云端、Web 和 PC Bridge 架构 | `approved-with-actions` |
 | [04_acceptance_checklist.md](04_acceptance_checklist.md) | V0 验收、证据要求和停止条件 | 当前 |
 | [05_ai_coding_agent_guide.md](05_ai_coding_agent_guide.md) | Codex/AI Coding 工作协议 | 当前 |
 | [06_progress.md](06_progress.md) | 进度、评审状态和下一步 | 持续更新 |
