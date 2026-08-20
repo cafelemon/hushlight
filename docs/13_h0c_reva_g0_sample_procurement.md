@@ -1,95 +1,144 @@
-# 小熙 Hushlight H0C Rev A G0 样件采购清单
+# 小熙 Hushlight H0C Rev A Gate 样件采购与到货核验清单
 
-> 日期：2026-08-14  
-> 状态：可用于样件询价与采购；**不是** PCB 贴装 BOM、Gerber 放行或量产采购授权  
+> 版本：V1.1
+> 更新日期：2026-08-20
+> 状态：第一批验证样件可据此采购；最终结构件、PCB BOM 和量产料号仍受 Gate 控制
 > 权威上游：[10_hardware_board_design_spec.md](10_hardware_board_design_spec.md)、[07_decisions.md](07_decisions.md)
 
-## 1. 用途与边界
+## 1. 采购规则
 
-这份清单解决的是“先拿到真实件，才能做 G0 实测”的问题。它不是把尚未 ERC 的原理图直接变成整板采购：
+本轮目标是取得能关闭 `H-IO-001/H-CAM-001/H-MOT-001/H-ENC-001/H-MIC-001/H-FFC-001` 的实物证据，不把样件采购误当成最终 BOM 冻结。
 
-- `A 组` 可立即下单并独立用于显示、视觉、运动、声学和 PD 台架；
-- `B 组` 是当前已冻结、交期可能影响进度的 IC，可作为 3 块 Base 首板加返工余量的风险备料；
-- `C 组` 必须等实物 Gate、原理图/ERC 或隐私方案冻结，**暂不下单**。
-
-采购员收到本单时，任何“相近替代型号”都必须先回到硬件工程师确认，不能自行替换。到货前不生成 PCB 生产订单；到货后按第 5 节顺序做 G0，结果再决定原理图接线与下单 BOM。
-
-## 2. A 组：今天可下单的验证样件
-
-| ID | 采购物 | 规格/推荐型号 | 数量 | 用途与到货后首个检查 | 不可替换的关键条件 |
-|---|---|---|---:|---|---|
-| A-01 | Head 显示计算模组 | Waveshare `ESP32-S3-Touch-AMOLED-2.41` 标准版 | 2 | 一台做 Head/角色软件，另一台做针脚、摄像头和故障对照 | 必须为 2.41 英寸、600×450、ESP32-S3 的该标准模组；不要买只有显示屏的裸 AMOLED |
-| A-02 | 视觉备份开发板 | Seeed Studio `XIAO ESP32S3 Sense`（含 OV3660） | 2 | 先验证本地目标坐标输出、帧率和功耗；也作为 Head GPIO 不足时的正式备份路线 | 必须是带摄像头的 Sense 版；它用于视觉算力备份，**不是**最终 Head 显示模组 |
-| A-03 | 最终形态相机样件 | `OV3660` DVP 固定焦模组，水平 FOV `100°±10°` | 3 | 在目标距离 0.45–1.5m 验证覆盖、人脸像素、低照度和镜头高度 | 供货方须给出完整 pinout、FPC 针数/间距/同异面、镜头 FOV；无这些资料不买 |
-| A-04 | Pan/Tilt 电机样件 A | N20 微型金属减速有刷直流电机，6V、约 `1:100`、3mm 输出轴 | 2 | 量取堵转电流、噪声、回差、输出转速与发热 | 额定工作电流 ≤0.5A、堵转 ≤1.2A；不得用舵机替代 |
-| A-05 | Pan/Tilt 电机样件 B | N20 微型金属减速有刷直流电机，6V、约 `1:150`、3mm 输出轴 | 2 | 与 A-04 对比，筛选实际传动比 | 同 A-04；两组须来自可提供减速比与堵转电流曲线的供应商 |
-| A-06 | 电机台架驱动 | `DRV8833` 双 H 桥 breakout/eval board | 2 | 在未完成 Base PCB 前验证两电机、PWM、急停与堵转保护 | 供电范围覆盖 5–6V；能单独测每个 H 桥 |
-| A-07 | Motion 开发板 | `ESP32-C3-DevKitM-1` 或官方等效 C3 开发板 | 2 | 先跑 1kHz 控制环、AB 编码器和限位状态机 | 必须为 ESP32-C3；不要用 Base-S3 临时代替运动控制域 |
-| A-08 | 编码器 IC | `MT6701CT-STD`（SOP-8，嘉立创 `C2856764`） | 10 | 两颗用于实验、其余用于两块编码器小板与返工 | 必须是 SOP-8 `CT`，以 A/B 输出为首轮接口 |
-| A-09 | 编码器磁铁 | 钕铁硼、**径向/直径向充磁**、`Ø6 × 2.5mm` 圆柱 | 12 | 验证气隙、偏心、回零重复性与电机杂散磁场 | 禁止买轴向充磁；MT6701 推荐该尺寸，气隙目标 0.5–2.0mm、偏心不大于 0.3mm |
-| A-10 | 硬限位开关 | 小型常闭（NC）机械微动/杠杆开关 | 6 | 验证回零、断线故障与机械终点 | 必须能获得 NC 接点；不能以只有 NO 的按钮代替 |
-| A-11 | 同步带传动试制包 | GT2，6mm 宽皮带；3mm 孔径 `16T` 主动轮、`48T` 从动轮各 4；配张紧件 | 1 套 | 先做 3:1 二级减速的噪声、回差与全行程测试 | 仅作首轮台架；最终轮径随 Head 重心和结构尺寸复核 |
-| A-12 | 音频麦克风 | `Infineon IM73A135V01` 模拟差分 MEMS | 10 | 两颗用于声学样件，其余用于 PCB/返工；核对供电、相位与灵敏度 | 必须为模拟**差分**版本，不能用 PDM 数字麦替换 |
-| A-13 | 扬声器样件 | 40mm、4Ω、3W 全频扬声器 | 4 | 选声压、失真与装入独立密闭音腔后的表现 | 40mm 外径须先与壳体保留空间核对；两颗备用用于声学对照 |
-| A-14 | 声学结构料 | 金属网、防尘透声膜、硅胶隔振垫、泡棉密封条 | 各 1 包 | 制作独立麦腔、扬声器腔与隔振试件 | 透声膜不得堵塞底部进声孔；不得与扬声器共腔 |
-| A-15 | Head 线束试样 | 30Pin、0.5mm、高柔性动态 FFC；150/200/250mm 各 2 条，分别购买同面与异面触点样式 | 共 12 | 待打印件出来后筛选长度、弯折方向与余量 | 只买标明高柔性/动态弯折的产品；本批用于机构试验，不等于最终连接器配对 |
-| A-16 | USB-PD 台架电源 | USB-C PD 充电器，明确支持 `12V/3A` PDO；配 3A C-to-C 线 | 1 套 | 验证 STUSB4500 的 5/9/12V 合同与受限模式 | 不能只看“65W”；商品规格页必须明确列出 12V PDO |
-| A-17 | PD 协议/功率测量 | USB-C PD 协议分析仪或触发器 + 电压/电流显示 | 1 | 记录 PDO、协商、掉电与电机启动瞬态 | 必须能显示实际 PDO 和 VBUS；普通 USB 电流表不够 |
-| A-18 | Base 软件台架 | `ESP32-S3-DevKitC-1`，N16R8 或与 `ESP32-S3-WROOM-1-N16R8` 资源等效 | 2 | 在 Base PCB 前开发 Wi-Fi、I²S、状态与 Motion UART | 必须具备 16MB Flash、8MB PSRAM；不要买无 PSRAM 版本 |
-
-### 2.1 采购 A-03/A-04/A-05 时必须要求供应商提供的资料
-
-| 样件 | 必拿资料 | 拿不到时的处理 |
+| 状态 | 含义 | 允许动作 |
 |---|---|---|
-| OV3660 | 模组正反面图、DVP/FPC pinout、FPC 尺寸与同异面、镜头型号、真实 HFOV、工作电压 | 不采购为最终样件；最多作为纯视觉算法对照，不能进入 Head Carrier |
-| N20 电机 | 额定电压、空载转速/电流、堵转电流、减速比、轴径/轴长、外形图、噪声样本或数据 | 不采购；这些数据缺失则无法判断与 DRV8833、电源树和 3D 结构的匹配 |
-| FFC | 针数、间距、触点方向、动态弯折次数/半径、线长、导体额定电流 | 仅买少量机构试样；不能据此冻结 PCB 连接器 |
+| `BUY-SAMPLE` | 型号明确，可直接用于 Gate 验证 | 核对商品页后采购 |
+| `RFQ-FIRST` | 标题不足以证明接口或机械条件 | 先向卖家索取资料，资料通过后再买 |
+| `HOLD` | 依赖其他实物或原理图结果 | 暂不采购，不接受“相近替代” |
+| `RISK-STOCK` | 已冻结 IC 的备料，不代表允许做 PCB | 仅库存/交期确有风险时少量锁货 |
 
-## 3. B 组：可提前锁货，但只用于最终通过 G1 的 PCB 装配
+只有“兼容”“N20”“OV3660”“30Pin FFC”等泛称的商品，不足以关闭任何 Gate。商品页必须出现制造商完整型号或 SKU。
 
-这些 IC 已在当前架构中冻结，若交期或库存不稳定可以今天预购；建议每种 `5` 颗（3 块 Base 首板 + 返工余量）。被动料、连接器和封装必须从 ERC 后生成的 BOM 与嘉立创贴装库同步下单，不在这里手工凑料。
+## 2. 第一批：建议现在采购
 
-| ID | 器件 | 当前推荐订货号 | 数量 | 备注 |
+### 2.1 Head、显示与视觉
+
+| ID | 状态 | 完整型号/SKU | 数量 | 用途与采购前确认 |
 |---|---|---|---:|---|
-| B-01 | Base 主控 | `ESP32-S3-WROOM-1-N16R8` | 5 | Base 域；天线布局仍由 PCB Gate 控制 |
-| B-02 | Motion 主控 | `ESP32-C3-MINI-1-N4` | 5 | 运动域；GPIO2/8/9 启动电平须先在原理图核对 |
-| B-03 | 电机驱动 | `DRV8833PWPR` / 嘉立创 `C50506` | 5 | 当前 EDA 已用该卷带订货号；必须使用带 PowerPAD 的 PWP 封装与正确散热焊盘 |
-| B-04 | PD Sink | `STUSB4500QTR` | 5 | 到货后先做 NVM PDO 编程/读取台架 |
-| B-05 | 主 Buck | `TPS56637RPAR` | 5 | 12V→5.1V/6A；外围按 G1 计算与波形冻结 |
-| B-06 | 3.3V Buck | `TPS62132RGTR` / 嘉立创 `C81563` | 5 | 不得误购固定 5V 的 TPS62133 |
-| B-07 | 音频 LDO | `TPS7A2033PDBVR` / 嘉立创 `C2862740` | 5 | 只供敏感音频模拟域 |
-| B-08 | Head/Motor eFuse | `TPS259470ARPWR` / 嘉立创 `C3662799` | 10 | 每块 Base 两颗；限流和软启动仍待 H-PWR-001 |
-| B-09 | 音频 ADC | `ES7210` | 5 | 仅接两颗 IM73A135V01 的模拟差分路径 |
-| B-10 | 音频 DAC/Codec | `ES8311` | 5 | AEC 参考从功放前取得 |
-| B-11 | 功放 | `NS4150B` | 5 | 仍须按实际扬声器和壳体核对热/EMI |
-| B-12 | I²C GPIO 扩展 | `TCA9554PWR` | 5 | 地址脚与唯一 SYS_I2C 上拉在 G1 复核 |
-| B-13 | 麦克风独立 LDO | `TPS7A2028PDBVR` | 5 | `AUDIO_3V3A → MIC_2V8`；3PDT 直接切该支路而非切 Codec 总电源 |
+| P-01 | `BUY-SAMPLE` | Waveshare `ESP32-S3-Touch-AMOLED-2.41` 标准无外壳版 | 2 | 核对完整型号、背标和 PCB 版本；不要买 `-B` 带壳版或裸 AMOLED。到货后测 34Pin、5V 输入、GPIO、显示和触控。 |
+| P-02 | `BUY-SAMPLE` | Seeed Studio `XIAO ESP32S3 Sense`，SKU `113991115` | 2 | Seeed 已发布 OV2640→OV3660 变更；付款前要求卖家书面确认当前批次为 OV3660并保存截图。用于视觉备份路线。 |
+| P-03 | `BUY-SAMPLE` | Seeed `OV5640 Camera for XIAO ESP32S3 Sense (With Heat Sink)`，SKU `114993115` | 1 | 用于 OV3660/OV5640 画质、对焦、温升和低照度对比；不等于最终 Head Carrier 相机。 |
+| P-04 | `RFQ-FIRST` | OV3660/OV5640 DVP 宽视场模组，目标 HFOV `80°–100°` | 最多 2 型号、各 1 | 必须取得传感器、镜头型号、真实 HFOV、DVP/FPC pinout、FPC 针数/间距/同异面、尺寸和电压；任一缺失则不买为最终候选。 |
 
-## 4. C 组：明确暂不采购
+Waveshare 公开资料确认 P-01 为 600×450、ESP32-S3R8、16MB Flash、8MB PSRAM、34Pin 2.54mm GPIO；仍须以实物通断关闭 `H-IO-001`。P-02 的同一 SKU 存在摄像头批次变化，订单批次证据必须留存。
 
-| 项目 | 为什么不能现在下单 | 放行条件 |
+### 2.2 运动、编码器与限位
+
+| ID | 状态 | 完整型号/SKU | 数量 | 用途与采购前确认 |
+|---|---|---|---:|---|
+| P-05 | `BUY-SAMPLE` | Pololu `100:1 Micro Metal Gearmotor MP 6V`，Item `#2367` | 2 | 3mm D 轴，典型堵转 0.67A；必须是 MP 6V，不是 HP/LP。 |
+| P-06 | `BUY-SAMPLE` | Pololu `150:1 Micro Metal Gearmotor MP 6V`，Item `#2368` | 2 | 与 P-05 比较速度、噪声、回差、温升；不要用 1.6A 堵转的 HP 版替代。 |
+| P-07 | `BUY-SAMPLE` | Texas Instruments `DRV8833EVM` | 2 | 作为双 H 桥、PWM、刹车/滑行、限流、nSLEEP/nFAULT 电气基准；不以无原理图通用小板替代首轮基准。 |
+| P-08 | `BUY-SAMPLE` | Espressif `ESP32-C3-DevKitM-1` | 2 | 验证 GPIO2/8/9 绑带、1kHz 控制、UART 和限位安全态；记录模组完整后缀。 |
+| P-09 | `BUY-SAMPLE` | MagnTek `MT6701CT-ACD-R`，SOP-8；LCSC `C3202694` | 10 | AB 输出 1024 脉冲/圈；不买 `MT6701CT-STD/C2856764`（AB 仅 1 脉冲/圈），验证气隙、偏心、重复精度和磁干扰。 |
+| P-10 | `RFQ-FIRST` | 钕铁硼直径向充磁磁铁，`Ø6×2.5mm` | 12 | 卖家必须书面确认直径向/径向充磁并给方向图；轴向充磁禁止采购。 |
+| P-11 | `BUY-SAMPLE` | Omron/Aratas `D2F-01L`，SPDT 直杠杆 PCB 端子 | 6 | 核对 COM/NC/NO；用于 NC 断线故障和机构行程。 |
+| P-12 | `BUY-SAMPLE` | Omron/Aratas `D2F-L-D3`，SPDT 直杠杆焊片端子 | 4 | 与 P-11 比较 PCB/线束安装；最终型号由安装面决定。 |
+| P-13 | `BUY-SAMPLE` | GT2 6mm 皮带；3mm 孔 `16T`、`48T` 轮和张紧件 | 1 套 | 做 3:1 二级减速台架；最终皮带长度仍为 HOLD。 |
+
+P-05/P-06 的典型堵转均约 0.67A，落在当前单轴 ≤1.2A 的设计包络内。DRV8833 PWP/RTY 每桥为 1.5A RMS、2A 峰值；最终仍须按实际 PCB 散热、限流和双轴同时动作实测。
+
+### 2.3 音频、静音与扬声器
+
+| ID | 状态 | 完整型号/SKU | 数量 | 用途与采购前确认 |
+|---|---|---|---:|---|
+| P-14 | `BUY-SAMPLE` | Infineon `IM73A135V01XTSA1` | 10 | 必须是模拟差分 `V01`，不得以 PDM 数字麦替代；验证相位、底噪、隔振和双麦一致性。 |
+| P-15 | `BUY-SAMPLE` | PUI Audio `AS04004PR-R`，40mm、4Ω、3W | 2 | 核对 40mm 直径、17.5mm 高度和焊片；验证声压、失真、音腔和 NS4150B 热负载。 |
+| P-16 | `RFQ-FIRST` | TE Connectivity `1825265-1` / Alias `MSS4200R04`，4PDT、ON-ON、直角 THT | 2 | TE 标记 Active 但当前不直接供货；先确认授权分销库存和完整标签。用 3 组验证麦电源、红灯、`MUTE_SENSE`，第 4 组备用。 |
+| P-17 | `BUY-SAMPLE` | 防尘透声膜、金属网、硅胶隔振垫、闭孔泡棉 | 各 1 包 | 记录厚度、透气/防水等级和胶层；麦克风不得与扬声器共腔。 |
+
+P-16 只冻结“至少 3 组独立保持触点”的电气候选。替代件必须先提交 datasheet、触点图、尺寸图和商品链接，不接受只凭照片判断。
+
+### 2.4 FFC 与 PD 台架
+
+| ID | 状态 | 完整型号/SKU | 数量 | 用途与采购前确认 |
+|---|---|---|---:|---|
+| P-18 | `BUY-SAMPLE` | Molex `150780930`，30Pin/0.5mm/229mm/Type A 同面 | 2 | 仅做 Pin 1、方向、长度和机构样件；单针 0.35A，不关闭 Head 电流 Gate。 |
+| P-19 | `BUY-SAMPLE` | Molex `150782930`，30Pin/0.5mm/229mm/Type D 异面 | 2 | 与 P-18 对比。四根 `HEAD_5V` 只有 1.4A 标称合计，低于当前 1.5A 峰值。 |
+| P-20 | `RFQ-FIRST` | Molex `15166` Ultra-Flex 或有等效寿命证明的 30Pin/0.5mm 定制件 | A/D 各 2 | 要求长度、端厚、单针电流、最小弯折半径和寿命曲线；没有规格书不买为最终件。 |
+| P-21 | `RFQ-FIRST` | 明确列出 `12V/3A` PDO 的 USB-C PD 电源 + 3A C-to-C 线 | 1 套 | 只写 65W/100W 不足以证明 12V；先取得完整 PDO 表。 |
+| P-22 | `BUY-SAMPLE` | 能显示 PDO、电压、电流并支持触发/记录的 PD 分析仪 | 1 | 普通 USB 电流表不满足；保留型号、固件版本和说明书。 |
+| P-23 | `BUY-SAMPLE` | Espressif `ESP32-S3-DevKitC-1` + `ESP32-S3-WROOM-1-N16R8` | 2 | 必须 16MB Flash/8MB PSRAM；用于 Base 软件台架。 |
+
+## 3. 询价与采购回填
+
+| 询价对象 | 必须向卖家索取 | 通过条件 |
 |---|---|---|
-| Head Carrier 的 30Pin FPC 座 | 同面/异面、安装面和精确料号依赖 Head 模组与 FFC 的实物结构 | `H-FFC-001` 完成，冻结连接器料号与方向 |
-| 最终 OV3660 模组 | DVP 引脚是否能由 AMOLED 模组安全直连仍是 `H-IO-001` Gate | 完成 H-IO 后，以 A-03 的真实 pinout 冻结 |
-| 3PDT 静音开关、相机快门联动双触点开关、红/绿状态灯与相机电源开关 IC | 隐私方案已经冻结，但电气料号、开关安装面和快门机构尺寸仍依赖结构与 Head/相机实物 | 静音/快门结构图、相机电源电压与 Head 原理图冻结 |
-| 机械壳、轴、轴承、支架和最终皮带长度 | 依赖电机、Head 实物、重心与线束测量 | A-01/A-04/A-05/A-15 到货后的 `H-MOT-001` 与 `H-FFC-001` |
-| Base/Head 完整 PCB 被动料、FPC 座、USB-C 座、ESD、TVS、散热件 | 当前原理图未完成接线/ERC；手工提前购料会造成封装或数值错配 | G1 原理图、ERC、BOM 版本一致 |
-| 电机线 TVS/RC snubber 最终数值 | 取决于实际电机和线束反电动势波形 | 电机台架示波器实测 |
+| 最终相机 | 正反面、传感器/镜头、HFOV、DVP/FPC pinout、FPC 尺寸/同异面、电压、帧率 | 型号与资料一一对应；目标距离实测后冻结 |
+| 直径向磁铁 | 尺寸、镀层、磁材、充磁方向图 | 明确直径向/径向，不接受“强磁圆柱” |
+| 动态 FFC | 系列、针数、间距、A/D、长度、端厚、电流、弯折半径和寿命 | 电流与寿命同时满足；不足时先改 30Pin 电源分配 |
+| PD 电源 | 全部固定 PDO、线缆能力 | 明确包含 12V/3A，实物再由分析仪复核 |
+| 替代开关 | 完整料号、触点图、保持方式、寿命、尺寸/开孔、在产状态 | 静音至少 3 个独立保持触点；快门有两条独立硬件事实通路 |
 
-## 5. 样件到货后的 G0 顺序
+| ID | 实际商品完整标题 | 商品链接 | 卖家/渠道 | 订单型号/SKU | 数量 | 下单日期 | 到货照片路径 | 结论 |
+|---|---|---|---|---|---:|---|---|---|
+|  |  |  |  |  |  |  |  |  |
 
-1. `A-01/A-02/A-03`：先完成 Head 扩展针脚、相机 pinout、帧率、FOV 和本地坐标输出验证，关闭 `H-IO-001/H-CAM-001`。
-2. `A-04` 至 `A-11`：用 C3 + DRV8833 台架量取电机电流、噪声、回差、编码器气隙/偏心和 NC 回零，关闭 `H-MOT-001/H-ENC-001`。
-3. `A-12` 至 `A-14`：在 ES7210 参考拓扑上验证双麦一致性、播报打断与结构隔振，关闭 `H-MIC-001`。
-4. `A-15`：在打印云台上完成全行程折弯/应力检查，冻结 FFC 座同异面、长度和压线方式，关闭 `H-FFC-001`。
-5. `A-16/A-17`：记录 5/9/12V 协商、受限模式、启动和峰值负载；eFuse `ILIM/DVDT/ITIMER` 仍须在 Base PCB 前后完成 `H-PWR-001`。
-6. 以上 Gate 有记录后，才把 B 组与最终 BOM、PCB、贴装一起送入 G1/G2/G3。
+下单前可把链接填入本表或直接发给我复核。到货后先拍外包装标签、正反面、连接器和 Pin 1，再拆装测试。
 
-## 6. 关键资料
+## 4. 暂不采购
 
-- [Waveshare ESP32-S3-Touch-AMOLED-2.41 原理图](https://files.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-2.41/ESP32-S3-Touch-AMOLED-2.41-Schematic.pdf)
-- [Seeed XIAO ESP32S3 Sense 官方资料](https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/)
-- [MT6701 数据手册](https://www.magntek.com.cn/upload/pdf/202407/MT6701_Rev.1.8.pdf)
-- [IM73A135V01 数据手册](https://www.infineon.com/assets/row/public/documents/24/49/infineon-im73a135-datasheet-en.pdf)
-- [DRV8833 数据手册](https://www.ti.com/lit/ds/symlink/drv8833.pdf)
-- [STUSB4500 数据手册](https://www.st.com/resource/en/datasheet/stusb4500.pdf)
+| 项目 | 停止原因 | 放行证据 |
+|---|---|---|
+| Head 模组 34Pin 最终插座/排针 | P-01 安装高度、焊接状态和载板方向未知 | 实物尺寸、通断、3D 装配 |
+| Base/Head 最终 30Pin FFC 座 | A/D、安装面和最终动态 FFC 未冻结 | P-18/P-19 试装 + P-20 规格 + 两端 Pin 1 |
+| 30Pin FFC 最终电源分配 | 4×0.35A=1.4A，低于 1.5A 峰值 | 增加电源针、降低实测峰值或换高额定线缆，并记录决策 |
+| 最终 Head 相机、FPC 座和 ESD | 取决于 P-01 GPIO 与 P-04 接口 | `H-IO-001/H-CAM-001` 关闭 |
+| 最终静音开关和开孔 | P-16 仅验证电气逻辑 | 触点真值表、开孔、寿命、断线默认静音 |
+| 快门量产开关 | 小型 DPDT 行程件未冻结；先用同一快门凸轮驱动两颗独立 SPDT 验证 | 一路断相机电源、一路输出 `SHUTTER_CLOSED_N`，验证时序/失效 |
+| 最终电机、皮带、支架、轴承 | 依赖 Head 质量、重心、惯量和线束阻力 | `H-MOT-001` 与 CAD 装配 |
+| 最终电机/编码器/限位连接器与保护 | 取决于线长、线序和反电动势 | 实物线序、示波器、EMI/ESD 方案 |
+| 完整 PCB 被动料、连接器、ESD、TVS、散热件 | 多页接线、ERC、封装未完成 | G1 原理图、ERC、BOM/PCB 一致 |
+
+## 5. IC 风险备料：默认不随第一批下单
+
+| ID | 状态 | 器件 | 当前订货号 | 建议数量 | 备注 |
+|---|---|---|---|---:|---|
+| R-01 | `RISK-STOCK` | Base 主控 | `ESP32-S3-WROOM-1-N16R8` | 5 | 天线布局仍受 PCB Gate 控制 |
+| R-02 | `RISK-STOCK` | Motion 主控 | `ESP32-C3-MINI-1-N4` | 5 | GPIO2/8/9 绑带先审查 |
+| R-03 | `RISK-STOCK` | 电机驱动 | `DRV8833PWPR` / LCSC `C50506` | 5 | PWP PowerPAD |
+| R-04 | `RISK-STOCK` | PD Sink | `STUSB4500QTR` | 5 | 先做 NVM PDO 台架 |
+| R-05 | `RISK-STOCK` | 主 Buck | `TPS56637RPAR` | 5 | 外围/波形受 G1 控制 |
+| R-06 | `RISK-STOCK` | 3.3V Buck | `TPS62132RGTR` / LCSC `C81563` | 5 | 不得误购 TPS62133 |
+| R-07 | `RISK-STOCK` | 音频 LDO | `TPS7A2033PDBVR` / LCSC `C2862740` | 5 | 3.3V 音频域 |
+| R-08 | `RISK-STOCK` | Head/Motor eFuse | `TPS259470ARPWR` / LCSC `C3662799` | 10 | ILIM/软启动待实测 |
+| R-09 | `HOLD` | ES7210/ES8311/NS4150B | 完整后缀/封装/授权来源待复核 | 0 | 不凭系列名买裸 IC |
+| R-10 | `RISK-STOCK` | I²C 扩展 | `TCA9554PWR` | 5 | 地址/上拉待 G1 |
+| R-11 | `RISK-STOCK` | 麦 LDO | `TPS7A2028PDBVR` | 5 | `MIC_2V8_LDO` |
+
+## 6. 到货后 Gate 关闭顺序
+
+1. P-01：记录订单、背标、PCB 版本、34Pin 与可用 GPIO。
+2. P-02/P-03/P-04：固定距离、照度和分辨率做同场景对比，决定相机路径。
+3. P-05 至 P-13：先空载，再限流堵转；记录电流、转速、噪声、温升、回差、编码器和 NC 限位。
+4. P-14 至 P-17：完成双麦、电气静音、红灯、`MUTE_SENSE`、扬声器和隔振。
+5. P-18 至 P-20：完成方向、通断、压降、温升、弯折半径和全行程寿命，再冻结连接器和电源针数。
+6. P-21/P-22：记录 5/9/12V PDO、掉电和峰值负载。
+7. Gate 只在“订单型号 + 实物照片 + 数据手册 + 测试记录”齐全后关闭，再更新分页接线清单和最终缺件。
+
+## 7. 资料
+
+- [Waveshare 2.41 产品页](https://www.waveshare.com/esp32-s3-touch-amoled-2.41.htm)
+- [Waveshare 2.41 Wiki](https://www.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-2.41)
+- [Seeed XIAO ESP32S3 Sense](https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/)
+- [Seeed 摄像头变更 PCN](https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/PCN-XIAO_ESP32-S3_Sense_Series_Camera_Upgrade.pdf)
+- [Seeed OV5640 SKU 114993115](https://www.seeedstudio.com/OV5640-Camera-for-XIAO-ESP32S3-Sense-With-Heat-Sink-p-5739.html)
+- [Pololu Micro Metal Gearmotor 数据](https://www.pololu.com/file/0J1487/pololu-micro-metal-gearmotors-rev-6-1.pdf)
+- [TI DRV8833](https://www.ti.com/product/DRV8833)、[DRV8833EVM](https://www.ti.com/tool/DRV8833EVM)
+- [MagnTek MT6701](https://www.magntek.com.cn/upload/pdf/202407/MT6701_Rev.1.8.pdf)
+- [Infineon IM73A135V01](https://www.infineon.com/assets/row/public/documents/24/49/infineon-im73a135-datasheet-en.pdf)
+- [Omron/Aratas D2F](https://components.omron.com/system/files/2025-01/datasheet_pdf/CDLA-038.pdf)
+- [TE Connectivity 1825265-1 / MSS4200R04](https://www.te.com/en/product-1825265-1.html)
+- [PUI Audio AS04004PR-R](https://www.digikey.com/en/products/detail/pui-audio-inc/AS04004PR-R/3189932)
+- [Molex Type A 150780930](https://www.molex.com/en-us/products/part-detail/150780930)、[Type D 150782930](https://www.molex.com/en-us/products/part-detail/150782930)、[Premo-Flex 选型](https://www.molex.com/content/dam/molex/molex-dot-com/en_us/pdf/solution-guides/987652-6221.pdf)
+
+资料核对只证明候选合理，不证明到货批次、实物针序、机械装配或整机效果通过。

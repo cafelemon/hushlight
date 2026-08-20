@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 WIRING = DOCS / "wiring"
 ARCHIVE = DOCS / "archive" / "11_h0c_reva_schematic_wiring_handoff_stage_2026-08-20.md"
+PROCUREMENT = DOCS / "13_h0c_reva_g0_sample_procurement.md"
 
 
 def fail(message: str) -> None:
@@ -75,6 +76,40 @@ def validate_part_placements() -> None:
             fail(f"04 placement record is missing {token}")
 
 
+def validate_procurement() -> None:
+    if not PROCUREMENT.exists():
+        fail("missing Gate sample procurement checklist")
+    text = PROCUREMENT.read_text(encoding="utf-8")
+    rows = re.findall(
+        r"^\| P-(\d{2}) \| `(BUY-SAMPLE|RFQ-FIRST|HOLD|RISK-STOCK)` \|",
+        text,
+        flags=re.MULTILINE,
+    )
+    ids = [int(item_id) for item_id, _ in rows]
+    if ids != list(range(1, 24)):
+        fail(f"procurement P IDs must be continuous P-01..P-23; got {ids}")
+
+    required = (
+        "ESP32-S3-Touch-AMOLED-2.41",
+        "113991115",
+        "114993115",
+        "#2367",
+        "#2368",
+        "DRV8833EVM",
+        "MT6701CT-ACD-R",
+        "IM73A135V01XTSA1",
+        "AS04004PR-R",
+        "1825265-1",
+        "150780930",
+        "150782930",
+        "4×0.35A=1.4A",
+        "订单型号 + 实物照片 + 数据手册 + 测试记录",
+    )
+    for token in required:
+        if token not in text:
+            fail(f"procurement checklist is missing {token}")
+
+
 def validate_markdown_links() -> None:
     link_pattern = re.compile(r"\[[^\]]+\]\(([^)]+\.md)(?:#[^)]+)?\)")
     missing: list[str] = []
@@ -115,11 +150,13 @@ def main() -> int:
 
     validate_01()
     validate_part_placements()
+    validate_procurement()
     validate_markdown_links()
     print("PASS: 12 online schematic pages have independent numbering starting at 1")
     print("PASS: 01POWERUSB is continuous 1..208 with the D1.1/Q1.9/R5 repair baseline")
     print("PASS: 02 is 1..42 and 06 is 1..33")
     print("PASS: C62..C68 placement records contain exact part and no-wiring status")
+    print("PASS: procurement IDs P-01..P-23 and Gate evidence rules are complete")
     print("PASS: old 1..212 stage checklist is archived and Markdown links resolve")
     return 0
 

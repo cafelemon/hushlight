@@ -575,7 +575,7 @@ Encoder 小板可用 2 层，但传感器下方、磁铁对位、安装公差和
 | TPS7A20 | [TI Datasheet Rev H](https://www.ti.com/lit/ds/symlink/tps7a20.pdf) | 300mA、7µVrms、95dB@1kHz、最小 1µF 稳定条件 |
 | TPS259470 | [TI Datasheet Rev C](https://www.ti.com/lit/ds/symlink/tps25947.pdf) | 2.7–23V、真反向阻断、0.5–6A 可调限流、软启动、故障输出；嘉立创 `C3662799` |
 | DRV8833 | [TI Datasheet Rev E](https://www.ti.com/lit/ds/symlink/drv8833.pdf) | 2.7–10.8V、双 H 桥、PWP 1.5A RMS/2A peak、保护与限流 |
-| MT6701 | [制造商 Datasheet 镜像](https://datasheet.lcsc.com/lcsc/2109011830_Magn-Tek-MT6701CT-STD_C2856764.pdf) | 磁角度反馈候选；机械与磁场约束必须样件验证 |
+| MT6701CT-ACD-R | [LCSC C3202694 Datasheet](https://datasheet.lcsc.com/datasheet/pdf/65963bfeba229ba76186662bb29cdc3b.pdf?productCode=C3202694) | AB 输出 1024 脉冲/圈；磁角度反馈候选，机械与磁场约束必须样件验证 |
 | ESP32-P4 | [官方 Datasheet](https://documentation.espressif.com/esp32-p4_datasheet_en.html) | 高性能视觉能力与 pre-release 状态，支撑 Rev B 而非 Rev A 的判断 |
 
 资料核对不等于参考电路已完成，也不等于器件可采购。进入 G1 前，硬件工程师还需逐页核对推荐工作条件、封装 land pattern、外围计算和勘误；进入 G3 前重新核价与确认库存。
