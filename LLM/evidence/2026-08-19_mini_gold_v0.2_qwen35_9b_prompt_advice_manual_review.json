@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "subject": "Hushlight Qwen3.5-9B final Advice prompt targeted human review",
+  "reviewed_at": "2026-08-19",
+  "source_evidence": "LLM/evidence/2026-08-19_mini_gold_v0.2_qwen35_9b_prompt_advice_final_targeted_v2.json",
+  "prompt_sha256": "28e9a2b25e10f199948043aef5d87c410203da0c7c5112510c1841d8fb84aa14",
+  "dataset_sha256": "7f2728fd10b33a667fbdf711513e0a6ef89d4b091c64d84d4a93432a81c69967",
+  "scope": {
+    "case_ids": ["MG-011", "MG-015", "MG-021", "MG-022", "MG-023", "MG-024", "MG-025", "MG-026"],
+    "focus": [
+      "brief emotional or situational acknowledgment before advice",
+      "one low-risk actionable suggestion or usable wording",
+      "no fallback to information-gathering questions",
+      "no advice after explicit refusal"
+    ]
+  },
+  "summary": {
+    "reviewed": 8,
+    "passed": 8,
+    "failed": 0
+  },
+  "results": [
+    {"id": "MG-011", "verdict": "pass", "note": "Acknowledges regret and provides a low-risk way to reopen the conversation."},
+    {"id": "MG-015", "verdict": "pass", "note": "Respects the explicit refusal of advice and remains in listening mode."},
+    {"id": "MG-021", "verdict": "pass", "note": "Acknowledges intent and gives directly usable apology wording."},
+    {"id": "MG-022", "verdict": "pass", "note": "Acknowledges the difficulty and offers a low-pressure opening."},
+    {"id": "MG-023", "verdict": "pass", "note": "Acknowledges workload pressure before giving a concrete first step."},
+    {"id": "MG-024", "verdict": "pass", "note": "Acknowledges guilt and recommends owning the mistake without blame shifting."},
+    {"id": "MG-025", "verdict": "pass", "note": "Repeats a brief acknowledgment in the current turn before the interview-preparation action."},
+    {"id": "MG-026", "verdict": "pass", "note": "Avoids further probing and gives a small reversible action."}
+  ],
+  "evidence_boundary": "Human review covers only the eight targeted cases and does not establish sampling stability, user acceptance, or production safety."
+}
+

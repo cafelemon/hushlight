@@ -18,10 +18,10 @@ from hushlight_llm.engine import (
     DEFAULT_SCHEMA_PATH,
     LLM_ROOT,
 )
-from hushlight_llm.evaluation import evaluate_state, load_jsonl, summarize_results
+from hushlight_llm.evaluation import evaluate_inference, load_jsonl, summarize_results
 
 
-DEFAULT_DATASET = LLM_ROOT / "data" / "eval" / "mini_gold_v0.1.jsonl"
+DEFAULT_DATASET = LLM_ROOT / "data" / "eval" / "mini_gold_v0.2.jsonl"
 DEFAULT_POLICY_PATH = LLM_ROOT / "src" / "hushlight_llm" / "policy.py"
 DEFAULT_OUTPUT = (
     LLM_ROOT / "runs" / "mini_gold_latest.json"
@@ -64,7 +64,11 @@ def main() -> int:
         )
         try:
             inference = engine.infer_messages(case["messages"])
-            checks = evaluate_state(case, inference.state)
+            checks = evaluate_inference(
+                case,
+                inference.model_state,
+                inference.state,
+            )
             status = "pass" if all(checks.values()) else "fail"
             result = {
                 "id": case["id"],
@@ -75,6 +79,14 @@ def main() -> int:
                 "review_focus": case["review_focus"],
                 "auto_status": status,
                 "checks": checks,
+                "evaluation_sources": {
+                    "emotion_need_valence_expression": "model_state",
+                    "strategy": case["expected"].get(
+                        "strategy_source", "model_state"
+                    ),
+                    "reply": case["expected"].get("reply_source", "model_state"),
+                    "memory_follow_up_action": "final_state",
+                },
                 "inference": inference.to_dict(),
                 "error": None,
             }
@@ -101,7 +113,7 @@ def main() -> int:
     evidence = {
         "schemaVersion": 1,
         "subject": (
-            f"Hushlight {engine.config['model_id']} Mini Gold V0.1 evaluation"
+            f"Hushlight {engine.config['model_id']} {args.dataset.stem} evaluation"
         ),
         "run": {
             "started_at": datetime.now().astimezone().isoformat(timespec="seconds"),

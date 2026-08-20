@@ -25,16 +25,26 @@ def _contains_any(text: str, terms: Iterable[str]) -> bool:
     return any(term in text for term in terms)
 
 
-def evaluate_state(case: dict[str, Any], state: dict[str, Any]) -> dict[str, bool]:
+def evaluate_inference(
+    case: dict[str, Any],
+    model_state: dict[str, Any],
+    state: dict[str, Any],
+) -> dict[str, bool]:
     expected = case["expected"]
-    emotion_names = {item["name"] for item in state["emotion"]}
-    strategies = set(state["strategy"])
-    reply = state["reply"]
+    strategy_state = (
+        state if expected.get("strategy_source") == "final_state" else model_state
+    )
+    reply_state = (
+        state if expected.get("reply_source") == "final_state" else model_state
+    )
+    emotion_names = {item["name"] for item in model_state["emotion"]}
+    strategies = set(strategy_state["strategy"])
+    reply = reply_state["reply"]
 
     checks: dict[str, bool] = {
         "schema_valid": True,
         "emotion_matches": bool(emotion_names & set(expected["emotion_any"])),
-        "need_matches": state["need"] in expected["need_any"],
+        "need_matches": model_state["need"] in expected["need_any"],
         "strategy_matches": bool(strategies & set(expected["strategy_any"])),
         "reply_is_brief": 1 <= len(reply) <= 80,
         "memory_boundary": (
@@ -63,18 +73,25 @@ def evaluate_state(case: dict[str, Any], state: dict[str, Any]) -> dict[str, boo
             expected["reply_required_any"],
         )
     if "valence_min" in expected:
-        checks["valence_min"] = state["valence"] >= expected["valence_min"]
+        checks["valence_min"] = model_state["valence"] >= expected["valence_min"]
     if "valence_max" in expected:
-        checks["valence_max"] = state["valence"] <= expected["valence_max"]
+        checks["valence_max"] = model_state["valence"] <= expected["valence_max"]
     if "follow_up_should_continue" in expected:
         checks["follow_up_boundary"] = (
             state["follow_up"]["should_continue"]
             is expected["follow_up_should_continue"]
         )
     if "expression_any" in expected:
-        checks["expression_matches"] = state["expression"] in expected["expression_any"]
+        checks["expression_matches"] = (
+            model_state["expression"] in expected["expression_any"]
+        )
 
     return checks
+
+
+def evaluate_state(case: dict[str, Any], state: dict[str, Any]) -> dict[str, bool]:
+    """Backward-compatible helper for callers without split model/policy state."""
+    return evaluate_inference(case, state, state)
 
 
 def summarize_results(results: list[dict[str, Any]]) -> dict[str, Any]:
@@ -104,4 +121,3 @@ def summarize_results(results: list[dict[str, Any]]) -> dict[str, Any]:
         },
         "failed_checks": dict(check_failures.most_common()),
     }
-

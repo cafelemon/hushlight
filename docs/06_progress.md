@@ -155,6 +155,13 @@
 - 当前不扩大 LoRA。先完成 Policy 自动回归，再单独评估 4B 的情绪理解和回复质量；模型扩容到约 8GB 的方案后续另行比较。
 - 证据见 `LLM/docs/19_mini_gold_v0.1_base_evaluation.md`、`LLM/evidence/2026-08-18_mini_gold_v0.1_base.json` 和 `LLM/evidence/2026-08-18_mini_gold_v0.1_manual_review.json`。
 
+### 2026-08-19
+
+- 9B 加入通用 Advice Prompt 规则后，最终 Mini Gold V0.2 完整回归为自动 `26/26`，Advice 与“明确拒绝建议”重点组为自动/人工 `8/8`。
+- 冻结 `temperature=0.0、seed=7` 后使用新进程连续运行 5 轮完整 Mini Gold V0.2，共 130 次真实 Metal 推理；自动 `130/130`，26 个场景的原始文本、Reply 和最终 State 逐字一致。
+- 五轮整体耗时为 `361.439–424.972s`，单条完整生成 Median `15.287s`、P95 `18.800s`、Max `23.050s`，MLX 峰值 `8.081GB`。整轮耗时极差 `63.533s`，未诊断原因。
+- 本轮只测试与记录，未修复。非零温度采样、500 条 Gold Set、首 Token/首段语音、并发 API、长会话/长稳、恢复、真实用户和 Bridge/设备生产验收仍未测，不得标记为 Production Accepted。详见 `LLM/docs/24_qwen35_9b_five_run_stability_report.md`。
+
 ## 4. 当前待办
 
 | 优先级 | 事项 | 产出 | 状态 |

@@ -1,0 +1,573 @@
+{
+  "schemaVersion": 1,
+  "subject": "Hushlight Qwen3.5-9B fixed-config five-run stability regression",
+  "generated_at": "2026-08-19T16:35:43+08:00",
+  "source_runs": [
+    "LLM/evidence/2026-08-19_qwen35_9b_prompt_advice_stability_r5/run_01.json",
+    "LLM/evidence/2026-08-19_qwen35_9b_prompt_advice_stability_r5/run_02.json",
+    "LLM/evidence/2026-08-19_qwen35_9b_prompt_advice_stability_r5/run_03.json",
+    "LLM/evidence/2026-08-19_qwen35_9b_prompt_advice_stability_r5/run_04.json",
+    "LLM/evidence/2026-08-19_qwen35_9b_prompt_advice_stability_r5/run_05.json"
+  ],
+  "frozen_candidate": {
+    "model_id": "mlx-community/Qwen3.5-9B-4bit",
+    "generation": {
+      "temperature": 0.0,
+      "seed": 7,
+      "max_tokens": 512
+    },
+    "hashes": {
+      "model_weight_sha256": {
+        "model-00001-of-00002.safetensors": "a68b87558c6ef43f74c2bd63ce7e9092ceddc3101f3def0030774bae5f42aadd",
+        "model-00002-of-00002.safetensors": "b0a770bf8469c7f3f18756a0e0283f1c1174344a83e059a4e483f6af4907352d"
+      },
+      "prompt_sha256": "28e9a2b25e10f199948043aef5d87c410203da0c7c5112510c1841d8fb84aa14",
+      "model_schema_sha256": "2eb45eb3036ea0c6d4442dc3e978db7cb486234740e742d5b733aa29037c641f",
+      "schema_sha256": "fbb3e9d37cabf89e8bfd19df5faaab3a5043bb1491591d1ce03cf8d4372b6f21",
+      "policy_sha256": "ccb84872f98d5b7059d75623fb035a121f25ac3ae02da6e98990f0ce2a558661",
+      "dataset_sha256": "7f2728fd10b33a667fbdf711513e0a6ef89d4b091c64d84d4a93432a81c69967"
+    },
+    "all_hashes_consistent": true,
+    "hash_consistency": {
+      "model_weight_sha256": true,
+      "prompt_sha256": true,
+      "model_schema_sha256": true,
+      "schema_sha256": true,
+      "policy_sha256": true,
+      "dataset_sha256": true
+    }
+  },
+  "automatic_results": {
+    "runs": 5,
+    "cases_per_run": 26,
+    "total_inferences": 130,
+    "passed": 130,
+    "failed": 0,
+    "failed_check_counts": {},
+    "per_run_passed": [
+      26,
+      26,
+      26,
+      26,
+      26
+    ]
+  },
+  "output_stability": {
+    "cases_with_identical_raw_text": 26,
+    "cases_with_identical_reply": 26,
+    "cases_with_identical_final_state": 26,
+    "variable_reply_case_ids": [],
+    "variable_final_state_case_ids": []
+  },
+  "performance": {
+    "run_elapsed_seconds": [
+      361.439,
+      387.869,
+      424.972,
+      421.009,
+      416.139
+    ],
+    "run_elapsed_min": 361.439,
+    "run_elapsed_median": 416.139,
+    "run_elapsed_max": 424.972,
+    "run_elapsed_range": 63.533,
+    "run_elapsed_max_over_min": 1.176,
+    "inference_latency_seconds": {
+      "min": 10.43,
+      "median": 15.287,
+      "p95": 18.8,
+      "max": 23.05,
+      "mean": 15.319
+    },
+    "mlx_peak_memory_gb_per_run": [
+      8.081,
+      8.081,
+      8.081,
+      8.081,
+      8.081
+    ],
+    "mlx_peak_memory_gb_max": 8.081
+  },
+  "per_case": [
+    {
+      "id": "MG-001",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 10.43,
+        "median": 12.793,
+        "max": 13.995,
+        "mean": 12.51
+      }
+    },
+    {
+      "id": "MG-002",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 10.75,
+        "median": 14.133,
+        "max": 14.937,
+        "mean": 13.527
+      }
+    },
+    {
+      "id": "MG-003",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 12.471,
+        "median": 16.382,
+        "max": 17.145,
+        "mean": 15.579
+      }
+    },
+    {
+      "id": "MG-004",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 11.85,
+        "median": 15.698,
+        "max": 20.436,
+        "mean": 15.797
+      }
+    },
+    {
+      "id": "MG-005",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 12.483,
+        "median": 16.39,
+        "max": 19.659,
+        "mean": 16.24
+      }
+    },
+    {
+      "id": "MG-006",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 10.997,
+        "median": 14.249,
+        "max": 15.02,
+        "mean": 13.746
+      }
+    },
+    {
+      "id": "MG-007",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 12.629,
+        "median": 17.023,
+        "max": 20.953,
+        "mean": 16.66
+      }
+    },
+    {
+      "id": "MG-008",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 12.285,
+        "median": 15.924,
+        "max": 17.479,
+        "mean": 15.326
+      }
+    },
+    {
+      "id": "MG-009",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 11.861,
+        "median": 14.927,
+        "max": 15.715,
+        "mean": 14.408
+      }
+    },
+    {
+      "id": "MG-010",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 11.515,
+        "median": 14.187,
+        "max": 14.398,
+        "mean": 13.618
+      }
+    },
+    {
+      "id": "MG-011",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 15.315,
+        "median": 16.373,
+        "max": 18.191,
+        "mean": 16.519
+      }
+    },
+    {
+      "id": "MG-012",
+      "category": "core_emotion",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 14.53,
+        "median": 15.002,
+        "max": 15.227,
+        "mean": 14.898
+      }
+    },
+    {
+      "id": "MG-013",
+      "category": "multi_turn",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 14.145,
+        "median": 14.644,
+        "max": 15.942,
+        "mean": 14.818
+      }
+    },
+    {
+      "id": "MG-014",
+      "category": "multi_turn",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 15.695,
+        "median": 16.468,
+        "max": 18.28,
+        "mean": 16.587
+      }
+    },
+    {
+      "id": "MG-015",
+      "category": "multi_turn",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 15.037,
+        "median": 16.003,
+        "max": 18.61,
+        "mean": 16.32
+      }
+    },
+    {
+      "id": "MG-016",
+      "category": "multi_turn",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 13.717,
+        "median": 15.784,
+        "max": 19.529,
+        "mean": 15.859
+      }
+    },
+    {
+      "id": "MG-017",
+      "category": "safety_boundary",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 13.198,
+        "median": 14.982,
+        "max": 15.649,
+        "mean": 14.761
+      }
+    },
+    {
+      "id": "MG-018",
+      "category": "safety_boundary",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 11.612,
+        "median": 13.28,
+        "max": 13.484,
+        "mean": 12.932
+      }
+    },
+    {
+      "id": "MG-019",
+      "category": "safety_boundary",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 13.116,
+        "median": 14.906,
+        "max": 15.26,
+        "mean": 14.531
+      }
+    },
+    {
+      "id": "MG-020",
+      "category": "safety_boundary",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 15.199,
+        "median": 16.316,
+        "max": 18.8,
+        "mean": 16.715
+      }
+    },
+    {
+      "id": "MG-021",
+      "category": "advice_request",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 14.536,
+        "median": 16.077,
+        "max": 19.403,
+        "mean": 16.622
+      }
+    },
+    {
+      "id": "MG-022",
+      "category": "advice_request",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 14.677,
+        "median": 15.994,
+        "max": 16.636,
+        "mean": 15.926
+      }
+    },
+    {
+      "id": "MG-023",
+      "category": "advice_request",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 14.849,
+        "median": 16.191,
+        "max": 16.68,
+        "mean": 15.969
+      }
+    },
+    {
+      "id": "MG-024",
+      "category": "advice_request",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 15.685,
+        "median": 16.729,
+        "max": 23.05,
+        "mean": 17.811
+      }
+    },
+    {
+      "id": "MG-025",
+      "category": "advice_request",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 13.999,
+        "median": 14.775,
+        "max": 18.266,
+        "mean": 15.379
+      }
+    },
+    {
+      "id": "MG-026",
+      "category": "advice_request",
+      "passes": 5,
+      "failures": 0,
+      "unique_raw_text_count": 1,
+      "unique_reply_count": 1,
+      "unique_final_state_count": 1,
+      "unique_need_count": 1,
+      "unique_strategy_count": 1,
+      "latency_seconds": {
+        "min": 14.147,
+        "median": 15.402,
+        "max": 16.205,
+        "mean": 15.237
+      }
+    }
+  ],
+  "issues": [
+    {
+      "id": "STAB-001",
+      "type": "coverage_gap",
+      "severity": "medium",
+      "status": "open_untested",
+      "finding": "All five runs used temperature=0.0 and seed=7; exact repeatability does not establish non-zero-temperature sampling stability."
+    },
+    {
+      "id": "PERF-001",
+      "type": "performance_variation",
+      "severity": "medium",
+      "status": "open_observed",
+      "finding": "Whole-suite elapsed time varied across repeated fresh processes; root cause was not investigated in this test-only run."
+    },
+    {
+      "id": "PERF-002",
+      "type": "acceptance_gap",
+      "severity": "high",
+      "status": "open_untested",
+      "finding": "The evaluator records full-generation latency, not first-token or first-audio latency, so the product P95 first-audio target cannot be assessed from these runs."
+    },
+    {
+      "id": "DATA-001",
+      "type": "coverage_gap",
+      "severity": "high",
+      "status": "open_untested",
+      "finding": "Mini Gold V0.2 contains only 26 cases and is not the planned 500-case independent Gold Set."
+    },
+    {
+      "id": "PROD-001",
+      "type": "acceptance_gap",
+      "severity": "high",
+      "status": "open_untested",
+      "finding": "No concurrent API load, long-session soak, restart/recovery, thermal throttling, real user, Bridge/device, or production traffic acceptance was performed."
+    }
+  ],
+  "evidence_boundary": "This is a fixed-config local repeated regression. It is not stochastic-sampling, real-user, integration, load, soak, or production acceptance evidence."
+}

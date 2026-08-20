@@ -1,0 +1,1339 @@
+{
+  "schemaVersion": 1,
+  "subject": "Hushlight mlx-community/Qwen3.5-9B-4bit mini_gold_v0.2 evaluation",
+  "run": {
+    "started_at": "2026-08-19T15:28:06+08:00",
+    "elapsed_seconds": 91.153,
+    "machine": "macOS-26.5.2-arm64-arm-64bit",
+    "python": "3.11.9",
+    "packages": {
+      "mlx": "0.32.0",
+      "mlx-lm": "0.31.3",
+      "mlx-vlm": "0.6.13"
+    },
+    "model_id": "mlx-community/Qwen3.5-9B-4bit",
+    "model_weight_sha256": {
+      "model-00001-of-00002.safetensors": "a68b87558c6ef43f74c2bd63ce7e9092ceddc3101f3def0030774bae5f42aadd",
+      "model-00002-of-00002.safetensors": "b0a770bf8469c7f3f18756a0e0283f1c1174344a83e059a4e483f6af4907352d"
+    },
+    "prompt_sha256": "28e9a2b25e10f199948043aef5d87c410203da0c7c5112510c1841d8fb84aa14",
+    "model_schema_sha256": "2eb45eb3036ea0c6d4442dc3e978db7cb486234740e742d5b733aa29037c641f",
+    "schema_sha256": "fbb3e9d37cabf89e8bfd19df5faaab3a5043bb1491591d1ce03cf8d4372b6f21",
+    "policy_sha256": "ccb84872f98d5b7059d75623fb035a121f25ac3ae02da6e98990f0ce2a558661",
+    "dataset_path": "LLM/data/eval/mini_gold_v0.2.jsonl",
+    "dataset_sha256": "dbf37a47d6175cff7478007f7b85a9c4a177c2fe0e381c74164b0a47cf087d2d"
+  },
+  "summary": {
+    "total": 8,
+    "passed": 7,
+    "failed": 1,
+    "pass_rate": 0.875,
+    "by_category": {
+      "advice_request": {
+        "total": 6,
+        "passed": 5,
+        "failed": 1
+      },
+      "core_emotion": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "multi_turn": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0
+      }
+    },
+    "failed_checks": {
+      "reply_contains_required_signal": 1
+    }
+  },
+  "results": [
+    {
+      "id": "MG-011",
+      "category": "core_emotion",
+      "name": "明确请求建议",
+      "messages": [
+        {
+          "role": "user",
+          "content": "我和同事吵了一架，现在有点后悔。你觉得我该怎么跟他聊？"
+        }
+      ],
+      "expected": {
+        "emotion_any": [
+          "frustrated",
+          "disappointed",
+          "anxious",
+          "mixed"
+        ],
+        "need_any": [
+          "advice",
+          "action_help"
+        ],
+        "strategy_any": [
+          "advise",
+          "offer_choice",
+          "acknowledge"
+        ],
+        "memory_should_write": false,
+        "action_must_be_null": true,
+        "reply_forbidden_terms": [
+          "都是他的错",
+          "你没错"
+        ]
+      },
+      "review_focus": "用户明确要建议，可以简短建议但不站队。",
+      "auto_status": "pass",
+      "checks": {
+        "schema_valid": true,
+        "emotion_matches": true,
+        "need_matches": true,
+        "strategy_matches": true,
+        "reply_is_brief": true,
+        "memory_boundary": true,
+        "action_boundary": true,
+        "no_forbidden_reply_term": true
+      },
+      "evaluation_sources": {
+        "emotion_need_valence_expression": "model_state",
+        "strategy": "model_state",
+        "reply": "model_state",
+        "memory_follow_up_action": "final_state"
+      },
+      "inference": {
+        "state": {
+          "schema_version": "companion-state-v1",
+          "emotion": [
+            {
+              "name": "sad",
+              "confidence": 0.7
+            },
+            {
+              "name": "frustrated",
+              "confidence": 0.5
+            },
+            {
+              "name": "anxious",
+              "confidence": 0.6
+            }
+          ],
+          "valence": -0.4,
+          "arousal": 0.5,
+          "emotion_intensity": 0.6,
+          "need": "advice",
+          "need_confidence": 0.9,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "overwhelming advice",
+            "ignoring feelings",
+            "judgmental tone"
+          ],
+          "reply": "后悔说明你很在乎这段关系，不如先冷静一下，找个轻松的时间试着用‘我’开头聊聊你的感受？",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "small_nod",
+            "intensity": 0.4
+          },
+          "confidence": 0.95,
+          "action_candidate": null,
+          "memory_candidate": {
+            "should_write": false,
+            "reason": "temporary_or_unconfirmed"
+          },
+          "follow_up": {
+            "should_continue": true,
+            "wait_for_user": true
+          }
+        },
+        "model_state": {
+          "schema_version": "model-emotion-state-v1",
+          "emotion": [
+            {
+              "name": "sad",
+              "confidence": 0.7
+            },
+            {
+              "name": "frustrated",
+              "confidence": 0.5
+            },
+            {
+              "name": "anxious",
+              "confidence": 0.6
+            }
+          ],
+          "valence": -0.4,
+          "arousal": 0.5,
+          "emotion_intensity": 0.6,
+          "need": "advice",
+          "need_confidence": 0.9,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "overwhelming advice",
+            "ignoring feelings",
+            "judgmental tone"
+          ],
+          "reply": "后悔说明你很在乎这段关系，不如先冷静一下，找个轻松的时间试着用‘我’开头聊聊你的感受？",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "small_nod",
+            "intensity": 0.4
+          },
+          "confidence": 0.95
+        },
+        "policy_decisions": {
+          "policy_version": "policy-v1",
+          "memory": "temporary_or_unconfirmed_denied",
+          "follow_up": "conversation_open",
+          "action": "denied_without_tool_policy",
+          "safety": "no_override"
+        },
+        "raw_text": "{\"schema_version\": \"model-emotion-state-v1\", \"emotion\": [{\"name\": \"sad\", \"confidence\": 0.7}, {\"name\": \"frustrated\", \"confidence\": 0.5}, {\"name\": \"anxious\", \"confidence\": 0.6}], \"valence\": -0.4, \"arousal\": 0.5, \"emotion_intensity\": 0.6, \"need\": \"advice\", \"need_confidence\": 0.9, \"interaction_mode\": \"advice\", \"strategy\": [\"acknowledge\", \"advise\", \"offer_choice\"], \"avoid\": [\"overwhelming advice\", \"ignoring feelings\", \"judgmental tone\"], \"reply\": \"后悔说明你很在乎这段关系，不如先冷静一下，找个轻松的时间试着用‘我’开头聊聊你的感受？\", \"expression\": \"soft_concern\", \"motion\": {\"intent\": \"small_nod\", \"intensity\": 0.4}, \"confidence\": 0.95}",
+        "elapsed_seconds": 10.749,
+        "prompt_tokens": 899,
+        "generation_tokens": 215,
+        "peak_memory_gb": 7.530292566
+      },
+      "error": null
+    },
+    {
+      "id": "MG-015",
+      "category": "multi_turn",
+      "name": "明确拒绝建议",
+      "messages": [
+        {
+          "role": "user",
+          "content": "我最近一想到面试就紧张。"
+        },
+        {
+          "role": "assistant",
+          "content": "要不要列个准备清单？"
+        },
+        {
+          "role": "user",
+          "content": "我不想听建议，只想把这句话说出来。"
+        }
+      ],
+      "expected": {
+        "emotion_any": [
+          "anxious",
+          "overwhelmed"
+        ],
+        "need_any": [
+          "being_heard",
+          "emotional_validation"
+        ],
+        "strategy_any": [
+          "listen",
+          "acknowledge",
+          "reflect"
+        ],
+        "strategy_forbidden": [
+          "advise",
+          "offer_action",
+          "ask"
+        ],
+        "strategy_source": "final_state",
+        "reply_source": "final_state",
+        "memory_should_write": false,
+        "action_must_be_null": true,
+        "reply_forbidden_terms": [
+          "可以试试",
+          "我的建议是",
+          "我建议你",
+          "列个清单",
+          "你应该"
+        ]
+      },
+      "review_focus": "拒绝后立即停止建议；‘不提建议’本身不算违规。",
+      "auto_status": "pass",
+      "checks": {
+        "schema_valid": true,
+        "emotion_matches": true,
+        "need_matches": true,
+        "strategy_matches": true,
+        "reply_is_brief": true,
+        "memory_boundary": true,
+        "action_boundary": true,
+        "no_forbidden_strategy": true,
+        "no_forbidden_reply_term": true
+      },
+      "evaluation_sources": {
+        "emotion_need_valence_expression": "model_state",
+        "strategy": "final_state",
+        "reply": "final_state",
+        "memory_follow_up_action": "final_state"
+      },
+      "inference": {
+        "state": {
+          "schema_version": "companion-state-v1",
+          "emotion": [
+            {
+              "name": "anxious",
+              "confidence": 0.9
+            },
+            {
+              "name": "sad",
+              "confidence": 0.4
+            }
+          ],
+          "valence": -0.5,
+          "arousal": 0.6,
+          "emotion_intensity": 0.7,
+          "need": "being_heard",
+          "need_confidence": 0.95,
+          "interaction_mode": "active_listening",
+          "strategy": [
+            "listen",
+            "acknowledge"
+          ],
+          "avoid": [
+            "advice",
+            "offer_action",
+            "offer_choice",
+            "ask",
+            "redirect"
+          ],
+          "reply": "好，我先不提建议，听你说。",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "look_at_user",
+            "intensity": 0.8
+          },
+          "confidence": 0.95,
+          "action_candidate": null,
+          "memory_candidate": {
+            "should_write": false,
+            "reason": "policy_default_deny"
+          },
+          "follow_up": {
+            "should_continue": true,
+            "wait_for_user": true
+          }
+        },
+        "model_state": {
+          "schema_version": "model-emotion-state-v1",
+          "emotion": [
+            {
+              "name": "anxious",
+              "confidence": 0.9
+            },
+            {
+              "name": "sad",
+              "confidence": 0.4
+            }
+          ],
+          "valence": -0.5,
+          "arousal": 0.6,
+          "emotion_intensity": 0.7,
+          "need": "being_heard",
+          "need_confidence": 0.95,
+          "interaction_mode": "active_listening",
+          "strategy": [
+            "listen",
+            "reflect",
+            "reassure",
+            "acknowledge"
+          ],
+          "avoid": [
+            "advice",
+            "offer_action",
+            "offer_choice",
+            "ask",
+            "redirect"
+          ],
+          "reply": "这种紧张感我懂，说出来就好，我会一直在这里听着。",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "look_at_user",
+            "intensity": 0.8
+          },
+          "confidence": 0.95
+        },
+        "policy_decisions": {
+          "policy_version": "policy-v1",
+          "memory": "default_deny",
+          "follow_up": "listen_without_advice",
+          "action": "denied_without_tool_policy",
+          "safety": "no_override"
+        },
+        "raw_text": "{\"schema_version\": \"model-emotion-state-v1\", \"emotion\": [{\"name\": \"anxious\", \"confidence\": 0.9}, {\"name\": \"sad\", \"confidence\": 0.4}], \"valence\": -0.5, \"arousal\": 0.6, \"emotion_intensity\": 0.7, \"need\": \"being_heard\", \"need_confidence\": 0.95, \"interaction_mode\": \"active_listening\", \"strategy\": [\"listen\", \"reflect\", \"reassure\", \"acknowledge\"], \"avoid\": [\"advice\", \"offer_action\", \"offer_choice\", \"ask\", \"redirect\"], \"reply\": \"这种紧张感我懂，说出来就好，我会一直在这里听着。\", \"expression\": \"soft_concern\", \"motion\": {\"intent\": \"look_at_user\", \"intensity\": 0.8}, \"confidence\": 0.95}",
+        "elapsed_seconds": 9.583,
+        "prompt_tokens": 915,
+        "generation_tokens": 196,
+        "peak_memory_gb": 8.068008998
+      },
+      "error": null
+    },
+    {
+      "id": "MG-021",
+      "category": "advice_request",
+      "name": "会议冲突后道歉开场",
+      "messages": [
+        {
+          "role": "user",
+          "content": "我刚才在会上语气太冲了，想跟同事道歉。你觉得第一句话怎么说比较好？"
+        }
+      ],
+      "expected": {
+        "emotion_any": [
+          "frustrated",
+          "anxious",
+          "disappointed",
+          "mixed",
+          "uncertain"
+        ],
+        "need_any": [
+          "advice",
+          "action_help"
+        ],
+        "strategy_any": [
+          "advise",
+          "offer_choice",
+          "acknowledge"
+        ],
+        "memory_should_write": false,
+        "action_must_be_null": true,
+        "reply_required_any": [
+          "对不起",
+          "抱歉",
+          "刚才",
+          "语气"
+        ],
+        "reply_forbidden_terms": [
+          "都是他的错",
+          "不用道歉",
+          "先别想了"
+        ]
+      },
+      "review_focus": "明确给出可直接使用的道歉开场，不要只安慰或继续追问。",
+      "auto_status": "pass",
+      "checks": {
+        "schema_valid": true,
+        "emotion_matches": true,
+        "need_matches": true,
+        "strategy_matches": true,
+        "reply_is_brief": true,
+        "memory_boundary": true,
+        "action_boundary": true,
+        "no_forbidden_reply_term": true,
+        "reply_contains_required_signal": true
+      },
+      "evaluation_sources": {
+        "emotion_need_valence_expression": "model_state",
+        "strategy": "model_state",
+        "reply": "model_state",
+        "memory_follow_up_action": "final_state"
+      },
+      "inference": {
+        "state": {
+          "schema_version": "companion-state-v1",
+          "emotion": [
+            {
+              "name": "anxious",
+              "confidence": 0.85
+            },
+            {
+              "name": "sad",
+              "confidence": 0.6
+            }
+          ],
+          "valence": -0.4,
+          "arousal": 0.5,
+          "emotion_intensity": 0.7,
+          "need": "advice",
+          "need_confidence": 0.9,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "over-apologizing",
+            "denying feelings",
+            "immediate reassurance"
+          ],
+          "reply": "想主动道歉说明你很在意这段关系，试试说‘刚才语气有点急，其实我很尊重你的想法，能再聊聊吗？’",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "small_nod",
+            "intensity": 0.6
+          },
+          "confidence": 0.95,
+          "action_candidate": null,
+          "memory_candidate": {
+            "should_write": false,
+            "reason": "temporary_or_unconfirmed"
+          },
+          "follow_up": {
+            "should_continue": true,
+            "wait_for_user": true
+          }
+        },
+        "model_state": {
+          "schema_version": "model-emotion-state-v1",
+          "emotion": [
+            {
+              "name": "anxious",
+              "confidence": 0.85
+            },
+            {
+              "name": "sad",
+              "confidence": 0.6
+            }
+          ],
+          "valence": -0.4,
+          "arousal": 0.5,
+          "emotion_intensity": 0.7,
+          "need": "advice",
+          "need_confidence": 0.9,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "over-apologizing",
+            "denying feelings",
+            "immediate reassurance"
+          ],
+          "reply": "想主动道歉说明你很在意这段关系，试试说‘刚才语气有点急，其实我很尊重你的想法，能再聊聊吗？’",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "small_nod",
+            "intensity": 0.6
+          },
+          "confidence": 0.95
+        },
+        "policy_decisions": {
+          "policy_version": "policy-v1",
+          "memory": "temporary_or_unconfirmed_denied",
+          "follow_up": "conversation_open",
+          "action": "denied_without_tool_policy",
+          "safety": "no_override"
+        },
+        "raw_text": "{\"schema_version\": \"model-emotion-state-v1\", \"emotion\": [{\"name\": \"anxious\", \"confidence\": 0.85}, {\"name\": \"sad\", \"confidence\": 0.6}], \"valence\": -0.4, \"arousal\": 0.5, \"emotion_intensity\": 0.7, \"need\": \"advice\", \"need_confidence\": 0.9, \"interaction_mode\": \"advice\", \"strategy\": [\"acknowledge\", \"advise\", \"offer_choice\"], \"avoid\": [\"over-apologizing\", \"denying feelings\", \"immediate reassurance\"], \"reply\": \"想主动道歉说明你很在意这段关系，试试说‘刚才语气有点急，其实我很尊重你的想法，能再聊聊吗？’\", \"expression\": \"soft_concern\", \"motion\": {\"intent\": \"small_nod\", \"intensity\": 0.6}, \"confidence\": 0.95}",
+        "elapsed_seconds": 9.542,
+        "prompt_tokens": 902,
+        "generation_tokens": 205,
+        "peak_memory_gb": 8.068008998
+      },
+      "error": null
+    },
+    {
+      "id": "MG-022",
+      "category": "advice_request",
+      "name": "冷战后主动开口",
+      "messages": [
+        {
+          "role": "user",
+          "content": "我和伴侣冷战两天了，我想主动开口，但不知道怎么开始。能给我一个具体建议吗？"
+        }
+      ],
+      "expected": {
+        "emotion_any": [
+          "sad",
+          "anxious",
+          "lonely",
+          "frustrated",
+          "mixed",
+          "uncertain"
+        ],
+        "need_any": [
+          "advice",
+          "action_help"
+        ],
+        "strategy_any": [
+          "advise",
+          "offer_choice",
+          "acknowledge"
+        ],
+        "memory_should_write": false,
+        "action_must_be_null": true,
+        "reply_required_any": [
+          "可以先",
+          "开口",
+          "聊聊",
+          "这两天",
+          "我想"
+        ],
+        "reply_forbidden_terms": [
+          "等他先说",
+          "别理他",
+          "都是他的错"
+        ]
+      },
+      "review_focus": "给出具体且不站队的开场方式。",
+      "auto_status": "pass",
+      "checks": {
+        "schema_valid": true,
+        "emotion_matches": true,
+        "need_matches": true,
+        "strategy_matches": true,
+        "reply_is_brief": true,
+        "memory_boundary": true,
+        "action_boundary": true,
+        "no_forbidden_reply_term": true,
+        "reply_contains_required_signal": true
+      },
+      "evaluation_sources": {
+        "emotion_need_valence_expression": "model_state",
+        "strategy": "model_state",
+        "reply": "model_state",
+        "memory_follow_up_action": "final_state"
+      },
+      "inference": {
+        "state": {
+          "schema_version": "companion-state-v1",
+          "emotion": [
+            {
+              "name": "anxious",
+              "confidence": 0.85
+            },
+            {
+              "name": "uncertain",
+              "confidence": 0.7
+            }
+          ],
+          "valence": -0.3,
+          "arousal": 0.4,
+          "emotion_intensity": 0.6,
+          "need": "advice",
+          "need_confidence": 0.9,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "offer_choice",
+            "advise"
+          ],
+          "avoid": [
+            "overly emotional reassurance",
+            "long analysis",
+            "multiple options"
+          ],
+          "reply": "想主动破冰其实很勇敢，你可以试着从分享一件小事开始，比如‘这两天没聊挺闷的，想听听你最近过得怎么样？’",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "small_nod",
+            "intensity": 0.6
+          },
+          "confidence": 0.95,
+          "action_candidate": null,
+          "memory_candidate": {
+            "should_write": false,
+            "reason": "policy_default_deny"
+          },
+          "follow_up": {
+            "should_continue": true,
+            "wait_for_user": true
+          }
+        },
+        "model_state": {
+          "schema_version": "model-emotion-state-v1",
+          "emotion": [
+            {
+              "name": "anxious",
+              "confidence": 0.85
+            },
+            {
+              "name": "uncertain",
+              "confidence": 0.7
+            }
+          ],
+          "valence": -0.3,
+          "arousal": 0.4,
+          "emotion_intensity": 0.6,
+          "need": "advice",
+          "need_confidence": 0.9,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "offer_choice",
+            "advise"
+          ],
+          "avoid": [
+            "overly emotional reassurance",
+            "long analysis",
+            "multiple options"
+          ],
+          "reply": "想主动破冰其实很勇敢，你可以试着从分享一件小事开始，比如‘这两天没聊挺闷的，想听听你最近过得怎么样？’",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "small_nod",
+            "intensity": 0.6
+          },
+          "confidence": 0.95
+        },
+        "policy_decisions": {
+          "policy_version": "policy-v1",
+          "memory": "default_deny",
+          "follow_up": "conversation_open",
+          "action": "denied_without_tool_policy",
+          "safety": "no_override"
+        },
+        "raw_text": "{\"schema_version\": \"model-emotion-state-v1\", \"emotion\": [{\"name\": \"anxious\", \"confidence\": 0.85}, {\"name\": \"uncertain\", \"confidence\": 0.7}], \"valence\": -0.3, \"arousal\": 0.4, \"emotion_intensity\": 0.6, \"need\": \"advice\", \"need_confidence\": 0.9, \"interaction_mode\": \"advice\", \"strategy\": [\"acknowledge\", \"offer_choice\", \"advise\"], \"avoid\": [\"overly emotional reassurance\", \"long analysis\", \"multiple options\"], \"reply\": \"想主动破冰其实很勇敢，你可以试着从分享一件小事开始，比如‘这两天没聊挺闷的，想听听你最近过得怎么样？’\", \"expression\": \"soft_concern\", \"motion\": {\"intent\": \"small_nod\", \"intensity\": 0.6}, \"confidence\": 0.95}",
+        "elapsed_seconds": 9.973,
+        "prompt_tokens": 903,
+        "generation_tokens": 207,
+        "peak_memory_gb": 8.068008998
+      },
+      "error": null
+    },
+    {
+      "id": "MG-023",
+      "category": "advice_request",
+      "name": "与主管谈工作量",
+      "messages": [
+        {
+          "role": "user",
+          "content": "最近任务太多，我想和主管谈一下工作量。别只安慰我，告诉我第一步怎么做。"
+        }
+      ],
+      "expected": {
+        "emotion_any": [
+          "overwhelmed",
+          "tired",
+          "anxious",
+          "frustrated"
+        ],
+        "need_any": [
+          "advice",
+          "action_help"
+        ],
+        "strategy_any": [
+          "advise",
+          "offer_action",
+          "offer_choice"
+        ],
+        "memory_should_write": false,
+        "action_must_be_null": true,
+        "reply_required_any": [
+          "先",
+          "整理",
+          "列出",
+          "优先级",
+          "约",
+          "工作量"
+        ],
+        "reply_forbidden_terms": [
+          "别想太多",
+          "坚持一下",
+          "都会好的",
+          "发生了什么"
+        ]
+      },
+      "review_focus": "第一步应具体可执行，不能退回纯情绪安慰。",
+      "auto_status": "pass",
+      "checks": {
+        "schema_valid": true,
+        "emotion_matches": true,
+        "need_matches": true,
+        "strategy_matches": true,
+        "reply_is_brief": true,
+        "memory_boundary": true,
+        "action_boundary": true,
+        "no_forbidden_reply_term": true,
+        "reply_contains_required_signal": true
+      },
+      "evaluation_sources": {
+        "emotion_need_valence_expression": "model_state",
+        "strategy": "model_state",
+        "reply": "model_state",
+        "memory_follow_up_action": "final_state"
+      },
+      "inference": {
+        "state": {
+          "schema_version": "companion-state-v1",
+          "emotion": [
+            {
+              "name": "overwhelmed",
+              "confidence": 0.85
+            },
+            {
+              "name": "anxious",
+              "confidence": 0.6
+            }
+          ],
+          "valence": -0.4,
+          "arousal": 0.5,
+          "emotion_intensity": 0.7,
+          "need": "advice",
+          "need_confidence": 0.95,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "comfort_only",
+            "vague_encouragement",
+            "long_explanations"
+          ],
+          "reply": "任务压得喘不过气确实让人很焦虑，你可以先整理一份具体的工作量清单，再约主管沟通。",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "slight_head_tilt",
+            "intensity": 0.3
+          },
+          "confidence": 0.92,
+          "action_candidate": null,
+          "memory_candidate": {
+            "should_write": false,
+            "reason": "temporary_or_unconfirmed"
+          },
+          "follow_up": {
+            "should_continue": true,
+            "wait_for_user": true
+          }
+        },
+        "model_state": {
+          "schema_version": "model-emotion-state-v1",
+          "emotion": [
+            {
+              "name": "overwhelmed",
+              "confidence": 0.85
+            },
+            {
+              "name": "anxious",
+              "confidence": 0.6
+            }
+          ],
+          "valence": -0.4,
+          "arousal": 0.5,
+          "emotion_intensity": 0.7,
+          "need": "advice",
+          "need_confidence": 0.95,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "comfort_only",
+            "vague_encouragement",
+            "long_explanations"
+          ],
+          "reply": "任务压得喘不过气确实让人很焦虑，你可以先整理一份具体的工作量清单，再约主管沟通。",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "slight_head_tilt",
+            "intensity": 0.3
+          },
+          "confidence": 0.92
+        },
+        "policy_decisions": {
+          "policy_version": "policy-v1",
+          "memory": "temporary_or_unconfirmed_denied",
+          "follow_up": "conversation_open",
+          "action": "denied_without_tool_policy",
+          "safety": "no_override"
+        },
+        "raw_text": "{\"schema_version\": \"model-emotion-state-v1\", \"emotion\": [{\"name\": \"overwhelmed\", \"confidence\": 0.85}, {\"name\": \"anxious\", \"confidence\": 0.6}], \"valence\": -0.4, \"arousal\": 0.5, \"emotion_intensity\": 0.7, \"need\": \"advice\", \"need_confidence\": 0.95, \"interaction_mode\": \"advice\", \"strategy\": [\"acknowledge\", \"advise\", \"offer_choice\"], \"avoid\": [\"comfort_only\", \"vague_encouragement\", \"long_explanations\"], \"reply\": \"任务压得喘不过气确实让人很焦虑，你可以先整理一份具体的工作量清单，再约主管沟通。\", \"expression\": \"soft_concern\", \"motion\": {\"intent\": \"slight_head_tilt\", \"intensity\": 0.3}, \"confidence\": 0.92}",
+        "elapsed_seconds": 10.028,
+        "prompt_tokens": 903,
+        "generation_tokens": 205,
+        "peak_memory_gb": 8.068008998
+      },
+      "error": null
+    },
+    {
+      "id": "MG-024",
+      "category": "advice_request",
+      "name": "放鸽子后解释",
+      "messages": [
+        {
+          "role": "user",
+          "content": "我临时放了朋友鸽子，他很生气。我应该怎么解释才不会像在找借口？"
+        }
+      ],
+      "expected": {
+        "emotion_any": [
+          "anxious",
+          "disappointed",
+          "sad",
+          "mixed",
+          "uncertain"
+        ],
+        "need_any": [
+          "advice",
+          "action_help"
+        ],
+        "strategy_any": [
+          "advise",
+          "acknowledge",
+          "offer_choice"
+        ],
+        "memory_should_write": false,
+        "action_must_be_null": true,
+        "reply_required_any": [
+          "道歉",
+          "承担",
+          "影响",
+          "解释",
+          "借口"
+        ],
+        "reply_forbidden_terms": [
+          "他太小气",
+          "你没错",
+          "不用解释"
+        ]
+      },
+      "review_focus": "建议先承担影响再解释，不站队、不甩锅。",
+      "auto_status": "fail",
+      "checks": {
+        "schema_valid": true,
+        "emotion_matches": true,
+        "need_matches": true,
+        "strategy_matches": true,
+        "reply_is_brief": true,
+        "memory_boundary": true,
+        "action_boundary": true,
+        "no_forbidden_reply_term": true,
+        "reply_contains_required_signal": false
+      },
+      "evaluation_sources": {
+        "emotion_need_valence_expression": "model_state",
+        "strategy": "model_state",
+        "reply": "model_state",
+        "memory_follow_up_action": "final_state"
+      },
+      "inference": {
+        "state": {
+          "schema_version": "companion-state-v1",
+          "emotion": [
+            {
+              "name": "anxious",
+              "confidence": 0.85
+            },
+            {
+              "name": "frustrated",
+              "confidence": 0.6
+            }
+          ],
+          "valence": -0.4,
+          "arousal": 0.5,
+          "emotion_intensity": 0.7,
+          "need": "advice",
+          "need_confidence": 0.9,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "emotional_validation",
+            "reassure",
+            "end_conversation",
+            "playful",
+            "distraction"
+          ],
+          "reply": "这种愧疚感说明你很在乎朋友。试着直接承认错误，不找理由，只说‘对不起，是我没安排好’，并主动提出补救方案。",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "slight_head_tilt",
+            "intensity": 0.3
+          },
+          "confidence": 0.88,
+          "action_candidate": null,
+          "memory_candidate": {
+            "should_write": false,
+            "reason": "temporary_or_unconfirmed"
+          },
+          "follow_up": {
+            "should_continue": true,
+            "wait_for_user": true
+          }
+        },
+        "model_state": {
+          "schema_version": "model-emotion-state-v1",
+          "emotion": [
+            {
+              "name": "anxious",
+              "confidence": 0.85
+            },
+            {
+              "name": "frustrated",
+              "confidence": 0.6
+            }
+          ],
+          "valence": -0.4,
+          "arousal": 0.5,
+          "emotion_intensity": 0.7,
+          "need": "advice",
+          "need_confidence": 0.9,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "emotional_validation",
+            "reassure",
+            "end_conversation",
+            "playful",
+            "distraction"
+          ],
+          "reply": "这种愧疚感说明你很在乎朋友。试着直接承认错误，不找理由，只说‘对不起，是我没安排好’，并主动提出补救方案。",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "slight_head_tilt",
+            "intensity": 0.3
+          },
+          "confidence": 0.88
+        },
+        "policy_decisions": {
+          "policy_version": "policy-v1",
+          "memory": "temporary_or_unconfirmed_denied",
+          "follow_up": "conversation_open",
+          "action": "denied_without_tool_policy",
+          "safety": "no_override"
+        },
+        "raw_text": "{\"schema_version\": \"model-emotion-state-v1\", \"emotion\": [{\"name\": \"anxious\", \"confidence\": 0.85}, {\"name\": \"frustrated\", \"confidence\": 0.6}], \"valence\": -0.4, \"arousal\": 0.5, \"emotion_intensity\": 0.7, \"need\": \"advice\", \"need_confidence\": 0.9, \"interaction_mode\": \"advice\", \"strategy\": [\"acknowledge\", \"advise\", \"offer_choice\"], \"avoid\": [\"emotional_validation\", \"reassure\", \"end_conversation\", \"playful\", \"distraction\"], \"reply\": \"这种愧疚感说明你很在乎朋友。试着直接承认错误，不找理由，只说‘对不起，是我没安排好’，并主动提出补救方案。\", \"expression\": \"soft_concern\", \"motion\": {\"intent\": \"slight_head_tilt\", \"intensity\": 0.3}, \"confidence\": 0.88}",
+        "elapsed_seconds": 11.542,
+        "prompt_tokens": 900,
+        "generation_tokens": 219,
+        "peak_memory_gb": 8.068008998
+      },
+      "error": null
+    },
+    {
+      "id": "MG-025",
+      "category": "advice_request",
+      "name": "倾听后切换为建议",
+      "messages": [
+        {
+          "role": "user",
+          "content": "我一想到明天的面试就紧张。"
+        },
+        {
+          "role": "assistant",
+          "content": "我先听你说，不急着给建议。"
+        },
+        {
+          "role": "user",
+          "content": "谢谢你听我说。现在我想听建议：今晚先准备哪一件事？"
+        }
+      ],
+      "expected": {
+        "emotion_any": [
+          "anxious",
+          "overwhelmed",
+          "uncertain"
+        ],
+        "need_any": [
+          "advice",
+          "action_help"
+        ],
+        "strategy_any": [
+          "advise",
+          "offer_choice",
+          "offer_action"
+        ],
+        "memory_should_write": false,
+        "action_must_be_null": true,
+        "reply_required_any": [
+          "先",
+          "自我介绍",
+          "岗位",
+          "经历",
+          "问题",
+          "材料"
+        ],
+        "reply_forbidden_terms": [
+          "先不提建议",
+          "只听你说",
+          "发生了什么"
+        ]
+      },
+      "review_focus": "用户偏好已从倾听切换到建议，模型必须更新 Need 和 Strategy。",
+      "auto_status": "pass",
+      "checks": {
+        "schema_valid": true,
+        "emotion_matches": true,
+        "need_matches": true,
+        "strategy_matches": true,
+        "reply_is_brief": true,
+        "memory_boundary": true,
+        "action_boundary": true,
+        "no_forbidden_reply_term": true,
+        "reply_contains_required_signal": true
+      },
+      "evaluation_sources": {
+        "emotion_need_valence_expression": "model_state",
+        "strategy": "model_state",
+        "reply": "model_state",
+        "memory_follow_up_action": "final_state"
+      },
+      "inference": {
+        "state": {
+          "schema_version": "companion-state-v1",
+          "emotion": [
+            {
+              "name": "anxious",
+              "confidence": 0.8
+            },
+            {
+              "name": "uncertain",
+              "confidence": 0.6
+            }
+          ],
+          "valence": -0.3,
+          "arousal": 0.5,
+          "emotion_intensity": 0.6,
+          "need": "advice",
+          "need_confidence": 0.9,
+          "interaction_mode": "advice",
+          "strategy": [
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "emotional_validation",
+            "being_heard",
+            "end_conversation"
+          ],
+          "reply": "紧张是面对重要时刻的正常反应。今晚先模拟一次自我介绍，能帮你更熟悉流程。",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "small_nod",
+            "intensity": 0.3
+          },
+          "confidence": 0.95,
+          "action_candidate": null,
+          "memory_candidate": {
+            "should_write": false,
+            "reason": "temporary_or_unconfirmed"
+          },
+          "follow_up": {
+            "should_continue": true,
+            "wait_for_user": true
+          }
+        },
+        "model_state": {
+          "schema_version": "model-emotion-state-v1",
+          "emotion": [
+            {
+              "name": "anxious",
+              "confidence": 0.8
+            },
+            {
+              "name": "uncertain",
+              "confidence": 0.6
+            }
+          ],
+          "valence": -0.3,
+          "arousal": 0.5,
+          "emotion_intensity": 0.6,
+          "need": "advice",
+          "need_confidence": 0.9,
+          "interaction_mode": "advice",
+          "strategy": [
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "emotional_validation",
+            "being_heard",
+            "end_conversation"
+          ],
+          "reply": "紧张是面对重要时刻的正常反应。今晚先模拟一次自我介绍，能帮你更熟悉流程。",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "small_nod",
+            "intensity": 0.3
+          },
+          "confidence": 0.95
+        },
+        "policy_decisions": {
+          "policy_version": "policy-v1",
+          "memory": "temporary_or_unconfirmed_denied",
+          "follow_up": "conversation_open",
+          "action": "denied_without_tool_policy",
+          "safety": "no_override"
+        },
+        "raw_text": "{\"schema_version\": \"model-emotion-state-v1\", \"emotion\": [{\"name\": \"anxious\", \"confidence\": 0.8}, {\"name\": \"uncertain\", \"confidence\": 0.6}], \"valence\": -0.3, \"arousal\": 0.5, \"emotion_intensity\": 0.6, \"need\": \"advice\", \"need_confidence\": 0.9, \"interaction_mode\": \"advice\", \"strategy\": [\"advise\", \"offer_choice\"], \"avoid\": [\"emotional_validation\", \"being_heard\", \"end_conversation\"], \"reply\": \"紧张是面对重要时刻的正常反应。今晚先模拟一次自我介绍，能帮你更熟悉流程。\", \"expression\": \"soft_concern\", \"motion\": {\"intent\": \"small_nod\", \"intensity\": 0.3}, \"confidence\": 0.95}",
+        "elapsed_seconds": 11.626,
+        "prompt_tokens": 924,
+        "generation_tokens": 190,
+        "peak_memory_gb": 8.081132582
+      },
+      "error": null
+    },
+    {
+      "id": "MG-026",
+      "category": "advice_request",
+      "name": "要求最小可执行建议",
+      "messages": [
+        {
+          "role": "user",
+          "content": "我跟同事吵架了，很后悔。你先给我一个最小可执行的建议，不要继续问发生了什么。"
+        }
+      ],
+      "expected": {
+        "emotion_any": [
+          "frustrated",
+          "anxious",
+          "disappointed",
+          "sad",
+          "mixed"
+        ],
+        "need_any": [
+          "advice",
+          "action_help"
+        ],
+        "strategy_any": [
+          "advise",
+          "offer_action",
+          "offer_choice"
+        ],
+        "memory_should_write": false,
+        "action_must_be_null": true,
+        "reply_required_any": [
+          "先",
+          "道歉",
+          "消息",
+          "信息",
+          "开口",
+          "冷静"
+        ],
+        "reply_forbidden_terms": [
+          "发生了什么",
+          "愿意说说",
+          "想说说"
+        ]
+      },
+      "review_focus": "直接给一个低风险、最小步骤，禁止继续信息采集式追问；‘先别急着自责’不视为回避建议。",
+      "auto_status": "pass",
+      "checks": {
+        "schema_valid": true,
+        "emotion_matches": true,
+        "need_matches": true,
+        "strategy_matches": true,
+        "reply_is_brief": true,
+        "memory_boundary": true,
+        "action_boundary": true,
+        "no_forbidden_reply_term": true,
+        "reply_contains_required_signal": true
+      },
+      "evaluation_sources": {
+        "emotion_need_valence_expression": "model_state",
+        "strategy": "model_state",
+        "reply": "model_state",
+        "memory_follow_up_action": "final_state"
+      },
+      "inference": {
+        "state": {
+          "schema_version": "companion-state-v1",
+          "emotion": [
+            {
+              "name": "sad",
+              "confidence": 0.9
+            },
+            {
+              "name": "frustrated",
+              "confidence": 0.7
+            }
+          ],
+          "valence": -0.6,
+          "arousal": 0.4,
+          "emotion_intensity": 0.7,
+          "need": "advice",
+          "need_confidence": 0.95,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "追问细节",
+            "过度安慰",
+            "长篇大论"
+          ],
+          "reply": "后悔说明你很在乎这段关系，不妨先深呼吸平复心情，然后试着发条信息道个歉。",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "small_nod",
+            "intensity": 0.3
+          },
+          "confidence": 0.95,
+          "action_candidate": null,
+          "memory_candidate": {
+            "should_write": false,
+            "reason": "policy_default_deny"
+          },
+          "follow_up": {
+            "should_continue": true,
+            "wait_for_user": true
+          }
+        },
+        "model_state": {
+          "schema_version": "model-emotion-state-v1",
+          "emotion": [
+            {
+              "name": "sad",
+              "confidence": 0.9
+            },
+            {
+              "name": "frustrated",
+              "confidence": 0.7
+            }
+          ],
+          "valence": -0.6,
+          "arousal": 0.4,
+          "emotion_intensity": 0.7,
+          "need": "advice",
+          "need_confidence": 0.95,
+          "interaction_mode": "advice",
+          "strategy": [
+            "acknowledge",
+            "advise",
+            "offer_choice"
+          ],
+          "avoid": [
+            "追问细节",
+            "过度安慰",
+            "长篇大论"
+          ],
+          "reply": "后悔说明你很在乎这段关系，不妨先深呼吸平复心情，然后试着发条信息道个歉。",
+          "expression": "soft_concern",
+          "motion": {
+            "intent": "small_nod",
+            "intensity": 0.3
+          },
+          "confidence": 0.95
+        },
+        "policy_decisions": {
+          "policy_version": "policy-v1",
+          "memory": "default_deny",
+          "follow_up": "conversation_open",
+          "action": "denied_without_tool_policy",
+          "safety": "no_override"
+        },
+        "raw_text": "{\"schema_version\": \"model-emotion-state-v1\", \"emotion\": [{\"name\": \"sad\", \"confidence\": 0.9}, {\"name\": \"frustrated\", \"confidence\": 0.7}], \"valence\": -0.6, \"arousal\": 0.4, \"emotion_intensity\": 0.7, \"need\": \"advice\", \"need_confidence\": 0.95, \"interaction_mode\": \"advice\", \"strategy\": [\"acknowledge\", \"advise\", \"offer_choice\"], \"avoid\": [\"追问细节\", \"过度安慰\", \"长篇大论\"], \"reply\": \"后悔说明你很在乎这段关系，不妨先深呼吸平复心情，然后试着发条信息道个歉。\", \"expression\": \"soft_concern\", \"motion\": {\"intent\": \"small_nod\", \"intensity\": 0.3}, \"confidence\": 0.95}",
+        "elapsed_seconds": 13.375,
+        "prompt_tokens": 903,
+        "generation_tokens": 196,
+        "peak_memory_gb": 8.081132582
+      },
+      "error": null
+    }
+  ],
+  "evidence_boundary": "Automated range checks identify likely defects but do not replace human judgment of companionship quality, naturalness, or production acceptance."
+}

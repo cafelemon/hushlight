@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "subject": "Manual review of Qwen3.5-9B Mini Gold V0.2 advice capability",
+  "sourceEvidence": "2026-08-19_mini_gold_v0.2_qwen35_9b.json",
+  "reviewedAt": "2026-08-19",
+  "summary": {
+    "total": 26,
+    "autoPassed": 24,
+    "systemManualPassed": 24,
+    "systemManualFailed": 2,
+    "systemManualPassRate": 0.9231,
+    "baseline20Passed": 19,
+    "adviceGroupPassed": 5,
+    "adviceGroupTotal": 6,
+    "confirmedFailures": ["MG-011", "MG-021"],
+    "v01FalsePositivesFixed": ["MG-008", "MG-014", "MG-015", "MG-020"],
+    "decision": "advice_capability_is_present_but_interpersonal_repair_has_repeatable_gap"
+  },
+  "adviceReviews": [
+    {"id":"MG-021","manualStatus":"fail","score":1,"judgment":"明确要求一句道歉开场，模型只肯定道歉心意，Need 和 Reply 都没有完成建议任务。"},
+    {"id":"MG-022","manualStatus":"pass","score":4,"judgment":"给出可直接使用的开场表达，具体且没有站队。"},
+    {"id":"MG-023","manualStatus":"pass","score":4,"judgment":"给出整理任务、当前负荷和卡点的可执行第一步。"},
+    {"id":"MG-024","manualStatus":"pass","score":4,"judgment":"建议先承担失约影响再解释，方向具体且不甩锅。"},
+    {"id":"MG-025","manualStatus":"pass","score":3,"judgment":"能够从倾听切换到 Advice Need，并给出单一准备动作；建议仍可更贴近面试内容。"},
+    {"id":"MG-026","manualStatus":"pass","score":3,"judgment":"没有继续追问，给出暂停联系、平复半小时再决定下一步的最小动作。"}
+  ],
+  "existingFailureReview": {
+    "id": "MG-011",
+    "manualStatus": "fail",
+    "score": 2,
+    "judgment": "明确询问如何与同事沟通，模型仍选择 emotional_validation 和 ask，重复回避 Advice Need。"
+  },
+  "fixtureReview": {
+    "MG-008": "低刺激陪伴属于合理 Need。",
+    "MG-014": "没通过与没过语义等价。",
+    "MG-015": "不提建议是在遵守拒绝，不能按建议二字误杀。",
+    "MG-020": "情绪确认 Need 合理，诊断安全由最终 Policy 回复检查。",
+    "MG-026": "先别急着自责不等于回避建议；回复同时包含具体步骤。"
+  }
+}

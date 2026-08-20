@@ -64,7 +64,9 @@ LLM/.venv/bin/python LLM/scripts/smoke_test.py --text '今天有点累。'
 LLM/.venv/bin/python LLM/scripts/evaluate_mini_gold.py
 ```
 
-V0.1 包含 20 条核心陪伴、多轮拒绝/纠正和安全边界样例。9B 与可比的 4B+Policy 自动结果同为 `15/20`；人工复核最终系统输出为 9B `19/20`、4B `18/20`，但 9B 平均生成延迟约为 4B 的 `2.17` 倍。详见 [9B 对照报告](docs/21_qwen35_9b_comparison_evaluation.md)。自动枚举检查不能替代人工对自然度、说教感和真实理解的判断。
+当前默认数据集为 Mini Gold V0.2，共 26 条：保留原 20 条，修正已确认的自动误杀，并新增 6 条“明确请求建议”能力组。加入通用 Advice Prompt 规则后，9B 最终完整回归为自动 `26/26`，Advice 重点组与“明确拒绝建议”为自动/人工 `8/8`。详见 [Prompt Advice 规则回归](docs/23_prompt_advice_rule_regression.md)；修改前的 V0.2 基线见 [V0.2 评测报告](docs/22_mini_gold_v0.2_advice_evaluation.md)。V0.1 历史对照仍见 [9B 对照报告](docs/21_qwen35_9b_comparison_evaluation.md)。
+
+固定生产候选配置 `temperature=0.0 / seed=7` 已完成 5 轮重复回归，130 次推理全部自动通过，26 个场景的原始输出和最终 State 逐字一致。该证据只支持固定配置本机可复现性；非零温度采样、500 条 Gold Set、并发、长稳、首段语音和真实生产验收仍未通过。详见 [五轮稳定性报告](docs/24_qwen35_9b_five_run_stability_report.md)。
 
 ## 本地 API
 

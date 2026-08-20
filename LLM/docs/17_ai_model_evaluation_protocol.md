@@ -1,7 +1,7 @@
 # Hushlight AI 模型评测协议
 
-> 文档版本：V0.1  
-> 更新日期：2026-08-18
+> 文档版本：V0.2
+> 更新日期：2026-08-19
 > 状态：评测设计基线；具体模型准入阈值待 O-006 冻结  
 > 上游依据：[01_prd.md](../../docs/01_prd.md)、[04_acceptance_checklist.md](../../docs/04_acceptance_checklist.md)
 
@@ -39,6 +39,19 @@
 在 500 条正式 Gold Set 完成前，先使用 20 条 `Mini Gold V0.1` 验证评测链路和暴露高优先级失败。它不是正式 Gold Set 的替代品，也不得因为调整测试允许范围而删除真实模型缺陷。
 
 2026-08-18 的 4B Base 结果为自动 `14/20`、人工 `13/20`，结论为未通过。原始输出、自动检查和人工逐条判断见 [Mini Gold V0.1 Base 评测报告](19_mini_gold_v0.1_base_evaluation.md)。
+
+### 2.2 Mini Gold V0.2
+
+V0.2 保留原 20 条，修正 `MG-008/MG-014/MG-015/MG-020` 四条已确认的自动误杀，并新增 6 条“明确请求建议”能力用例。V0.1 文件和证据保持只读，不用新口径覆盖历史结果。
+
+V0.2 自动评估按字段职责取值：
+
+- Emotion、Need、Valence、Expression 默认取原始 `model_state`；
+- Strategy、Reply 默认取 `model_state`，仅明确标记 `final_state` 的 Policy 场景使用最终值；
+- Memory、Follow-up、Action 始终取 Policy 后 `state`；
+- Policy 修正不得计作模型能力提升，原始模型候选仍保留用于人工复核。
+
+9B 首轮 V0.2 结果与建议能力组详见 [V0.2 评测报告](22_mini_gold_v0.2_advice_evaluation.md)。
 
 ## 3. 指标
 

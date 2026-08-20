@@ -11,6 +11,9 @@
 | [19_mini_gold_v0.1_base_evaluation.md](19_mini_gold_v0.1_base_evaluation.md) | 20 条 Base 自动评测、人工复核、硬门槛与缺陷分流 | 13/20；基线失败，待修正后回归 |
 | [20_policy_engine_v1.md](20_policy_engine_v1.md) | 模型理解与 Memory/Exit/Follow-up/Action/Safety 代码边界、20 条回归 | Policy 硬边界当前回归归零；生产安全未验收 |
 | [21_qwen35_9b_comparison_evaluation.md](21_qwen35_9b_comparison_evaluation.md) | 9B 与同 Prompt/Schema/Policy/Data 的 4B 20 条质量、延迟和内存对照 | 9B 当前配置；自动 15/20，人工系统输出 19/20 |
+| [22_mini_gold_v0.2_advice_evaluation.md](22_mini_gold_v0.2_advice_evaluation.md) | 修正 V0.1 四条误杀，并新增 6 条明确请求建议能力组 | 9B 自动/人工 24/26；建议组 5/6 |
+| [23_prompt_advice_rule_regression.md](23_prompt_advice_rule_regression.md) | 通用 Advice Prompt 规则、评测词表修正与过度建议回归 | 最终完整 26/26；Advice/拒绝建议自动与人工 8/8 |
+| [24_qwen35_9b_five_run_stability_report.md](24_qwen35_9b_five_run_stability_report.md) | 9B 固定配置五轮重复回归、输出一致性、性能与生产验收缺口 | 130/130，26/26 场景逐字一致；生产验收未通过 |
 | [原始训练架构 V1.0](reference/Hushlight_AI_Emotion_Engine_Training_Architecture_V1.0.md) | 用户提供的输入材料原文，保留用于追溯 | SHA-256 与桌面原件一致 |
 
 可执行资产分别位于：
