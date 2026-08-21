@@ -1,0 +1,19 @@
+{
+  "connections": [
+    { "pin": "U1:3V3", "kind": "power", "net": "BASE_3V3" },
+    { "pin": "C10:1", "kind": "power", "net": "BASE_3V3" },
+    { "pin": "C10:2", "kind": "gnd", "net": "GND" },
+    { "pin": "C9:1", "kind": "power", "net": "BASE_3V3" },
+    { "pin": "C9:2", "kind": "gnd", "net": "GND" },
+    { "pin": "C11:1", "kind": "power", "net": "BASE_3V3" },
+    { "pin": "C11:2", "kind": "gnd", "net": "GND" }
+  ],
+  "rules": {
+    "avoidTitleBlock": true,
+    "avoidPinFanout": true,
+    "staggerLabels": true,
+    "offsetRange": [18, 80],
+    "offsetStep": 6,
+    "minLabelGap": 12
+  }
+}

@@ -90,11 +90,12 @@ def validate_procurement() -> None:
         fail(f"procurement P IDs must be continuous P-01..P-23; got {ids}")
 
     required = (
-        "ESP32-S3-Touch-AMOLED-2.41",
+        "2.4 英寸 320×240 IPS LCD + 电容触控",
         "113991115",
         "114993115",
-        "#2367",
-        "#2368",
+        "NFP-GM12-N20W",
+        "100:1",
+        "150:1",
         "DRV8833EVM",
         "MT6701CT-ACD-R",
         "IM73A135V01XTSA1",
@@ -103,6 +104,8 @@ def validate_procurement() -> None:
         "150780930",
         "150782930",
         "4×0.35A=1.4A",
+        "C2913202",
+        "C81563",
         "订单型号 + 实物照片 + 数据手册 + 测试记录",
     )
     for token in required:
@@ -156,7 +159,7 @@ def main() -> int:
     print("PASS: 01POWERUSB is continuous 1..208 with the D1.1/Q1.9/R5 repair baseline")
     print("PASS: 02 is 1..42 and 06 is 1..33")
     print("PASS: C62..C68 placement records contain exact part and no-wiring status")
-    print("PASS: procurement IDs P-01..P-23 and Gate evidence rules are complete")
+    print("PASS: procurement IDs P-01..P-23, IPS Head, N20 axis candidates and Gate evidence rules are complete")
     print("PASS: old 1..212 stage checklist is archived and Markdown links resolve")
     return 0
 

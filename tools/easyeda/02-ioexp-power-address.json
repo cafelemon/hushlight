@@ -1,0 +1,17 @@
+{
+  "connections": [
+    { "pin": "U13:VCC", "kind": "power", "net": "BASE_3V3" },
+    { "pin": "C13:1", "kind": "power", "net": "BASE_3V3" },
+    { "pin": "U13:GND", "kind": "gnd", "net": "GND" },
+    { "pin": "C13:2", "kind": "gnd", "net": "GND" },
+    { "pin": "U13:1", "kind": "gnd", "net": "GND" }
+  ],
+  "rules": {
+    "avoidTitleBlock": true,
+    "avoidPinFanout": true,
+    "staggerLabels": true,
+    "offsetRange": [18, 80],
+    "offsetStep": 6,
+    "minLabelGap": 12
+  }
+}

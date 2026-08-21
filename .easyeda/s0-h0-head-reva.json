@@ -1,0 +1,29 @@
+{
+  "modules": [
+    {"name":"HEAD_POWER_DEBUG","kind":"POWER","parts":["U_HEAD_S3","U_HEAD_3V3","J_DEBUG"],"page":"00-SYSTEM","zone":"left"},
+    {"name":"HEAD_MCU_RF","kind":"MCU","parts":["U_HEAD_S3"],"page":"00-SYSTEM","zone":"center"},
+    {"name":"DISPLAY_TOUCH","kind":"IO","parts":["J_LCD","J_TP"],"page":"01-DISPLAY-TOUCH","zone":"center"},
+    {"name":"CAMERA_PRIVACY","kind":"IO","parts":["J_CAM","SW_SHUTTER","D_CAM_ACTIVE"],"page":"02-CAMERA-PRIVACY","zone":"center"},
+    {"name":"FLEX_TEST","kind":"IO","parts":["J_FFC_HEAD","TP_HEAD"],"page":"03-FLEX-TEST","zone":"center"}
+  ],
+  "flow":["POWER","MCU","IO"],
+  "flowAxis":"auto",
+  "pages":[
+    {"name":"00-SYSTEM","sheet":"A4","modules":["HEAD_POWER_DEBUG","HEAD_MCU_RF"]},
+    {"name":"01-DISPLAY-TOUCH","sheet":"A4","modules":["DISPLAY_TOUCH"]},
+    {"name":"02-CAMERA-PRIVACY","sheet":"A4","modules":["CAMERA_PRIVACY"]},
+    {"name":"03-FLEX-TEST","sheet":"A4","modules":["FLEX_TEST"]}
+  ],
+  "stackup":{"layers":4,"groundStrategy":"plane","innerLayers":["GND","VCC_3V3"]},
+  "assembly":{"profile":"reflow","side":"top"},
+  "rf":{"parts":["U_HEAD_S3"],"keepoutLayers":"all"},
+  "board":{"outline":"compact"},
+  "interfaces":[
+    {"name":"Base FFC","ref":"J_FFC_HEAD","internal":true},
+    {"name":"LCD FPC","ref":"J_LCD","internal":true},
+    {"name":"Touch FPC","ref":"J_TP","internal":true},
+    {"name":"Camera FPC","ref":"J_CAM","internal":true},
+    {"name":"Debug","ref":"J_DEBUG","internal":true}
+  ],
+  "costTier":"standard"
+}

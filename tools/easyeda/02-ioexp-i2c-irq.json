@@ -1,0 +1,24 @@
+{
+  "connections": [
+    { "pin": "U13:SCL", "kind": "netport", "net": "SYS_I2C_SCL" },
+    { "pin": "U1:IO18", "kind": "netport", "net": "SYS_I2C_SCL" },
+    { "pin": "R6:1", "kind": "netport", "net": "SYS_I2C_SCL" },
+    { "pin": "R6:2", "kind": "power", "net": "BASE_3V3" },
+    { "pin": "U13:SDA", "kind": "netport", "net": "SYS_I2C_SDA" },
+    { "pin": "U1:IO17", "kind": "netport", "net": "SYS_I2C_SDA" },
+    { "pin": "R7:1", "kind": "netport", "net": "SYS_I2C_SDA" },
+    { "pin": "R7:2", "kind": "power", "net": "BASE_3V3" },
+    { "pin": "U13:#INT", "kind": "netport", "net": "IOEXP_IRQ_N" },
+    { "pin": "U1:IO40", "kind": "netport", "net": "IOEXP_IRQ_N" },
+    { "pin": "R45:1", "kind": "netport", "net": "IOEXP_IRQ_N" },
+    { "pin": "R45:2", "kind": "power", "net": "BASE_3V3" }
+  ],
+  "rules": {
+    "avoidTitleBlock": true,
+    "avoidPinFanout": true,
+    "staggerLabels": true,
+    "offsetRange": [18, 80],
+    "offsetStep": 6,
+    "minLabelGap": 12
+  }
+}

@@ -14,11 +14,11 @@
 
 | 项 | 结果 |
 |---|---|
-| EDA 基础工程 | `H0-BASE-REVA` 的 `01POWERUSB、02-MCU-DEBUG、03-AUDIO-IN、04-AUDIO-OUT、05-HEAD-LINK、06-MOTION-IO、07-CONNECTORS-TEST` 与系统页均存在；`H0-HEAD-REVA` 四页存在但尚未开始放件 |
+| EDA 基础工程 | `H0-BASE-REVA` 的 `01POWERUSB、02-MCU-DEBUG、03-AUDIO-IN、04-AUDIO-OUT、05-HEAD-LINK、06-MOTION-IO、07-CONNECTORS-TEST` 与系统页均存在；`H0-HEAD-REVA` 四页已按新 IPS Head 路线清空，等待重新放件 |
 | `01POWERUSB` | `D4/R30/R31/R32/F1/F2` 已删除；对象搜索确认 `D2=1/1、D4=0/0、F1=0/0、F2=0/0`。D2/U17/D5/R46…R54/C56…C60 已落位，126–212 已发布；新增暂存件仍有重叠，须先关闭 `01-LAYOUT-01`，再完成接线和 209–212 标签更正，随后进入整页 ERC |
 | `02-MCU-DEBUG` | 21 件已落图，`R45=10kΩ` 存在且未接线 |
 | `04-AUDIO-OUT` | 存在若干未命名绿线片段；不能据此认定功放 bulk 或 Codec 网络已正确连接 |
-| Head Carrier | 2026-08-14 逐页打开确认 `00-SYSTEM`、`01-DISPLAY-TOUCH`、`02-CAMERA-PRIVACY`、`03-FLEX-TEST` 均为 0 元件、0 网络、0 导线；空白/Gate 状态符合当前 `H-IO-001` 约束，没有把未知显示或摄像头 GPIO 伪接入 |
+| Head | 2026-08-21 只读复核后，经明确授权删除 `03-FLEX-TEST` 的旧 `FPC1/C1–C3/H1`；保存、reload 回读确认四页均为 0 个设计元件、0 条导线（仅保留 A4 图框）。新 IPS Head 从 S0 方案书重新开始。 |
 
 ## 3. 审计问题
 

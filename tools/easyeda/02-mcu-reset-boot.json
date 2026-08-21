@@ -1,0 +1,26 @@
+{
+  "connections": [
+    { "pin": "U1:1", "kind": "gnd", "net": "GND" },
+    { "pin": "U1:41", "kind": "gnd", "net": "GND" },
+    { "pin": "U1:EN", "kind": "netport", "net": "EN_BASE" },
+    { "pin": "R8:1", "kind": "netport", "net": "EN_BASE" },
+    { "pin": "C12:1", "kind": "netport", "net": "EN_BASE" },
+    { "pin": "SW1:1", "kind": "netport", "net": "EN_BASE" },
+    { "pin": "R8:2", "kind": "power", "net": "BASE_3V3" },
+    { "pin": "C12:2", "kind": "gnd", "net": "GND" },
+    { "pin": "SW1:2", "kind": "gnd", "net": "GND" },
+    { "pin": "U1:IO0", "kind": "netport", "net": "BOOT_N" },
+    { "pin": "R9:1", "kind": "netport", "net": "BOOT_N" },
+    { "pin": "SW2:1", "kind": "netport", "net": "BOOT_N" },
+    { "pin": "R9:2", "kind": "power", "net": "BASE_3V3" },
+    { "pin": "SW2:2", "kind": "gnd", "net": "GND" }
+  ],
+  "rules": {
+    "avoidTitleBlock": true,
+    "avoidPinFanout": true,
+    "staggerLabels": true,
+    "offsetRange": [18, 80],
+    "offsetStep": 6,
+    "minLabelGap": 12
+  }
+}

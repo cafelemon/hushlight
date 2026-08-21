@@ -19,14 +19,14 @@
 |---|---|---|---|---|
 | Base | `00_SYSTEM` | [00_base_system.md](00_base_system.md) | 框图/跨页契约 | 维护电源树和 Gate，不画器件线 |
 | Base | `01POWERUSB` | [01_power_usb.md](01_power_usb.md) | 接线完成，ERC 待逐项解释 | 只做复核与警告分类 |
-| Base | `02-MCU-DEBUG` | [02_mcu_debug.md](02_mcu_debug.md) | A 表开放 | 可独立施工 |
+| Base | `02-MCU-DEBUG` | [02_mcu_debug.md](02_mcu_debug.md) | 02-A/B/C/D（1–38）完成；02-E 由用户手工接线 | 自动化已收尾，等待人工接线后复核 |
 | Base | `03-AUDIO-IN` | [03_audio_in.md](03_audio_in.md) | 数字/供电 A 表开放；模拟链 Gate | 可完成供电、数字总线和已冻结耦合件布局 |
 | Base | `04-AUDIO-OUT` | [04_audio_out.md](04_audio_out.md) | 数字/供电 A 表开放；模拟增益 Gate | 可完成供电、数字总线和参考电容布局 |
 | Base | `05-HEAD-LINK` | [05_head_link.md](05_head_link.md) | FFC 针序已定义，实物方向 Gate | 只做基于 30Pin 契约的页内准备 |
 | Base | `06-MOTION-IO` | [06_motion_io.md](06_motion_io.md) | A 表开放；电机/传感器 Gate | 可独立施工 1–33 |
 | Base | `07-CONNECTORS-TEST` | [07_connectors_test.md](07_connectors_test.md) | 候选器件 Gate | 只做清点与机械证据收集 |
 | Head | `00-SYSTEM` | [head_00_system.md](head_00_system.md) | 空页/Gate | 冻结 Head 供电与跨页契约 |
-| Head | `01-DISPLAY-TOUCH` | [head_01_display_touch.md](head_01_display_touch.md) | 空页/Gate | 等模组 34Pin 与实物通断表 |
+| Head | `01-DISPLAY-TOUCH` | [head_01_display_touch.md](head_01_display_touch.md) | 空页/Gate | 等 IPS/触控 FPC、时序和实物通断表 |
 | Head | `02-CAMERA-PRIVACY` | [head_02_camera_privacy.md](head_02_camera_privacy.md) | 空页/Gate | 等摄像头/隐私件实物 Gate |
 | Head | `03-FLEX-TEST` | [head_03_flex_test.md](head_03_flex_test.md) | 空页/Gate | 等 FFC 同异面与 Pin 1 证据 |
 
@@ -59,4 +59,5 @@
 
 - 旧阶段清单：[11_h0c_reva_schematic_wiring_handoff_stage_2026-08-20.md](../archive/11_h0c_reva_schematic_wiring_handoff_stage_2026-08-20.md)
 - 当前主入口：[11_h0c_reva_schematic_wiring_handoff.md](../11_h0c_reva_schematic_wiring_handoff.md)
+- 自动化接线阶段台账：[15_h0c_reva_automated_wiring_progress.md](../15_h0c_reva_automated_wiring_progress.md)
 - 正式电气/GPIO/接口权威：[10_hardware_board_design_spec.md](../10_hardware_board_design_spec.md)

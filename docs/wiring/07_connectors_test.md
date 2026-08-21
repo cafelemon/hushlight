@@ -12,7 +12,7 @@
 | 6 | 冻结 `MUTE_SENSE` | Base GPIO39 | GATE | 高低电平/断线真值表 |
 | 7 | Base 服务口针序 | `H1` 候选 | GATE | `GND/3V3/TX/RX/EN/BOOT` 实物方向 |
 | 8 | Motion 服务口针序 | `H2` 候选 | GATE | 同上，核对 C3 UART/绑带 |
-| 9 | Head 服务口针序 | `H3` 候选 | GATE | 同上，核对模组 34Pin |
+| 9 | Head 服务口针序 | `H3` 候选 | GATE | 与自研 Head-S3 的 USB/UART 恢复路径和 IPS/触控 FPC 无冲突 |
 | 10 | 预留扩展服务口归属 | `H4` 候选 | GATE | 业务所有者与针序 |
 | 11 | 扬声器座 | `CN1` 候选 | GATE | 4Ω/3W 扬声器、极性、线束 |
 | 12 | PAN 电机座 | `CN3` 候选 | GATE | 电机额定/堵转/线序 |

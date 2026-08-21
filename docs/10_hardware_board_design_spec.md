@@ -1,9 +1,9 @@
 # 小熙 Hushlight H0C Rev A 硬件板级设计规范
 
-> 文档版本：V0.1
-> 更新日期：2026-08-12
+> 文档版本：V0.2
+> 更新日期：2026-08-21
 > 状态：板级架构已批准；原理图实施开始，样件验证与采购未开始
-> 设计优先级：首版效果与稳定性优先于成本，成本优化后置
+> 设计优先级：消费版整机 BOM ≤300 元，同时不牺牲可信静音、相机隐私、运动安全和基础音频稳定性
 > 权威范围：H0C 自研板的器件选型、电源树、接口、GPIO、保护、去耦、层叠、布局布线及设计 Gate
 > 上游依据：[08_hardware_prototype_plan.md](08_hardware_prototype_plan.md)
 > 变更关系：本文取代 [09_jlceda_placement_guide.md](09_jlceda_placement_guide.md) 中的单主控、5V/2A、2.4 英寸 320×240 屏及待定数字麦假设；09 仅保留为首次人工放置记录
@@ -13,7 +13,7 @@
 H0C Rev A 不采用“单颗 ESP32-S3 同时承担语音、联网、高清动画、摄像头与双轴闭环”的方案。首板拆成三个独立实时域：
 
 1. **底座主控 `BASE-S3`**：负责双麦/AEC、播放、唤醒、联网、云端会话、隐私状态、物理控件与整机编排。
-2. **头部视觉主控 `HEAD-S3`**：负责 600×450 AMOLED、触摸、摄像头采集、本地人脸位置和角色动画。
+2. **头部视觉主控 `HEAD-S3`**：负责 2.4 英寸 320×240 IPS、触摸、摄像头采集、本地人脸位置和角色动画。
 3. **运动控制器 `MOTION-C3`**：负责双轴电机 PWM、角度反馈、限位、轨迹执行、失控停机和看门狗。
 
 该拆分的目标不是堆算力，而是隔离不同实时负载：屏幕刷帧或视觉峰值不得中断语音；Wi-Fi/云请求不得造成运动抖动；运动控制器故障不得破坏静音与基础聊天。ESP32-P4 作为 Rev B 的视觉升级候选，不进入 Rev A 首板。
@@ -26,7 +26,7 @@ USB-C PD 12V/3A
       │              ├── SPI/UART/控制 ── 30Pin FFC ── HEAD-S3
       │              └── UART+CRC ─────── MOTION-C3
       │
-      ├── 5V_HEAD（可关断）── AMOLED + Touch + Camera
+      ├── 5V_HEAD（可关断）── IPS LCD + Touch + Camera
       └── 5V_MOTOR（限流/可关断）── DRV8833 ── Pan/Tilt 电机
                                            └── 双路绝对角度反馈
 ```
@@ -35,7 +35,7 @@ USB-C PD 12V/3A
 
 ### 2.1 必须达到
 
-- 角色屏达到 600×450、核心动画不低于 20 fps，触摸反馈 P95 小于 150 ms。
+- 角色屏达到 320×240、核心动画不低于 20 fps，触摸反馈 P95 小于 150 ms；美术采用适合 IPS 的清晰块面和局部刷新，不以细腻暗场渐变作为通过前提。
 - 摄像头只在唤醒/对话期间工作，只输出目标坐标、置信度与时间戳；不把原始帧传到底座、云端、Web 或 PC Bridge。
 - 双轴运动平滑、有闭环角度、有软硬限位；`MOTION-C3` 失联时硬件进入安全停机。
 - 基础语音链路在显示刷新、摄像头工作和电机动作时不掉帧、不回声自激、不 brownout。
@@ -44,8 +44,8 @@ USB-C PD 12V/3A
 
 ### 2.2 本轮不做
 
-- 不以千台 BOM 150 元约束首板选型；Rev A 先证明体验，再形成 Rev B 降本表。
-- 不自研裸 AMOLED 玻璃的全部电源与 FPC 适配；首板使用成熟显示计算模组或等效已验证方案。
+- 消费版整机 BOM 以 300 元为成本上限；关键安全、音频和运动 Gate 不因成本目标而跳过。
+- 本版不使用零售 AMOLED 计算开发模组，也不进入裸 AMOLED 的高分辨率实现；Head 采用可量产的 IPS 屏、触控和自研 PCB。
 - 不在 ESP32 上运行通用大模型；端侧只做唤醒、音频前处理、角色渲染和轻量视觉。
 - 不做电池、MIPI 摄像头、4K 视频、原始视频上传、待机跟随或持续巡视。
 - 不冻结消费版 PCB 尺寸、ID、量产器件替代和认证方案。
@@ -82,7 +82,7 @@ motion_fw_tag
 | 域 | 处理器 | 主要职责 | 故障后的最低行为 |
 |---|---|---|---|
 | 底座 | ESP32-S3-WROOM-1-N16R8 | 音频、Wi-Fi、会话、状态、静音、整机编排 | 头部或运动失效时仍可语音和明确报错 |
-| 头部 | ESP32-S3R8 + 16MB Flash 的 2.41 英寸 AMOLED 模组 | 动画、触摸、摄像头、端侧目标坐标 | 摄像头失败仍显示角色；通信失败进入本地离线表情 |
+| 头部 | ESP32-S3-WROOM-1-N16R8 + 2.4 英寸 320×240 IPS/触控 | 动画、触摸、摄像头、端侧目标坐标 | 摄像头失败仍显示角色；通信失败进入本地离线表情 |
 | 运动 | ESP32-C3-MINI-1-N4 | 1 kHz 级控制环、双轴反馈、限位、安全停机 | 上位命令超时或 MCU 复位时 `nSLEEP=0`，电机高阻 |
 
 ### 4.1 为什么不是单颗 ESP32-S3
@@ -90,7 +90,7 @@ motion_fw_tag
 - 音频 DMA、Wi-Fi、显示刷新和 DVP 摄像头会同时争用内存带宽、DMA、GPIO 和实时调度余量。
 - 视觉与动画升级会持续挤压音频稳定性，造成难以定位的跨域回归。
 - 双轴控制需要固定周期和独立看门狗，不能依赖正在处理网络或屏幕任务的同一调度域。
-- 三域架构允许先用成熟头部模组证明效果，量产阶段再决定是否合并处理器。
+- 三域架构允许 Head 以独立 MCU 承担显示与视觉，并在不耦合 Base 音频的前提下迭代屏幕方案。
 
 ### 4.2 为什么 Rev A 不上 ESP32-P4
 
@@ -103,9 +103,11 @@ ESP32-P4 的 MIPI CSI/DSI、ISP、PPA、JPEG/H.264 和更高算力适合未来�
 | 子系统 | Rev A 选择 | 状态 | 选型理由与约束 |
 |---|---|---|---|
 | 底座主控 | ESP32-S3-WROOM-1-N16R8 | `FROZEN-A` | 16MB Flash、8MB Octal PSRAM；有成熟 ESP-SR、ESP-ADF 与 OTA 生态 |
-| 头部显示计算 | Waveshare ESP32-S3-Touch-AMOLED-2.41 标准版或电气等效模组 | `MODULE-A` | 2.41 英寸、600×450、QSPI RM690B0、FT6336、8MB PSRAM、16MB Flash；先证明角色表现 |
-| 头部载板 | 自研 4 层 carrier，连接显示模组、摄像头、隐私件与底座 FFC | `FROZEN-A` | 保持头部为自研机械/电气系统，同时隔离裸屏首板风险 |
+| 头部主控 | ESP32-S3-WROOM-1-N16R8 | `FROZEN-A` | Head 独立动画、触控与视觉域；保持与 Base 相同的 Flash/PSRAM 容量基线，具体 GPIO 由 Head 原理图冻结 |
+| 头部显示与触控 | 2.4 英寸 320×240 IPS LCD + 电容触控，QSPI/I80 优先 | `CANDIDATE` | 供应商必须提供完整屏/触控料号、FPC、时序、亮度、工作温度与千台报价；不以普通低速 SPI 屏默认满足 20fps |
+| 头部 PCB | 自研 4 层 Head PCB，连接 Head-S3、显示/触控、摄像头、隐私件与底座 FFC | `FROZEN-A` | 取消开发模组插座和 34Pin 扩展依赖；保留独立刷写、测试与恢复能力 |
 | 摄像头 | OV3660 DVP 模组；OV5640 留兼容性评估 | `CANDIDATE` | 官方/成熟 ESP32 摄像头驱动路径；只跑低分辨率本地目标定位 |
+| 双轴电机与传动 | Pan：国产 6V N20 100:1；Tilt：同系列 6V N20 150:1；均配 GT2 6mm 16T:48T 二级带传动 | `CANDIDATE` | `NFP-GM12-N20W` 或同等性能的 RFQ 候选；Pan 额定≥0.4kg·cm/≥80rpm，Tilt 额定≥0.6kg·cm/≥52rpm，两者额定≤0.27A、堵转≤0.65A、3mm D轴、无电机端编码器。输出轴仍由 MT6701 闭环；供应商/完整料号、噪声、实测扭矩、寿命和报价由 `H-MOT-001` 冻结 |
 | 运动 MCU | ESP32-C3-MINI-1-N4 | `FROZEN-A` | 15 GPIO、LEDC、TWAI/UART、看门狗；不启用 Wi-Fi/BLE，专做闭环控制 |
 | 双电机驱动 | DRV8833PWP | `FROZEN-A` | 2.7–10.8V、双 H 桥、限流、过流/过温/欠压保护、`nFAULT`/`nSLEEP` |
 | 角度反馈 | 2 × MT6701，优先 ABZ 增量输出 + 上电绝对角校准；每轴 1 颗 | `CANDIDATE` | 无接触、分辨率高；必须先验证磁铁偏心、气隙、电机磁场与零位重复性 |
@@ -124,6 +126,7 @@ ESP32-P4 的 MIPI CSI/DSI、ISP、PPA、JPEG/H.264 和更高算力适合未来�
 | 主输入保护 | TPS259474LRPWR，LCSC `C2864845` | `FROZEN-A` | 锁存关断 eFuse；`VBUS_PD → VBUS_BUCK_IN`；首轮 3.5A、UVLO≈7.6V、OVLO≈15.2V，带 DV/DT、ITIMER、PGTH、PG 与反向阻断；实测 Gate 未关闭 |
 | 主降压 12V→5V | TPS56637RPAR，目标 5.1V/6A | `FROZEN-A` | 4.5–28V 输入、6A；电感与补偿/输出电容按 TI 推荐值计算并仿真/台架验证 |
 | 底座 5V→3V3 | TPS62132RGTR，固定 3.3V/3A | `FROZEN-A` | 给 BASE-S3 与数字域，留 Wi-Fi 峰值余量；`TPS62133` 是固定 5.0V 型号，禁止混用 |
+| Head 5V→3V3 | TPS62132RGTR，固定 3.3V/3A | `CANDIDATE` | 首板与 Base 复用已知稳定性基线，给 Head-S3、触控与相机数字域；`U19` 已预放但未连线。IPS 背光/偏压、实际峰值、电感和去耦由 P-01/P-04 与 `H-PWR-001` 冻结 |
 | 低噪声音频 3V3 | TPS7A2033PDBVR | `FROZEN-A` | 固定 3.3V、300mA、低噪声、高 PSRR；仅供音频模拟/麦克风敏感域；嘉立创 `C2862740` |
 | 麦克风独立电源 | TPS7A2028PDBVR，`AUDIO_3V3A → MIC_2V8` | `FROZEN-A` | 固定 2.8V、300mA；匹配 IM73A135V01 1.52–3.00V 供电范围，并允许 3PDT 在麦克风实际供电路径作硬断开 |
 | Head 5V 开关 | TPS259470ARPWR | `FROZEN-A` | 2.7–23V、5.5A、真反向阻断；`HEAD_PWR_EN`、`HEAD_OC_N` 必须可观测；首版 `ILIM=2.0A`，台架后校正 |
@@ -139,7 +142,8 @@ ESP32-P4 的 MIPI CSI/DSI、ISP、PPA、JPEG/H.264 和更高算力适合未来�
 |---|---|---|
 | 单颗 ESP32-S3 承担全部整机功能 | `REJECTED-A` | 实时域耦合、GPIO/DMA/内存带宽紧张、回归定位困难 |
 | ESP32-P4 头部主控 | `REJECTED-A` | 首板复杂度与资料成熟度风险高；Rev B 再评估 |
-| 2.4 英寸 320×240 LCD 作为自研目标屏 | `REJECTED-A` | 参考联调可用，但不满足效果优先的角色表现目标 |
+| Waveshare 2.41 英寸 AMOLED 计算开发模组作为消费版 Head | `REJECTED-A` | 单模组成本不符合整机 BOM ≤300 元的消费版路线；仅可在独立批准后作为效果基准样件 |
+| 自研 600×450 AMOLED Head | `POSTPONED` | 记录为后续市场反馈触发的高表现版本候选；不占用本版成本或排期 |
 | MSM261DHP006 直接接 ES7210 | `REJECTED-A` | 该器件为数字麦，ES7210 输入为模拟路径，电气架构不兼容 |
 | 软件静音 | `REJECTED-A` | 不构成可信隐私边界 |
 | 智能舵机/Dynamixel 直接作为消费版方案 | `REJECTED-A` | 体积、噪声、供电和成本不匹配；仅可做算法台架对照 |
@@ -176,7 +180,7 @@ ESP32-P4 的 MIPI CSI/DSI、ISP、PPA、JPEG/H.264 和更高算力适合未来�
 |---|---:|---:|---|
 | `BASE_5V/3V3` | 0.6A | 1.0A | BASE-S3、I/O、调试 |
 | `AUDIO_5V/3V3A` | 0.7A | 1.2A | Codec、双麦、3W 功放；按满幅播放估算 |
-| `HEAD_5V` | 0.8A | 1.5A | AMOLED、HEAD-S3、触摸、摄像头；以样件实测修订 |
+| `HEAD_5V` | 0.8A | 1.5A | IPS 背光、HEAD-S3、触控、摄像头；以 P-01 样件实测修订 |
 | `MOTOR_5V` | 0.8A | 2.5A | 两轴运行/启动与短时堵转；限流必须低于供电与驱动能力 |
 | 余量 | 0.4A | 0.8A | 瞬态、线损、USB 外设与设计余量 |
 | 合计 | 3.3A | 7.0A 非同时 | 主 5V 设计 6A；固件禁止所有峰值同时出现 |
@@ -200,7 +204,7 @@ ESP32-P4 的 MIPI CSI/DSI、ISP、PPA、JPEG/H.264 和更高算力适合未来�
 | 板卡 | 嘉立创工程 | 内容 |
 |---|---|---|
 | `H0-BASE-REVA` | 现有 Base 工程 | PD、电源、BASE-S3、音频、MOTION-C3、DRV8833、控件、调试与 Head FFC |
-| `H0-HEAD-CARRIER-REVA` | 现有 Head 工程需改名/落实 | AMOLED 计算模组插座、摄像头、隐私灯/遮挡检测、Head FFC 与测试点 |
+| `H0-HEAD-REVA` | 现有 Head 工程 | Head-S3、2.4 英寸 IPS/触控 FPC、摄像头、隐私灯/遮挡检测、Head FFC 与测试点 |
 | `H0-ENCODER-PAN/TILT-REVA` | 可复用同一小板 | MT6701、去耦、连接器、安装孔与磁铁对位标记 |
 
 ### 7.2 底座到头部 30Pin FFC
@@ -210,7 +214,7 @@ FFC 使用 0.5mm 间距、翻盖锁紧、额定电流满足多针并联后的头
 | Pin | 信号 | 方向（以底座为准） | 规则 |
 |---:|---|---|---|
 | 1–4 | `GND` | — | 四针并联，首尾均安排回流 |
-| 5–8 | `HEAD_5V` | 输出 | 四针并联；两端各放 bulk cap，核对连接器单针额定电流 |
+| 5–8 | `HEAD_5V` | 输出 | 四针并联；当前样线合计 1.4A 低于 1.5A 峰值预算，针数/线缆/峰值必须在 `H-FFC-001` 关闭前重定，不得冻结 |
 | 9 | `HEAD_SPI_SCLK` | 输出 | 22–33Ω 源端串阻占位 |
 | 10 | `GND` | — | SPI 时钟回流 |
 | 11 | `HEAD_SPI_MOSI` | 输出 | 命令/资源块 |
@@ -304,25 +308,25 @@ TCA9554：`P0=ENC_SW`、`P1=MUTE_LED`、`P2=USER_LED`、`P3=PD_INT_N`、`P4=HEAD
 
 ### 8.2 HEAD-S3
 
-Rev A 头部使用成熟 AMOLED 计算模组。屏幕、触控、IMU、RTC、Flash/PSRAM 的内部 GPIO **以该模组官方原理图为准，不在自研载板重新分配**。自研载板只使用官方 34Pin 扩展口已经引出的信号。冻结前必须在 `H-IO-001` Gate 用实物 + 原理图逐针通断验证。
+Rev A Head 使用自研 `ESP32-S3-WROOM-1-N16R8` PCB。屏、触控、摄像头与 FFC 的 GPIO 不得沿用任何开发模组的针脚假设；屏和触控料号、接口模式、FPC、供电时序和 GPIO 分配须在 `H-IO-001` Gate 后冻结。
 
-| 扩展资源 | 载板用途 | 约束 |
+| 资源 | Head PCB 用途 | 约束 |
 |---|---|---|
-| 模组 `UART_TX/RX` | 与 BASE-S3 的恢复/日志通道 | 3.3V；交叉连接 |
-| 模组 `SDA/SCL` | Camera SCCB、载板低速 I/O | 先扫描板载地址，禁止冲突 |
-| 4 个连续可用 GPIO | `HEAD_SPI_SCLK/MOSI/MISO/CS_N` | 由 `H-IO-001` 冻结具体脚号，10MHz SI 台架验证 |
-| 3 个可用 GPIO | `HEAD_IRQ_N/HEAD_READY/SHUTTER_CLOSED_N` | `IRQ` 开漏优先；输入有安全默认值 |
+| `UART_TX/RX` | 与 BASE-S3 的恢复/日志通道 | 3.3V；交叉连接 |
+| `SDA/SCL` | 触控 I2C、Camera SCCB 与低速 I/O | 先生成地址表；触控与相机地址不得冲突 |
+| QSPI/I80 显示总线 | LCD 刷新 | 由屏 datasheet 冻结；20fps、纹波与 EMI 台架验证通过后方可冻结 |
+| 安全与状态 GPIO | `HEAD_IRQ_N/HEAD_READY/SHUTTER_CLOSED_N` | `IRQ` 开漏优先；输入有安全默认值 |
 | 头部 USB | 独立刷写与恢复 | 拆离底座或断开回灌路径后使用 |
 | 5V/GND | 来自 `HEAD_5V` | 不接模组电池接口，不装电池 |
 
-摄像头若因模组可用 GPIO 不足无法并接，不允许偷占屏幕/PSRAM脚。按优先级执行：
+摄像头若因已冻结的显示/PSRAM GPIO 或 DMA 资源不足无法并接，不允许偷占屏幕、PSRAM 或启动绑带脚。按优先级执行：
 
-1. 使用模组官方已暴露且经验证的 DVP 接口；
-2. 头部载板增加独立 XIAO ESP32-S3 Sense/等效视觉模组，AMOLED 模组只负责显示；
-3. 进入自研 HEAD-S3 + QSPI AMOLED 的 Rev A.1；
+1. 优化屏接口/帧缓冲与 DVP 的 GPIO/DMA 分配，并以实物测试验证；
+2. 头部 PCB 增加独立视觉模组作为兼容位，但不得将其默认计入消费版 BOM；
+3. 降低本地视觉分辨率/帧率，保持屏幕与视觉实时域独立；
 4. 不得回退为让 BASE-S3 同时承担摄像头与音频。
 
-这是一项有意保留的首板 Gate：当前公开资料确认模组有 34Pin 扩展，但在没有逐针实物核对前，不伪造确定的摄像头 GPIO 表。
+这是一项有意保留的首板 Gate：在没有选定 IPS 屏与相机实物前，不伪造确定的屏、触控或摄像头 GPIO 表。
 
 ### 8.3 MOTION-C3：ESP32-C3-MINI-1-N4
 
@@ -354,7 +358,7 @@ Rev A 头部使用成熟 AMOLED 计算模组。屏幕、触控、IMU、RTC、Fla
 | BASE `SYS_I2C` | ES8311 | `0x18`（候选） | 以 CE/地址脚配置和实测扫描冻结 |
 | BASE `SYS_I2C` | TCA9554 | `0x20` | A2:A0=000；与其他器件逐项核对 |
 | BASE `SYS_I2C` | STUSB4500 | `0x28`（7-bit） | 只用于诊断/NVM 配置，不作为上电必需条件 |
-| HEAD I2C | FT6336/IMU/RTC/扩展 | 以模组原理图为准 | 头部载板加器件前必须先生成扫描表 |
+| HEAD I2C | 触控/相机 SCCB/扩展 | 以 P-01/P-04 datasheet 为准 | Head 原理图放置前必须生成扫描表 |
 
 地址表在首板通电后以扫描结果校正；原理图地址脚、电阻默认值和软件配置必须三方一致。
 
@@ -425,7 +429,7 @@ Rev A 头部使用成熟 AMOLED 计算模组。屏幕、触控、IMU、RTC、Fla
 |---|---|
 | `BASE_3V3` | Buck 近端按 datasheet；S3 模组入口 22µF + 10µF + 多颗 100nF |
 | `AUDIO_3V3A` | TPS7A20 输入 2.2µF、输出 2.2–4.7µF 起始；每颗 Codec/MIC 再本地去耦，最终以 datasheet 稳定范围为准 |
-| `HEAD_5V` | FFC 两端各 47–100µF low-ESR + 1µF + 100nF；先确认模组允许的输入纹波与浪涌 |
+| `HEAD_5V` | FFC 两端各 47–100µF low-ESR + 1µF + 100nF；先确认 P-01 IPS/触控与 Head-S3 的输入纹波、背光浪涌和掉电行为 |
 | `MOTOR_5V` | eFuse 后 470µF 电解/固态 + 10µF + 100nF 起始；DRV8833 VM 近端 10µF + 100nF，按堵转波形修订 |
 | 功放 | 5V 入口 220µF + 10µF + 100nF 起始，BTL 回流不得穿过麦克风/ADC 地参考 |
 
@@ -435,7 +439,7 @@ Rev A 头部使用成熟 AMOLED 计算模组。屏幕、触控、IMU、RTC、Fla
 
 ### 12.1 层叠
 
-Base、Head Carrier 均采用嘉立创可稳定生产的 4 层板，建议 1.6mm、1oz 外层；最终介质厚度和阻抗线宽在下单前以嘉立创阻抗计算/叠层表为准。
+Base、Head PCB 均采用嘉立创可稳定生产的 4 层板，建议 1.6mm、1oz 外层；最终介质厚度和阻抗线宽在下单前以嘉立创阻抗计算/叠层表为准。
 
 | 层 | 主要用途 | 规则 |
 |---|---|---|
@@ -503,8 +507,8 @@ Encoder 小板可用 2 层，但传感器下方、磁铁对位、安装公差和
 | 1×4/1×2 排针被标为 U | 重注释为 J 类连接器 |
 | `01POWERUSB` 的 5V/2A 占位 | 改为 STUSB4500 + 12V→5V/6A + 分域电源树 |
 | `06-MOTION-IO` 只有接口占位 | 加入 MOTION-C3、DRV8833、编码器和常闭限位电路 |
-| Head 原理图为空 | 改为 Head Carrier：AMOLED 模组连接、摄像头、隐私、FFC、保护与调试 |
-| 2.4 英寸 320×240 屏假设 | 只保留 Korvo-2 参考线；自研首板升级 2.41 英寸 600×450 AMOLED |
+| Head 原理图为空 | 改为自研 Head：Head-S3、IPS/触控 FPC、摄像头、隐私、FFC、保护与调试 |
+| 2.4 英寸 320×240 屏假设 | 由旧参考线假设升级为当前消费版 IPS Head 基线；显示接口、完整料号和时序仍受 `H-IO-001` Gate 约束 |
 
 ## 16. 设计 Gate
 
@@ -512,7 +516,7 @@ Encoder 小板可用 2 层，但传感器下方、磁铁对位、安装公差和
 
 - [ ] 每颗 `FROZEN-A` 器件的制造商、完整料号、datasheet 版本、封装、温度等级和供货状态已记录。
 - [ ] 嘉立创符号与封装逐脚核对，双人复核关键器件与连接器。
-- [ ] `H-IO-001` 完成：AMOLED 模组 34Pin 实物/原理图逐针核对，确认 Head SPI、UART、摄像头与安全信号的可用 GPIO。
+- [ ] `H-IO-001` 完成：IPS 屏/触控/相机实物与 datasheet 的 FPC、Pin 1、供电时序、GPIO/DMA、20fps 显示和触控逐项验证。
 - [ ] 摄像头、磁编码器、电机/减速箱完成样件台架，不以网页规格替代实测。
 
 ### G1：原理图
@@ -550,13 +554,14 @@ Encoder 小板可用 2 层，但传感器下方、磁铁对位、安装公差和
 
 | ID | 事项 | Owner | 截止 Gate |
 |---|---|---|---|
-| `H-IO-001` | 头部 AMOLED 模组扩展 GPIO、摄像头并接能力和连接方式实测 | 硬件 + 固件 | G0 |
+| `H-IO-001` | Head IPS 屏/触控/相机 FPC、供电时序、GPIO/DMA、20fps 动画与连接方式实测 | 硬件 + 固件 | G0 |
 | `H-CAM-001` | OV3660/OV5640 模组、镜头 FOV、低照度、帧率和功耗对比 | 视觉固件 + 硬件 | G0 |
-| `H-MOT-001` | 电机额定/堵转电流、减速比、噪声、回差、速度与头部惯量 | 结构 + 硬件 | G0 |
+| `H-MOT-001` | Pan 100:1、Tilt 150:1 N20 + 3:1 GT2；核对额定/堵转电流、连续扭矩、80°/s、噪声、回差、温升、寿命与头部惯量 | 结构 + 硬件 | G0 |
 | `H-ENC-001` | MT6701 磁铁、气隙、同心度、磁干扰和重复精度 | 硬件 + 结构 | G0 |
 | `H-PWR-001` | Head/Motor eFuse 的 `ILIM`、软启动与故障时间常数实测冻结 | 硬件 | G1 |
 | `H-MIC-001` | IM73A135V01 声学样件、供电/外围、封装与隔振验证 | 音频 + 硬件 | G0 |
 | `H-FFC-001` | 30Pin FFC 连接器具体料号、同面/异面与线束寿命 | 硬件 + 结构 | G2 |
+| `H-CST-001` | 消费版整机分项 BOM：Head、Base 音频、运动/传动、结构、线束/电源、制造损耗与质保；总额 ≤300 元。当前估算和证据状态见 `16_consumer_bom_cost_baseline.md`，不得把估算当报价 | 硬件 + 采购 + 产品 | G3 |
 
 ## 18. 关键资料核对记录
 
@@ -567,8 +572,8 @@ Encoder 小板可用 2 层，但传感器下方、磁铁对位、安装公差和
 | Korvo-2 音频 | [V3.1 官方原理图](https://dl.espressif.com/dl/schematics/SCH_ESP32-S3-Korvo-2_V3.1.2_20240116.pdf)、[开发板指南](https://docs.espressif.com/projects/esp-adf/en/latest/design-guide/dev-boards/user-guide-esp32-s3-korvo-2.html) | ES7210 + ES8311 + NS4150、模拟 MEMS 与 AEC 参考拓扑 |
 | ES7210 | [Datasheet Rev 21.0](https://files.waveshare.com/wiki/common/ES7210_DS.pdf) | 四路 ADC、I2S/TDM、MICBIAS、地址/外围待逐脚复核 |
 | ESP32 摄像头 | [Espressif 官方 esp32-camera](https://github.com/espressif/esp32-camera)、[Seeed XIAO S3 Sense 官方资料](https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/) | OV3660/OV5640 驱动路径、PSRAM 与 DVP 参考 |
-| AMOLED 模组 | [Waveshare 产品资料](https://www.waveshare.com/product/esp32-s3-touch-amoled-2.41.htm)、[官方原理图](https://files.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-2.41/ESP32-S3-Touch-AMOLED-2.41-Schematic.pdf) | 2.41 英寸、600×450、RM690B0 QSPI、FT6336、8MB PSRAM/16MB Flash、34Pin 扩展 |
-| RM690B0 | [Datasheet V0.3](https://files.waveshare.com/wiki/common/RM690B0_DataSheet_V0.3_20210105_%28Public_version%29.pdf) | QSPI 与 480RGB×600 上限；显示初始化仍以具体模组 BSP 为准 |
+| IPS 屏/触控 | 待 P-01 RFQ 确定 | 完整料号、controller、FPC、时序、亮度、温度、ESD、千台报价与交期；当前不得用开发模组资料代替 |
+| 600×450 AMOLED Head | [RM690B0 Datasheet V0.3](https://files.waveshare.com/wiki/common/RM690B0_DataSheet_V0.3_20210105_%28Public_version%29.pdf) | 后续高表现版本候选；不属于本版 Head 设计输入 |
 | STUSB4500 | [ST 官方 Datasheet Rev 8](https://www.st.com/resource/en/datasheet/stusb4500.pdf) | 自动 PD Sink、最多三个 PDO、20V/5A 能力与 CC/VBUS 保护边界 |
 | TPS56637 | [TI 产品与 Datasheet](https://www.ti.com/product/TPS56637) | 4.5–28V 输入、6A 同步 Buck |
 | TPS62132 | [TI 产品与 Datasheet](https://www.ti.com/product/TPS62132) | 3–17V 输入、固定 3.3V、3A Buck；嘉立创器件 `TPS62132RGTR / C81563` |

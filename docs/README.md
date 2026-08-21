@@ -1,6 +1,6 @@
 # 小熙项目文档索引
 
-本目录中的 `00` 至 `14` 项目文档与 `../LLM/docs/` AI 专项文档共同构成当前项目启动基线。发生冲突时，按“决策记录 → 对应领域权威文档 → 研究材料”的顺序处理。
+本目录中的 `00` 至 `17` 项目文档与 `../LLM/docs/` AI 专项文档共同构成当前项目启动基线。发生冲突时，按“决策记录 → 对应领域权威文档 → 研究材料”的顺序处理。
 
 | 文档 | 用途 | 当前状态 |
 |---|---|---|
@@ -18,7 +18,9 @@
 | [11_h0c_reva_schematic_wiring_handoff.md](11_h0c_reva_schematic_wiring_handoff.md) | H0C Rev A 人工原理图连线、页内布局、补件与复核交接单 | V1.1，01 A 表 1–43、46–77 已截图复核（44/45 已撤销），eFuse 78–125 已发布；02 至 A42、06 至 A33；不替代 10 |
 | [12_h0c_reva_g0_schematic_audit.md](12_h0c_reva_g0_schematic_audit.md) | H0C Rev A 原理图审计、P0/P1 与接线前检查卡 | 当前，P0 与 06 器件级 P1-02 已关闭；仍未 ERC/转 PCB |
 | [13_h0c_reva_g0_sample_procurement.md](13_h0c_reva_g0_sample_procurement.md) | G0 台架样件采购、风险备料与到货验证顺序 | 当前，可用于样件询价/采购；不代表 PCB 下单 |
-| [14_h0c_reva_non_power_schematic_workplan.md](14_h0c_reva_non_power_schematic_workplan.md) | 保护 01 已接线内容，审计并安排 02–07/Head 的安全施工顺序 | V0.3，06 器件级 P1-02 已关闭、Head 四页已逐页确认空白；非 ERC/PCB 放行 |
+| [14_h0c_reva_non_power_schematic_workplan.md](14_h0c_reva_non_power_schematic_workplan.md) | 保护 01 已接线内容，审计并安排 02–07/Head 的安全施工顺序 | V0.4，06 器件级 P1-02 已关闭；Head 四页已按新路线清空；非 ERC/PCB 放行 |
+| [16_consumer_bom_cost_baseline.md](16_consumer_bom_cost_baseline.md) | 消费版分项成本估算、证据状态与成本 Gate | 当前估算；不是报价或成本通过证明 |
+| [17_h0c_head_reva_design_proposal.md](17_h0c_head_reva_design_proposal.md) | Head S0 设计方案书、分页与 PCB 前置约束 | 待 S0 确认；不得直接据此下单 PCB |
 | [LLM 大模型工作区](../LLM/README.md) | 模型下载、虚拟环境、Prompt、Schema、本地 API、训练、评测和数据治理的统一入口 | 已建立；4-bit MLX 单条推理与本地 API POC 通过 |
 
 ## 研究和历史材料
