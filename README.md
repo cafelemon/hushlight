@@ -7,6 +7,10 @@
 面向电脑桌面的 AI 情绪陪伴伙伴。<br>
 自然聊天、情绪理解、音乐陪伴，以及明确请求后的轻量行动。
 
+![小熙 Hushlight 产品概念效果图](assets/hushlight-product-concept.png)
+
+> 产品概念效果图：用于介绍固定底座、双轴轻量头部和屏幕角色陪伴的目标体验；不代表已冻结的消费版工业设计、量产规格或实机验收状态。
+
 [![Companion](https://img.shields.io/badge/定位-AI%20情绪陪伴-F4A261?style=flat-square)](#小熙是什么)
 [![Presence](https://img.shields.io/badge/形态-桌面陪伴设备-457B9D?style=flat-square)](#有存在感的桌面伙伴)
 [![Platforms](https://img.shields.io/badge/电脑-macOS%20%7C%20Windows-222222?style=flat-square)](#不只是聊天)
