@@ -1,5 +1,5 @@
 import XCTest
-@testable import HushlightMac
+@testable import BridgeCore
 
 final class ConfirmationSecurityTests: XCTestCase {
     private let now = Date(timeIntervalSince1970: 1_786_687_200)

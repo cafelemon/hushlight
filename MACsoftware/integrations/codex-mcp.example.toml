@@ -1,0 +1,5 @@
+# Copy this stanza into your Codex config.toml and replace both absolute paths.
+# Create the credential file through Agent Workbench pairing; do not put its contents here.
+[mcp_servers.agent-workbench]
+command = "/ABSOLUTE/PATH/TO/agent-workbench-mcp"
+args = ["--credential-file", "/ABSOLUTE/PATH/TO/workbench-credential"]

@@ -1,5 +1,5 @@
 import XCTest
-@testable import HushlightMac
+@testable import BridgeCore
 
 final class BridgeProtocolTests: XCTestCase {
     private let now = Date(timeIntervalSince1970: 1_786_687_200)
@@ -84,6 +84,31 @@ final class BridgeProtocolTests: XCTestCase {
         } catch {
             XCTAssertEqual(error as? StableErrorCode, .replayDetected)
         }
+    }
+
+    func testReplayCapacityFailsClosedAndExpiredEntriesFreeSpace() async throws {
+        let store = ReplayGuard(maximumEntries: 1)
+        let first = makeEnvelope(expiresAt: now.addingTimeInterval(1))
+        let second = BridgeEnvelope(
+            protocolVersion: first.protocolVersion, messageType: first.messageType,
+            messageID: first.messageID, requestID: first.requestID, source: first.source,
+            issuedAt: first.issuedAt, expiresAt: now.addingTimeInterval(30),
+            nonce: "second-unique-nonce-with-entropy", auth: first.auth, payload: first.payload
+        )
+        try await store.checkAndRecord(first, now: now)
+        do {
+            try await store.checkAndRecord(second, now: now)
+            XCTFail("Capacity overflow must not evict live nonces")
+        } catch {
+            XCTAssertEqual(error as? StableErrorCode, .internalError)
+        }
+        do {
+            try await store.checkAndRecord(first, now: now)
+            XCTFail("Full cache must still reject a known replay")
+        } catch {
+            XCTAssertEqual(error as? StableErrorCode, .replayDetected)
+        }
+        try await store.checkAndRecord(second, now: now.addingTimeInterval(2))
     }
 
     func testBundledSchemaIsValidJSONAndContainsCanonicalAction() throws {

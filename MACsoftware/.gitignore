@@ -4,3 +4,26 @@
 DerivedData/
 *.xcuserstate
 xcuserdata/
+
+# Machine-local verification and capture data are not publication assets.
+/evidence/*
+!/evidence/README.md
+/experiments/**/logs/
+/experiments/**/screenshots/
+/scripts/diagnostics/
+__pycache__/
+*.py[cod]
+
+# Local pairing/signing/database material belongs outside source control.
+*.credential
+*.p12
+*.pfx
+*.key
+*.pem
+*.sock
+*.db
+*.db-wal
+*.db-shm
+signing.json
+.wechat-local/
+.wechat-ui-state/

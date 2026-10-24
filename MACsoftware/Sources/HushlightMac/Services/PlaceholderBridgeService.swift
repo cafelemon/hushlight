@@ -16,4 +16,8 @@ actor PlaceholderBridgeService: BridgeService {
     func setPaused(_ paused: Bool) async throws {
         isPaused = paused
     }
+
+    func readSystemVolume() async throws -> VolumeReadback {
+        throw BridgeServiceError.notConfigured
+    }
 }

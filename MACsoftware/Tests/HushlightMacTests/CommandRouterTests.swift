@@ -1,5 +1,5 @@
 import XCTest
-@testable import HushlightMac
+@testable import BridgeCore
 
 final class CommandRouterTests: XCTestCase {
     func testPausedRouterRejectsWithoutCallingAdapter() async throws {
@@ -72,6 +72,21 @@ final class CommandRouterTests: XCTestCase {
         XCTAssertEqual(first, second)
         XCTAssertEqual(executionCount, 1)
         XCTAssertEqual(cachedResult, first)
+    }
+
+    func testEvictedResultCannotReexecuteStillLiveRequest() async throws {
+        let adapter = CountingAdapter(actions: ["system.volume.get"])
+        let router = try CommandRouter(adapters: [adapter], resultLimit: 1)
+        let first = makeCommand(requestID: "first")
+        let second = makeCommand(requestID: "second")
+        let initial = await router.handle(first)
+        XCTAssertEqual(initial.status, .succeeded)
+        _ = await router.handle(second)
+        let retried = await router.handle(first)
+        XCTAssertEqual(retried.status, .rejected)
+        XCTAssertEqual(retried.stableError, .replayDetected)
+        let count = await adapter.executionCount
+        XCTAssertEqual(count, 2)
     }
 
     func testUnknownOrUnimplementedCapabilityFailsClosed() async throws {

@@ -1,5 +1,5 @@
 import XCTest
-@testable import HushlightMac
+@testable import BridgeCore
 
 final class ActionParameterValidatorTests: XCTestCase {
     private let validator = ActionParameterValidator()
